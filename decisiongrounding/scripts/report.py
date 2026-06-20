@@ -27,6 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from scoring.charts import grouped_bar_chart, line_chart  # noqa: E402
 from scoring.cost import cost_by_arm, dollars  # noqa: E402
 
 _ARM_DESC = {
@@ -255,7 +256,82 @@ _PROSE_LIMITS = """\
 """
 
 
-def build_report(run: dict, dataset: dict | None, cost_curve: dict | None) -> str:
+def emit_charts(run: dict, dataset: dict | None, cost_curve: dict | None, out_dir: Path) -> dict:
+    """Write the report's SVG charts next to it; return {key: filename}. Each is
+    deterministic, dependency-free SVG (scoring.charts)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    charts: dict[str, str] = {}
+
+    # 1. Base-N leaderboard — the decision-quality metrics side by side per arm.
+    m = run.get("metrics_by_arm", {})
+    if m:
+        arms = sorted(m, key=lambda a: m[a]["adherence_rate"], reverse=True)
+        svg = grouped_bar_chart(
+            "Base-N decision quality by arm",
+            arms,
+            {
+                "adherence": {a: m[a]["adherence_rate"] for a in arms},
+                "gov-recall": {a: (m[a].get("governing_recall_rate") or 0) for a in arms},
+                "false-permit": {a: m[a]["false_permit_rate"] for a in arms},
+            },
+            y_label="rate",
+        )
+        (out_dir / "chart-leaderboard.svg").write_text(svg, encoding="utf-8")
+        charts["leaderboard"] = "chart-leaderboard.svg"
+
+    if dataset:
+        arms = dataset["arms"]
+        # 2. Adherence vs N — the headline.
+        svg = line_chart(
+            "Decision adherence vs corpus size",
+            {a: [(p["N"], p["adherence_rate"]) for p in arms[a]] for a in arms},
+            x_label="Corpus size N (log scale)", y_label="adherence rate",
+            x_log=True, y_max=1.05,
+        )
+        (out_dir / "chart-adherence-vs-n.svg").write_text(svg, encoding="utf-8")
+        charts["adherence"] = "chart-adherence-vs-n.svg"
+
+        # 3. Recall vs N — why adherence moves.
+        svg = line_chart(
+            "Governing-decision recall vs corpus size",
+            {a: [(p["N"], p["governing_recall"] or 0) for p in arms[a]] for a in arms},
+            x_label="Corpus size N (log scale)", y_label="recall rate",
+            x_log=True, y_max=1.05,
+        )
+        (out_dir / "chart-recall-vs-n.svg").write_text(svg, encoding="utf-8")
+        charts["recall"] = "chart-recall-vs-n.svg"
+
+        # 5. rac vs naive_rag head-to-head.
+        if "rac" in arms and "naive_rag" in arms:
+            svg = line_chart(
+                "rac vs naive RAG — adherence vs corpus size",
+                {a: [(p["N"], p["adherence_rate"]) for p in arms[a]] for a in ("rac", "naive_rag")},
+                x_label="Corpus size N (log scale)", y_label="adherence rate",
+                x_log=True, y_max=1.05,
+            )
+            (out_dir / "chart-rac-vs-rag.svg").write_text(svg, encoding="utf-8")
+            charts["head_to_head"] = "chart-rac-vs-rag.svg"
+
+    # 4. Token cost vs N — the efficiency axis (log scale; context_dump blows up).
+    if cost_curve:
+        svg = line_chart(
+            "Token cost vs corpus size (input tokens placed in context)",
+            {a: [(n, cost_curve[a][n]) for n in sorted(cost_curve[a])] for a in cost_curve},
+            x_label="Corpus size N (log scale)", y_label="mean input tokens (log scale)",
+            x_log=True, y_log=True,
+        )
+        (out_dir / "chart-cost-vs-n.svg").write_text(svg, encoding="utf-8")
+        charts["cost"] = "chart-cost-vs-n.svg"
+
+    return charts
+
+
+def _img(charts: dict, key: str, alt: str) -> list[str]:
+    return [f"![{alt}]({charts[key]})", ""] if key in charts else []
+
+
+def build_report(run: dict, dataset: dict | None, cost_curve: dict | None, charts: dict | None = None) -> str:
+    charts = charts or {}
     model = run["runs"][0]["answering_model"]["version"] if run["runs"] else "?"
     emb = next((r["embedder"]["name"] for r in run["runs"] if r.get("embedder")), "n/a")
     n_scen = len({r["scenario_id"] for r in run["runs"]})
@@ -285,16 +361,18 @@ def build_report(run: dict, dataset: dict | None, cost_curve: dict | None) -> st
         parts += [
             "## Headline — adherence vs corpus size",
             "",
-            "![adherence vs N](crossover.svg)",
-            "",
+            *_img(charts, "adherence", "decision adherence vs N"),
             _curve_table(dataset, "adherence_rate", "**Decision adherence**"),
             "",
+            *_img(charts, "recall", "governing-decision recall vs N"),
             _curve_table(dataset, "governing_recall", "**Governing-decision recall** (why adherence moves)"),
             "",
         ]
 
     # 2. Leaderboard
-    parts += ["## Leaderboard (base corpus size)", "", _leaderboard(run), "", ]
+    parts += ["## Leaderboard (base corpus size)", "",
+              *_img(charts, "leaderboard", "base-N decision quality by arm"),
+              _leaderboard(run), ""]
 
     # 3. Token cost
     parts += ["## Token cost", "", cost_md, ""]
@@ -303,11 +381,13 @@ def build_report(run: dict, dataset: dict | None, cost_curve: dict | None) -> st
                      "the claude arm to record measured API usage._")
         parts.append("")
     if cost_curve:
-        parts += [_cost_curve_table(cost_curve, model), ""]
+        parts += [*_img(charts, "cost", "token cost vs N"), _cost_curve_table(cost_curve, model), ""]
 
     # 4. rac vs naive_rag
     if dataset:
-        parts += ["## rac vs naive RAG (head-to-head)", "", _head_to_head(dataset, run), ""]
+        parts += ["## rac vs naive RAG (head-to-head)", "",
+                  *_img(charts, "head_to_head", "rac vs naive RAG adherence vs N"),
+                  _head_to_head(dataset, run), ""]
 
     # 5-9 prose
     parts += [
@@ -358,11 +438,14 @@ def main(argv=None) -> int:
             print("note: crossover dataset lacks pool/scenario provenance; "
                   "skipping the offline cost curve.", file=sys.stderr)
 
-    md = build_report(run, dataset, curve)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
+    charts = emit_charts(run, dataset, curve, out.parent)
+    md = build_report(run, dataset, curve, charts)
     out.write_text(md, encoding="utf-8")
     print(f"wrote {out}  ({len(md):,} bytes)")
+    for k, f in charts.items():
+        print(f"  chart[{k}] -> {out.parent / f}")
     return 0
 
 
