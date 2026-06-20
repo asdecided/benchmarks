@@ -34,6 +34,7 @@ from providers import (  # noqa: E402
     build_provider,
     make_answering_model,
 )
+from providers.answering import usage_dict  # noqa: E402
 from providers.base import SCAFFOLD, ProposedChange  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
@@ -97,6 +98,9 @@ def run_one(arm: str, scenario: Scenario, model, seed: int, embedder: str = "loc
             "artifacts_supplied": list(g.artifacts_supplied),
         },
         "embedder": embedder_meta,
+        # Real per-cell token usage when the answering model reports it (the
+        # claude arm); None for the offline stub. Drives the cost report.
+        "usage": getattr(model, "last_usage", None),
         "proposed_change": _pc_to_dict(pc),
         "score": sc.as_dict(),
         "retrieval": {"governing_decision_retrieved": governing_retrieved},
@@ -362,6 +366,7 @@ def cmd_batch(args) -> int:
             errors.append({"arm": arm, "scenario_id": sid, "error": repr(exc)})
             continue
         run = dict(cell["skel"])
+        run["usage"] = usage_dict(getattr(r.result.message, "usage", None))
         run["proposed_change"] = _pc_to_dict(pc)
         run["score"] = score(cell["scenario"], pc).as_dict()
         results.append(run)
@@ -408,6 +413,8 @@ def cmd_demo(args) -> int:
         answering_model_name=args.answering,
         embedder_spec=args.embedder,
         pool=pool,
+        pool_dir=(args.pool if args.distractors == "real" else None),
+        scenarios_dir=args.scenarios,
     )
     for arm in arms:
         row = " ".join(f"N={p['N']}:{p['adherence_rate']:.2f}" for p in dataset["arms"][arm])

@@ -159,6 +159,16 @@
         }
       }
     },
+    "usage": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["input_tokens", "output_tokens"],
+      "properties": {
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "output_tokens": { "type": "integer", "minimum": 0 }
+      },
+      "description": "Real answering-model token usage for this cell, when the model reports it (the claude arm). null for the offline stub. Drives the per-arm token-cost report; input tokens differ sharply by arm (context_dump pastes the whole corpus)."
+    },
     "harness_version": { "type": "string" }
   }
 }

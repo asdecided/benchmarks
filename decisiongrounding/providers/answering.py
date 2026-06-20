@@ -61,11 +61,27 @@ def _content_tokens(text: str) -> set[str]:
     return {t for t in _TOKEN.findall(text.lower()) if t not in _STOP and len(t) > 2}
 
 
+def usage_dict(usage) -> dict | None:
+    """Normalise a Messages `usage` object (sync response or a Batch result's
+    `.message.usage`) into a plain {input_tokens, output_tokens} dict, or None
+    when the model reports no usage (the offline stub)."""
+    if usage is None:
+        return None
+    inp = getattr(usage, "input_tokens", None)
+    out = getattr(usage, "output_tokens", None)
+    if inp is None and out is None:
+        return None
+    return {"input_tokens": int(inp or 0), "output_tokens": int(out or 0)}
+
+
 class AnsweringModel(ABC):
     name: str = "base"
     version: str = "0"
     temperature: float | None = 0.0  # None when the pinned model exposes no knob
     seed: int = 0
+    # Real token usage from the most recent respond(), so the runner can record
+    # per-cell cost. None for the offline stub (it makes no API call).
+    last_usage: dict | None = None
 
     @abstractmethod
     def respond(
@@ -292,4 +308,5 @@ class ClaudeAnsweringModel(AnsweringModel):
     ) -> ProposedChange:
         client = self._ensure_client()
         resp = client.messages.create(**self.build_request(scaffold, grounding, task))
+        self.last_usage = usage_dict(getattr(resp, "usage", None))
         return self.parse_message(resp)
