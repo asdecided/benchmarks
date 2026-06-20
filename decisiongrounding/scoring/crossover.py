@@ -108,7 +108,11 @@ def _run_arm_on_corpus(arm_name: str, corpus, scenario, answering_model, embedde
     pc = provider.respond(scenario.task)
     gov = scenario.gold_label.governing_decision
     retrieved = None if gov is None else (gov in provider.grounding.artifacts_supplied)
-    return score(scenario, pc), retrieved
+    # Token cost of what this arm placed in context — the deterministic estimate
+    # always, plus the real API usage when the answering model reports it.
+    token_estimate = provider.grounding.token_estimate
+    usage = getattr(answering_model, "last_usage", None)
+    return score(scenario, pc), retrieved, token_estimate, usage
 
 
 def build_dataset(
@@ -119,6 +123,8 @@ def build_dataset(
     answering_model_name: str = "offline-stub",
     embedder_spec: str = "local-hash",
     pool: list[CorpusArtifact] | None = None,
+    pool_dir: str | None = None,
+    scenarios_dir: str | None = None,
 ) -> dict:
     """Compute per-arm adherence at each N, averaged over discriminating scenarios.
 
@@ -156,6 +162,8 @@ def build_dataset(
         for arm in arms:
             adhered = 0
             retrieved_flags: list = []
+            token_estimates: list[int] = []
+            usages: list[dict] = []
             for sc in discriminating:
                 pad = max(0, n - len(sc.corpus))
                 if use_real:
@@ -164,7 +172,7 @@ def build_dataset(
                     distractors = make_filler_notes(pad, sc, seed, density)
                 corpus = list(sc.corpus) + distractors
                 try:
-                    sc_score, gov_retrieved = _run_arm_on_corpus(
+                    sc_score, gov_retrieved, tok_est, usage = _run_arm_on_corpus(
                         arm, corpus, sc, answering_model, embedder_spec
                     )
                     adherent = sc_score.adherent
@@ -176,8 +184,13 @@ def build_dataset(
                     adherent = False
                     stale = False
                     gov_retrieved = None
+                    tok_est = 0
+                    usage = None
                 adhered += 1 if adherent else 0
                 retrieved_flags.append(gov_retrieved)
+                token_estimates.append(tok_est)
+                if usage:
+                    usages.append(usage)
                 per_scenario[arm][sc.scenario_id].append(
                     {
                         "N": n,
@@ -189,9 +202,19 @@ def build_dataset(
             rate = adhered / len(discriminating) if discriminating else 0.0
             governed = [f for f in retrieved_flags if f is not None]
             recall = (sum(1 for f in governed if f) / len(governed)) if governed else None
-            points[arm].append(
-                {"N": n, "adherence_rate": rate, "governing_recall": recall}
-            )
+            # Mean grounding tokens this arm placed in context at this N — the
+            # deterministic estimate, plus real API usage means when available.
+            tok_mean = sum(token_estimates) / len(token_estimates) if token_estimates else 0
+            point = {
+                "N": n,
+                "adherence_rate": rate,
+                "governing_recall": recall,
+                "token_estimate_mean": tok_mean,
+            }
+            if usages:
+                point["input_tokens_mean"] = sum(u["input_tokens"] for u in usages) / len(usages)
+                point["output_tokens_mean"] = sum(u["output_tokens"] for u in usages) / len(usages)
+            points[arm].append(point)
     return {
         "metric": "decision_adherence_rate",
         "scenarios_included": [s.scenario_id for s in discriminating],
@@ -207,6 +230,9 @@ def build_dataset(
         "ns": list(ns),
         "answering_model": answering_model.version,
         "embedder": embedder_spec,
+        # Provenance so the cost-vs-N curve can be recomputed offline (no spend).
+        "pool_dir": pool_dir,
+        "scenarios_dir": scenarios_dir,
         "arms": {arm: points[arm] for arm in arms},
         "per_scenario": per_scenario,
         "errors": errors,
