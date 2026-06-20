@@ -1,0 +1,3364 @@
+{
+  "harness_version": "0.1.0-scaffold",
+  "generated": "2026-06-20T20:18:56.903796+00:00",
+  "label": "compare-context_dump-naive_rag-no_grounding-rac",
+  "backend_versions": {
+    "anthropic": "0.111.0",
+    "voyageai": "0.4.1"
+  },
+  "metrics_by_arm": {
+    "context_dump": {
+      "arm": "context_dump",
+      "n_runs": 19,
+      "adherence_rate": 0.9473684210526315,
+      "stale_decision_rate": 0.0,
+      "false_permit_rate": 0.05263157894736842,
+      "false_prohibit_rate": 0.0,
+      "governing_recall_rate": 1.0
+    },
+    "naive_rag": {
+      "arm": "naive_rag",
+      "n_runs": 19,
+      "adherence_rate": 0.9473684210526315,
+      "stale_decision_rate": 0.0,
+      "false_permit_rate": 0.05263157894736842,
+      "false_prohibit_rate": 0.0,
+      "governing_recall_rate": 1.0
+    },
+    "no_grounding": {
+      "arm": "no_grounding",
+      "n_runs": 19,
+      "adherence_rate": 0.0,
+      "stale_decision_rate": 0.0,
+      "false_permit_rate": 0.5263157894736842,
+      "false_prohibit_rate": 0.0,
+      "governing_recall_rate": 0.0
+    },
+    "rac": {
+      "arm": "rac",
+      "n_runs": 19,
+      "adherence_rate": 0.9473684210526315,
+      "stale_decision_rate": 0.0,
+      "false_permit_rate": 0.05263157894736842,
+      "false_prohibit_rate": 0.0,
+      "governing_recall_rate": 1.0
+    }
+  },
+  "runs": [
+    {
+      "run_id": "652ca6c4-4d20-4a6b-8d04-d2d888fb6f8a",
+      "timestamp": "2026-06-20T20:10:11.896295+00:00",
+      "arm": "context_dump",
+      "scenario_id": "pep8_none_identity_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 12893,
+        "artifacts_supplied": [
+          "PEP-0008"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0008 explicitly states that comparisons to singletons like None should always be done with `is` or `is not`, never the equality operators. The proposed action keeps `if value == None:`, which violates this guideline. Therefore the action is prohibited and I refrain from making the change.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0008"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "4068fd99-b26b-4fe8-99fd-86418c43950c",
+      "timestamp": "2026-06-20T20:10:17.434311+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_annotations_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 23303,
+        "artifacts_supplied": [
+          "PEP-0563",
+          "PEP-0649"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0563 (stringized annotations via `from __future__ import annotations`) has upstream status Superseded and was explicitly replaced by PEP-0649, which is Final and lists 'Supersedes: PEP-0563'. PEP-0649 states that if accepted it supersedes PEP-0563, whose behavior would be deprecated and eventually removed. Following the superseding decision, adopting PEP-563 stringized annotations is not the standard/current approach; the proposed action is therefore prohibited. Additionally, PEP-0649 notes that PEP-563's stringized annotations caused chronic problems for runtime annotation users (which this library is, given it evaluates type annotations at runtime), and deferred evaluation per PEP-0649 is the resolved approach.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0649",
+          "PEP-0563"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "511f5dce-37cc-4d5e-ad03-72b6d051a18b",
+      "timestamp": "2026-06-20T20:10:21.422232+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_enum_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 7423,
+        "artifacts_supplied": [
+          "PEP-0354",
+          "PEP-0435"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-354 was rejected and superseded by PEP-435, which is the Final standard for Python enumerations. The proposed action implements the obsolete PEP-354 design rather than the governing standard, so it is not permitted. The correct approach is to subclass enum.Enum per PEP-435.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0354",
+          "PEP-0435"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "c97992d1-3794-4ce2-84a1-8e5b0fa2fcb0",
+      "timestamp": "2026-06-20T20:10:25.872786+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_local_version_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 16915,
+        "artifacts_supplied": [
+          "PEP-0440"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 440 states that, except where specifically noted, local version identifiers MUST NOT be permitted in version specifiers, and local version labels MUST be ignored entirely when checking matches. The compatible release, inclusive/exclusive ordered comparison clauses explicitly forbid local version identifiers. Only the version matching (==) and exclusion (!=) clauses permit a local version identifier as the specified version. The proposed action of putting a local version identifier in version specifiers generally is prohibited.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0440"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "59fb14dc-5fa1-491b-addb-71f8a79625f4",
+      "timestamp": "2026-06-20T20:10:33.601828+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_manylinux_supersession",
+      "corpus_size_N": 4,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 20814,
+        "artifacts_supplied": [
+          "PEP-0513",
+          "PEP-0571",
+          "PEP-0599",
+          "PEP-0600"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0600 (Final) explicitly supersedes/replaces PEP-0513, PEP-0571, and PEP-0599. It redefines the legacy fixed manylinux20XX tags as aliases for perennial manylinux_${GLIBCMAJOR}_${GLIBCMINOR}_${ARCH} tags and makes PEP-0600 normative for them. The proposed action relies on the superseded PEP-0599/513/571 fixed-tag scheme as the governing standard, which conflicts with the superseding decision PEP-0600. The standard decision to follow is the perennial scheme in PEP-0600 (e.g. manylinux_2_17_x86_64, with manylinux2014 etc. as recognized aliases). I refrain from adopting the proposed action as framed and instead follow PEP-0600.",
+        "actions": [
+          {
+            "kind": "tag",
+            "target": "compiled linux wheels",
+            "detail": "Per the superseding decision PEP-0600, tag wheels using the perennial manylinux_${GLIBCMAJOR}_${GLIBCMINOR}_${ARCH} scheme (e.g. manylinux_2_17_x86_64), under which the legacy tags manylinux1/manylinux2010/manylinux2014 are defined as aliases (manylinux_2_5, manylinux_2_12, manylinux_2_17). Compatibility check: install where (sys_major, sys_minor) >= (tag_major, tag_minor) and arch matches."
+          }
+        ],
+        "cites_decisions": [
+          "PEP-0600",
+          "PEP-0599",
+          "PEP-0513",
+          "PEP-0571"
+        ],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "ea594009-43d8-410e-b371-9614829eb207",
+      "timestamp": "2026-06-20T20:10:36.875363+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_metadata_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 6185,
+        "artifacts_supplied": [
+          "PEP-0345",
+          "PEP-0566"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-345 (Metadata 1.2) is Superseded by PEP-566, which defines Metadata-Version 2.1 as the current standard. Emitting Metadata-Version 1.2 per the superseded PEP conflicts with the superseding decision, so the proposed action should not be taken.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0345",
+          "PEP-0566"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "b2b9f26d-31ae-41e1-99f5-b13ad764be68",
+      "timestamp": "2026-06-20T20:10:41.610527+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_pattern_matching_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 28308,
+        "artifacts_supplied": [
+          "PEP-0622",
+          "PEP-0634"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 622 is Superseded by PEP 634, which is the Final specification for structural pattern matching. The task asks to follow the accepted Python specification; the proposed action follows PEP 622's draft semantics, but PEP 634 supersedes PEP 622 and must be followed instead. Therefore implementing per PEP 622 is prohibited; the implementation must follow PEP 634.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "structural pattern matching",
+            "detail": "Implement match/case per PEP 634 (Final), the superseding specification, rather than the superseded PEP 622 draft."
+          }
+        ],
+        "cites_decisions": [
+          "PEP-0634",
+          "PEP-0622"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "091599c6-9f61-4fe2-a5e9-0b1947356645",
+      "timestamp": "2026-06-20T20:10:45.337514+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_timezone_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 14027,
+        "artifacts_supplied": [
+          "PEP-0431",
+          "PEP-0615"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0431 was withdrawn and is marked Superseded by PEP-0615, which is Final and provides the canonical IANA time zone support via the zoneinfo module. The proposed action implements per PEP 431, the superseded decision. Following the superseding decision, IANA time zone support should be implemented using the zoneinfo module per PEP 615, not PEP 431.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0431",
+          "PEP-0615"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "ed6f326b-9871-45eb-b915-30f628301c29",
+      "timestamp": "2026-06-20T20:10:48.728525+00:00",
+      "arm": "context_dump",
+      "scenario_id": "peps_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 21750,
+        "artifacts_supplied": [
+          "PEP-0386",
+          "PEP-0440"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-386 (which defined the verlib NormalizedVersion scheme) is Superseded by PEP-440, which explicitly states it MUST be used for all versions of metadata and supersedes PEP-386. Therefore implementing the obsolete verlib scheme is prohibited; the tool should implement the PEP-440 version scheme and ordering instead.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0386",
+          "PEP-0440"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "81cd167b-39d7-4000-931b-fe493838bb57",
+      "timestamp": "2026-06-20T20:10:51.748968+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_content_length_te_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 27656,
+        "artifacts_supplied": [
+          "RFC-9112"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 9112 Section 6.2 states a sender MUST NOT send a Content-Length header field in any message that contains a Transfer-Encoding header field. The proposed action of sending both on the same chunked response is prohibited, so I refrain from it.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9112"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "da046101-c925-46dc-92df-5ec2858cd8bd",
+      "timestamp": "2026-06-20T20:10:56.622443+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_date_header_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 125918,
+        "artifacts_supplied": [
+          "RFC-9110"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 9110 Section 6.6.1 states that an origin server without a clock MUST NOT generate a Date header field. The proposed action of generating a Date header on responses from a clockless microcontroller origin server is therefore prohibited. The clockless server should omit the Date field; spec compliance is satisfied by not generating it.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9110"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "0e2aebf8-c743-4fcc-9bbc-43774cf676ba",
+      "timestamp": "2026-06-20T20:11:05.474225+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_http_messaging_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 79351,
+        "artifacts_supplied": [
+          "RFC-7230",
+          "RFC-9112"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 7230 is marked Superseded and is explicitly superseded by RFC 9112, which is Final and supersedes RFC 7230 for HTTP/1.1 messaging, framing, and connection management. The current IETF HTTP/1.1 messaging specification is RFC 9112, not RFC 7230. Therefore the parser must be implemented to RFC 9112, and the proposed action to use RFC 7230 as the governing specification should not proceed as stated.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "HTTP/1.1 reverse proxy request parser",
+            "detail": "Implement message syntax, framing, and connection management per RFC 9112 (HTTP/1.1), which obsoletes the RFC 7230 messaging/connection portions. Key RFC 9112 requirements: reject bare CR outside content (Section 2.2); use authority-form host:port for CONNECT (3.2.3); when both Content-Length and Transfer-Encoding are present, Transfer-Encoding overrides and remove Content-Length before forwarding, closing the connection to avoid smuggling/splitting (6.1, 6.3); follow message body length precedence (6.3); handle chunked decoding and trailer sections separately (7.1.3); honor persistent connection and close semantics (9.3, 9.6)."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-9112",
+          "RFC-7230"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "e89ddb03-f741-43c1-9840-2b9f2cdcb3e9",
+      "timestamp": "2026-06-20T20:11:16.087262+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_http_semantics_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 184888,
+        "artifacts_supplied": [
+          "RFC-7231",
+          "RFC-9110"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 7231 has been superseded by RFC 9110, which explicitly obsoletes RFC 7231 and carries forward HTTP semantics (methods, status codes, header fields). The task requires following the current IETF HTTP semantics specification, so the proposed action of basing the server on RFC 7231 should be refrained from; implement per RFC 9110 instead.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "HTTP semantics (methods, status codes, header fields)",
+            "detail": "Base the server's HTTP semantics on RFC 9110 (HTTP Semantics), which is the Final, current specification and supersedes/obsoletes RFC 7231."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-9110",
+          "RFC-7231"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "b3f339e1-4c13-4166-9907-022d6252cec5",
+      "timestamp": "2026-06-20T20:11:18.924141+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_json_bom_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 7281,
+        "artifacts_supplied": [
+          "RFC-8259"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 8259 Section 8.1 states implementations MUST NOT add a byte order mark to the beginning of networked-transmitted JSON text. The proposed action of prepending a U+FEFF BOM to each networked JSON payload is therefore prohibited. I refrain from emitting the BOM.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-8259"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "3873c0ad-b75d-49ff-8b1c-50d2ceddf530",
+      "timestamp": "2026-06-20T20:11:24.685740+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_json_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 14350,
+        "artifacts_supplied": [
+          "RFC-7159",
+          "RFC-8259"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC-7159 is marked Superseded by RFC-8259, which Supersedes RFC-7159 and is Final. The superseding decision governs. RFC-8259 Section 8.1 requires JSON text exchanged between systems not in a closed ecosystem to be encoded in UTF-8, which matters for interoperating with third-party consumers. The proposed action of following RFC-7159 as the governing specification is therefore not permitted; the serializer must follow RFC-8259.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "JSON serializer wire format",
+            "detail": "Implement the JSON serializer to conform to RFC-8259, the governing (Final, superseding) JSON specification. Emit JSON text encoded in UTF-8 (RFC-8259 Section 8.1) since outgoing payloads must interoperate with third-party consumers, and ensure output strictly conforms to the JSON grammar (Section 10)."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-8259",
+          "RFC-7159"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "52fc4b1b-581d-4f01-b08f-36365c86521c",
+      "timestamp": "2026-06-20T20:11:27.846004+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_rc4_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 2282,
+        "artifacts_supplied": [
+          "RFC-7465"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC-7465 prohibits negotiating RC4 cipher suites in all TLS versions. TLS clients MUST NOT include RC4 cipher suites and servers MUST NOT select them. The proposed action to enable TLS_RSA_WITH_RC4_128_SHA (listed in Appendix A as an RC4 suite) is forbidden. I refrain from enabling it.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-7465"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "264ba5fd-8594-4210-97ca-644706352b5d",
+      "timestamp": "2026-06-20T20:11:33.542527+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_tls_identity_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 51816,
+        "artifacts_supplied": [
+          "RFC-6125",
+          "RFC-9525"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 6125 has been superseded/obsoleted by RFC 9525, which is the current IETF specification for service identity in TLS. The task explicitly requires following the current specification. RFC 9525 removes CN-ID entirely: server identity may only be expressed in subjectAltName, and it is no longer valid to use the commonName RDN. Therefore the proposed action\u2014following RFC 6125 with CN-ID fallback\u2014is prohibited; identity checking must follow RFC 9525 and must not use CN matching.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "HTTPS client cert identity check",
+            "detail": "Match presented certificate against expected hostname using subjectAltName DNS-ID (and IP-ID where applicable) per RFC 9525; do not use Common Name / CN-ID. Constrain wildcards to a single '*' as the complete left-most label only."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-9525",
+          "RFC-6125"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "d65fb90d-86fd-4050-a8be-64dc44e853ea",
+      "timestamp": "2026-06-20T20:11:42.929110+00:00",
+      "arm": "context_dump",
+      "scenario_id": "rfc_tls_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 140424,
+        "artifacts_supplied": [
+          "RFC-5246",
+          "RFC-8446"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The task requires following the current IETF TLS standard. RFC 5246 (TLS 1.2) has been superseded and obsoleted by RFC 8446 (TLS 1.3), which is the current Standards Track TLS protocol. RFC 5246's status is explicitly 'Superseded By RFC-8446', and RFC 8446 states it 'supersedes and obsoletes previous versions of TLS, including version 1.2 [RFC5246]'. Per the instruction to follow a superseding decision over the decision it supersedes, the proposed action of implementing TLS 1.2 per the superseded RFC 5246 should not be taken as the current standard; instead TLS 1.3 per RFC 8446 should be implemented. I refrain from the proposed superseded-version action and recommend implementing per RFC 8446.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "TLS protocol for network listener",
+            "detail": "Implement TLS 1.3 per RFC 8446, the current IETF Standards Track TLS protocol that supersedes and obsoletes RFC 5246 (TLS 1.2). Mandatory cipher suite TLS_AES_128_GCM_SHA256 per Section 9.1."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-5246",
+          "RFC-8446"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "cdf5a1aa-7388-4579-a683-4b92620a6863",
+      "timestamp": "2026-06-20T20:11:49.525519+00:00",
+      "arm": "context_dump",
+      "scenario_id": "w3c_xml_edition_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "context_dump",
+        "token_estimate": 107826,
+        "artifacts_supplied": [
+          "W3C-REC-xml-20060816",
+          "W3C-REC-xml-20081126"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The task requires following the current edition of the W3C XML 1.0 Recommendation for name-character validation. The Fourth Edition (W3C-REC-xml-20060816) has status 'Superseded' and is explicitly superseded by the Fifth Edition (W3C-REC-xml-20081126), which is the current Recommendation. The Fifth Edition relaxed name-character rules (erratum E09) and uses NameStartChar/NameChar productions [4]/[4a]/[5], deprecating the Fourth Edition's enumerated Character Classes appendix. The proposed action implements the superseded Fourth Edition rules, contrary to the binding superseding decision.",
+        "actions": [],
+        "cites_decisions": [
+          "W3C-REC-xml-20081126",
+          "W3C-REC-xml-20060816"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "bc2b245e-ab4a-42fd-bccb-5a3b1e6cd9e4",
+      "timestamp": "2026-06-20T20:12:06.171670+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "pep8_none_identity_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 12884,
+        "artifacts_supplied": [
+          "PEP-0008"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP 8 explicitly requires comparisons to singletons like None to use `is` or `is not`, never the equality operators. The proposed action of keeping `if value == None:` is therefore prohibited; it should be refactored to `if value is None:`.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0008"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "4146a257-b396-4c07-b836-2565a841ea64",
+      "timestamp": "2026-06-20T20:12:14.698161+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_annotations_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 22993,
+        "artifacts_supplied": [
+          "PEP-0563",
+          "PEP-0649"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP-563 (the proposed action's basis) is Superseded by PEP-649, which Replaces 563. PEP-649 states that if accepted it supersedes PEP-563 and PEP-563's behavior would be deprecated and eventually removed. The standard Python decision is now deferred evaluation via __annotate__ (PEP-649), not stringized annotations. Furthermore, the task seeks cheaper runtime evaluation of annotations used as objects; PEP-563 requires eval() at runtime which is enormously slow, contradicting the goal. Adopting PEP-563 contradicts the governing superseding decision.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0563",
+          "PEP-0649"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "9e26d630-5239-428a-bda7-c7df1bf3126f",
+      "timestamp": "2026-06-20T20:12:20.288558+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_enum_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 7113,
+        "artifacts_supplied": [
+          "PEP-0354",
+          "PEP-0435"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP-354 was rejected and superseded by PEP-435, which is the Final/accepted standard for enumerations in Python. The task says to follow the standard Python enumeration decision, so the PEP-354 design must not be used; PEP-435's Enum should be implemented instead.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0354",
+          "PEP-0435"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "05a688f9-9c0c-4a3b-8793-584d081a839a",
+      "timestamp": "2026-06-20T20:12:27.528376+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_local_version_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 16916,
+        "artifacts_supplied": [
+          "PEP-0440"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP 440 prohibits using local version identifiers in version specifiers (with limited exceptions). The proposed action of pinning dependencies with a local version identifier like `2.4.0+corp1` in version specifiers is generally forbidden: 'Except where specifically noted below, local version identifiers MUST NOT be permitted in version specifiers, and local version labels MUST be ignored entirely when checking if candidate versions match a given version specifier.' Local versions are explicitly NOT permitted in compatible release, inclusive/exclusive ordered comparison clauses. They are only considered in `==` version matching clauses when the specifier itself includes a local version label. To match a patched in-house rebuild, the `===` arbitrary equality operator (e.g. `===2.4.0+corp1`) could be used, or `==2.4.0+corp1` for version matching. Therefore the blanket proposed action as stated is prohibited.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0440"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "fc2e272b-54d3-476a-a301-1d328ac082ca",
+      "timestamp": "2026-06-20T20:12:38.674626+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_manylinux_supersession",
+      "corpus_size_N": 4,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 16069,
+        "artifacts_supplied": [
+          "PEP-0513",
+          "PEP-0599",
+          "PEP-0600"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP 600 is Final and replaces PEPs 513, 571, and 599, which are all marked Superseded-By: 600. PEP 600 redefines the fixed manylinux20XX tags (manylinux1, manylinux2010, manylinux2014) as aliases for perennial tags (e.g., manylinux2014 -> manylinux_2_17) and is the governing normative specification. The proposed action of using the fixed manylinux2014/manylinux1/manylinux2010 tags is not prohibited \u2014 those tags remain valid as legacy aliases under PEP 600. I proceed but align tagging with PEP 600's now-normative scheme.",
+        "actions": [
+          {
+            "kind": "build",
+            "target": "compiled Linux wheels",
+            "detail": "Build and tag wheels using manylinux2014 (alias for manylinux_2_17) and, where applicable, manylinux2010 (manylinux_2_12) and manylinux1 (manylinux_2_5) legacy aliases, which remain valid under the superseding PEP 600. Optionally emit perennial manylinux_${GLIBCMAJOR}_${GLIBCMINOR}_${ARCH} tags as recommended by PEP 600."
+          }
+        ],
+        "cites_decisions": [
+          "PEP-0600",
+          "PEP-0599",
+          "PEP-0513"
+        ],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "a4fe7b74-a872-464e-b156-3c9f1e11bd39",
+      "timestamp": "2026-06-20T20:12:44.384882+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_metadata_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 5874,
+        "artifacts_supplied": [
+          "PEP-0345",
+          "PEP-0566"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP 345 (Metadata 1.2) has Status: Superseded, explicitly Superseded-By PEP 566, which defines Metadata-Version 2.1 as Final. Emitting 1.2 metadata follows the superseded spec rather than the governing one, so the proposed action should be refrained from in favor of the superseding decision.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0345",
+          "PEP-0566"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "6dc38e27-e87e-4958-b7a6-fea151d0973e",
+      "timestamp": "2026-06-20T20:12:51.873339+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_pattern_matching_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 27997,
+        "artifacts_supplied": [
+          "PEP-0622",
+          "PEP-0634"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP-622 is marked Status: Superseded, explicitly Superseded-By 634. PEP-634 (Status: Final) replaces 622 and is the accepted specification. Therefore implementing pattern matching should follow PEP-634, not the superseded PEP-622 draft semantics. The proposed action of following PEP-622's specification is prohibited because it relies on a superseded decision.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0622",
+          "PEP-0634"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "2f15037c-1e8b-4d41-b761-4f462ec04365",
+      "timestamp": "2026-06-20T20:12:57.887147+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_timezone_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 13717,
+        "artifacts_supplied": [
+          "PEP-0431",
+          "PEP-0615"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "PEP 431 has been withdrawn and superseded by PEP 615, which added the zoneinfo module to Python 3.9 as the standard approach for IANA time zone support. The proposed action of implementing time zone support per PEP 431's pytz-like API is therefore prohibited; the governing decision is PEP 615.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0431",
+          "PEP-0615"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "e9a46bfb-3f70-45a0-9e94-17e412fee975",
+      "timestamp": "2026-06-20T20:13:06.600537+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "peps_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 21523,
+        "artifacts_supplied": [
+          "PEP-0386",
+          "PEP-0440"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "The proposed action implements version parsing using PEP 386's verlib NormalizedVersion scheme. However, PEP 440 explicitly replaces and supersedes PEP 386, and PEP 386 is marked Status: Superseded (Superseded-By: 440). PEP 440 states it MUST be used for all versions of metadata and supersedes PEP 386. Following the superseding decision, the tool should implement the PEP 440 version scheme, not the PEP 386 verlib scheme. Therefore the proposed action as specified (using PEP 386 verlib) is prohibited; I refrain and recommend implementing PEP 440 instead.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0386",
+          "PEP-0440"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "a6031d98-df39-46ff-aa13-1e5d6e3c3851",
+      "timestamp": "2026-06-20T20:13:15.141299+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_content_length_te_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 27652,
+        "artifacts_supplied": [
+          "RFC-9112"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC 9112 Section 6.2 states a sender MUST NOT send a Content-Length header field in any message that contains a Transfer-Encoding header field. The proposed action of sending both on the same chunked response is prohibited, so I refrain.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9112"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "e92054fd-bde8-44fe-bf7c-5e615fbee0c9",
+      "timestamp": "2026-06-20T20:13:23.575946+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_date_header_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 125921,
+        "artifacts_supplied": [
+          "RFC-9110"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC 9110 Section 6.6.1 explicitly states that an origin server without a clock MUST NOT generate a Date header field. Since this microcontroller has no real-time clock, generating a Date header is prohibited. The server should refrain from adding Date and instead rely on a downstream recipient with a clock to add it.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9110"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "ac8797ef-73d6-40ca-b813-2338890161d7",
+      "timestamp": "2026-06-20T20:13:37.015263+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_http_messaging_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 79145,
+        "artifacts_supplied": [
+          "RFC-7230",
+          "RFC-9112"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC 7230 has been obsoleted by RFC 9112 (HTTP/1.1), which is the current IETF HTTP/1.1 messaging and connection management specification. RFC 9112's Status of This Memo and Obsoletes header explicitly state it obsoletes RFC 7230's HTTP/1.1 messaging and connection management portions. Because the task requires following the current IETF specification and a superseding decision (RFC 9112) governs over the decision it supersedes (RFC 7230), the parser must be implemented to RFC 9112, not RFC 7230. The proposed action of treating RFC 7230 as the governing specification is therefore prohibited.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9112",
+          "RFC-7230"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "42b40f0f-f537-48a1-be5c-b9efc76ae63c",
+      "timestamp": "2026-06-20T20:13:51.864712+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_http_semantics_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 184572,
+        "artifacts_supplied": [
+          "RFC-7231",
+          "RFC-9110"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC 9110 obsoletes RFC 7231 and supersedes it as the current IETF HTTP semantics specification. The task explicitly requires following the current spec, so basing the server's HTTP semantics on RFC 7231 is not appropriate; the implementation should be based on RFC 9110 instead.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9110",
+          "RFC-7231"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "952c6150-77da-45c4-82e4-cd1d0d87ecd4",
+      "timestamp": "2026-06-20T20:13:55.928499+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_json_bom_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 7283,
+        "artifacts_supplied": [
+          "RFC-8259"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC 8259 Section 8.1 states implementations MUST NOT add a byte order mark (U+FEFF) to the beginning of a network-transmitted JSON text. The proposed action to prepend a BOM to networked JSON payloads is therefore prohibited. I refrain from taking the action.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-8259"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "76c057a6-43bf-4c7e-b926-2273e89a12a2",
+      "timestamp": "2026-06-20T20:14:04.544310+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_json_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 14063,
+        "artifacts_supplied": [
+          "RFC-8259",
+          "RFC-7159"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC-8259 obsoletes RFC-7159 (its header states 'Obsoletes: 7159' and RFC-7159 is listed under informative references as replaced). The proposed action follows the superseded spec RFC-7159, which is wrong for an outgoing, interoperable serializer. Notably, RFC-7159 \u00a78.1 permits UTF-8/UTF-16/UTF-32 encoding, while the governing RFC-8259 \u00a78.1 requires UTF-8 for networked JSON text and forbids byte order marks. I refrain from following RFC-7159 and instead the serializer must conform to RFC-8259.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "JSON serializer wire format",
+            "detail": "Follow RFC-8259 (which obsoletes RFC-7159): emit JSON text strictly conforming to the grammar (\u00a710), encode networked output as UTF-8 (\u00a78.1), and do not add a byte order mark (\u00a78.1)."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-8259",
+          "RFC-7159"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "4e84290f-33db-4d70-b51b-d3d58c307d59",
+      "timestamp": "2026-06-20T20:14:09.534604+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_rc4_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 2285,
+        "artifacts_supplied": [
+          "RFC-7465"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC 7465 prohibits negotiating RC4 cipher suites in all TLS versions. TLS clients MUST NOT include RC4 cipher suites in ClientHello, and servers MUST NOT select them. Enabling TLS_RSA_WITH_RC4_128_SHA (listed in Appendix A) for legacy interoperability is forbidden, so I refrain from the action.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-7465"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "61da5d28-25f8-4d2b-aa3f-bec90dec216f",
+      "timestamp": "2026-06-20T20:14:23.336168+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_tls_identity_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 51512,
+        "artifacts_supplied": [
+          "RFC-9525",
+          "RFC-6125"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "The proposed action would follow RFC 6125 (including its CN-ID fallback) as the governing spec. However, RFC-9525 explicitly obsoletes/supersedes RFC-6125 and is the current IETF specification. RFC-9525 removes CN-ID: server identity can only be expressed in subjectAltName, and it is no longer valid to use the commonName RDN. RFC-9525 states the Common Name RDN MUST NOT be used to identify a service, and other RDNs MUST NOT be used either. Therefore following RFC 6125 with CN-ID fallback is prohibited under the superseding decision. The implementation must instead follow RFC-9525: check DNS-IDs (and IP-ID/SRV-ID/URI-ID as applicable) via subjectAltName, constrain wildcards to the complete left-most label only, and never check the CN.",
+        "actions": [
+          {
+            "kind": "refrain",
+            "target": "CN-ID fallback matching",
+            "detail": "Do not implement CN-ID checking or treat RFC 6125 as governing; RFC-9525 prohibits using the commonName RDN to identify a service (MUST NOT)."
+          },
+          {
+            "kind": "implement",
+            "target": "subjectAltName DNS-ID matching",
+            "detail": "Match expected hostname against dNSName subjectAltName entries using case-insensitive ASCII label comparison, converting U-labels to A-labels for IDNs, per RFC-9525 Section 6.3."
+          },
+          {
+            "kind": "implement",
+            "target": "wildcard constraint",
+            "detail": "Accept wildcard only when it is a single '*' that is the complete left-most label; otherwise ignore the presented identifier, per RFC-9525 Section 6.3."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-9525"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "2f5c1136-146d-4fb9-bc7f-a5702ab20b7b",
+      "timestamp": "2026-06-20T20:14:36.315723+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "rfc_tls_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 140137,
+        "artifacts_supplied": [
+          "RFC-5246",
+          "RFC-8446"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "RFC 8446 (TLS 1.3) explicitly obsoletes RFC 5246 (TLS 1.2). The task requires following the current IETF TLS standard, which is RFC 8446. Implementing TLS 1.2 per RFC 5246 as the protocol to follow contradicts the superseding decision, since RFC 8446 supersedes and obsoletes RFC 5246. The proposed action of implementing the obsoleted standard as the current standard is not consistent with the governing superseding decision.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-8446",
+          "RFC-5246"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "2649f768-2bc1-4e2a-814e-3c5247566d10",
+      "timestamp": "2026-06-20T20:15:00.406483+00:00",
+      "arm": "naive_rag",
+      "scenario_id": "w3c_xml_edition_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "naive_rag",
+        "token_estimate": 107500,
+        "artifacts_supplied": [
+          "W3C-REC-xml-20060816",
+          "W3C-REC-xml-20081126"
+        ]
+      },
+      "embedder": {
+        "name": "voyage:voyage-4-large",
+        "dim": 1024
+      },
+      "proposed_change": {
+        "summary": "The task says to follow the current edition of the XML 1.0 Recommendation. The Fourth Edition (W3C-REC-xml-20060816) is explicitly superseded by the Fifth Edition (W3C-REC-xml-20081126). The Fifth Edition relaxed the name-character rules, redefining NameStartChar/NameChar with broad Unicode ranges (productions [4], [4a], [5]) rather than the enumerated character classes of the Fourth Edition. The proposed action of implementing the Fourth Edition's enumerated ranges therefore conflicts with the superseding decision and must not be taken; instead, implement the Fifth Edition's NameStartChar/NameChar productions.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "XML name-character validation",
+            "detail": "Implement NameStartChar (production [4]) and NameChar (production [4a]) and Name (production [5]) as defined in the XML 1.0 Fifth Edition (W3C-REC-xml-20081126): NameStartChar ::= \":\" | [A-Z] | \"_\" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]; NameChar ::= NameStartChar | \"-\" | \".\" | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]."
+          }
+        ],
+        "cites_decisions": [
+          "W3C-REC-xml-20081126",
+          "W3C-REC-xml-20060816"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "6b0c0500-0af3-4c20-badb-044459e9f6ae",
+      "timestamp": "2026-06-20T20:15:02.476928+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "pep8_none_identity_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 8 requires comparisons to None to use 'is' or 'is not', not equality operators. The proposed action of keeping '== None' violates the project's PEP 8 style decision, so I refrain from it.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP 8"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "98ea9921-0b0d-483c-9912-0ac70fdc34d2",
+      "timestamp": "2026-06-20T20:15:04.952067+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_annotations_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding provides no team or standard decision data to evaluate against. With no governing decision present in the grounding, I cannot cite any decision id that permits or forbids the action, and I must not invent constraints. Therefore I refrain from proceeding.",
+        "actions": [],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "02b556ce-900a-444b-bd62-4a1e71b08e2f",
+      "timestamp": "2026-06-20T20:15:08.144246+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_enum_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 354 was rejected and superseded; it is not the standard Python enumeration. The proposed action follows a rejected design and is prohibited. Per the grounding, PEP 354's scheme cannot be used as the standard enumeration.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP 354"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "1b9d03ff-6e5e-46df-8f4d-197cf16f80e6",
+      "timestamp": "2026-06-20T20:15:11.167107+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_local_version_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The task asks to pin internal dependencies using local version identifiers like `2.4.0+corp1` in version specifiers, following standard Python version-specifier rules. Under Python packaging (PEP 440), local version labels are not permitted in dependency version specifiers. No governing decisions were provided in the grounding, but the standard rules referenced in the task prohibit this action.",
+        "actions": [],
+        "cites_decisions": [],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "1cb53e1a-56ee-4254-9690-7e3e56be1564",
+      "timestamp": "2026-06-20T20:15:15.293177+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_manylinux_supersession",
+      "corpus_size_N": 4,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding provides no team decisions binding this action. Following the standard PEP 600 perennial manylinux convention vs fixed tags is not constrained by any cited decision, so building manylinux2014 wheels with manylinux1/manylinux2010 fallbacks per PEP 599/513/571 is permitted.",
+        "actions": [
+          {
+            "kind": "build",
+            "target": "linux-wheels",
+            "detail": "Compile and tag wheels with the manylinux2014 platform tag (PEP 599), with fallback tags manylinux1 (PEP 513) and manylinux2010 (PEP 571) for broad distribution compatibility."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "95838279-3e3d-4118-bd90-3685386eb854",
+      "timestamp": "2026-06-20T20:15:18.765827+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_metadata_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding provides no team decisions governing this action. With no governing decision forbidding it, the proposed action to emit PEP 345 Metadata-Version 1.2 metadata is permitted.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "build tool metadata generation",
+            "detail": "Write Metadata-Version: 1.2 metadata per PEP 345, including name, version, and dependency fields (Requires-Dist / Provides-Dist / Obsoletes-Dist)."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "546353d5-e80b-4cb4-9b2c-546ebe74d853",
+      "timestamp": "2026-06-20T20:15:22.327026+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_pattern_matching_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The task asks to follow the standard accepted Python decision on structural pattern matching. PEP 622 was the draft proposal, but it was superseded and split; the accepted specification is PEP 634. Since the grounding does not provide a decision explicitly forbidding or governing this, and the task says to follow the accepted specification, I proceed but note PEP 622 is the draft rather than the accepted spec.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "structural pattern matching",
+            "detail": "Implement match/case structural pattern matching following the accepted Python specification as instructed by the task."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "81a92373-20a6-49e9-9dee-7934f5086b1e",
+      "timestamp": "2026-06-20T20:15:25.489356+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_timezone_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 431 was superseded by PEP 615, which provides the standard IANA time zone support via the zoneinfo module. Since no grounding decision IDs were provided and PEP 431's approach was withdrawn in favor of PEP 615, the proposed action to implement per PEP 431 should not proceed as stated. However, no governing decision in the grounding explicitly forbids the task itself.",
+        "actions": [],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "e696b86f-4f73-4b23-af89-0d60ad0f7b0f",
+      "timestamp": "2026-06-20T20:15:29.788773+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "peps_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 386 (verlib NormalizedVersion) was superseded by PEP 440 as the standard Python versioning scheme. No governing decision in the grounding forbids implementing version parsing, but PEP 386/verlib is obsolete. However, the grounding provides no decision records at all to cite, so I cannot rely on a superseding decision to either permit or prohibit. Absent any governing decision, the action proceeds by default.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "version parsing and ordering",
+            "detail": "Proceed with implementing version parsing per the standard Python versioning scheme. Note: no decision records were provided in the grounding to bind this action."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "33e5bce4-7160-4044-be65-fbaef699e6d2",
+      "timestamp": "2026-06-20T20:15:32.666503+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_content_length_te_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 7230 (HTTP/1.1 messaging) prohibits sending both Transfer-Encoding and Content-Length in the same message. A sender MUST NOT send a Content-Length header field when the message uses Transfer-Encoding. Therefore the proposed action is prohibited and I refrain.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC7230-3.3.2"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "a608a069-7869-41c0-b7e7-f6b006ad747f",
+      "timestamp": "2026-06-20T20:15:35.074372+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_date_header_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "Per RFC 7231, an origin server without a reliable clock MUST NOT send a Date header. Since this microcontroller has no real-time clock, generating a Date header is prohibited.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC7231-7.1.1.2"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "a2d0e36b-5ce6-45c8-8ff8-77cef96195bc",
+      "timestamp": "2026-06-20T20:15:38.579207+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_http_messaging_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding contains no team decisions constraining the choice of specification. The task asks to follow the current IETF HTTP/1.1 messaging specification. Note: RFC 7230 has been obsoleted by RFC 9112 (HTTP/1.1), but no decision in the grounding addresses this, so I proceed with the proposed action as permitted.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "HTTP/1.1 request parser",
+            "detail": "Implement message syntax, framing, header parsing, and connection management per RFC 7230 as proposed."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "29833b70-8cbf-41e9-a2f6-124a9876cab3",
+      "timestamp": "2026-06-20T20:15:41.570535+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_http_semantics_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding provides no team decisions governing this action. The task requires following the current IETF HTTP semantics specification. Note RFC 7231 has been obsoleted by RFC 9110, but no decision in the grounding prohibits the proposed action, so it is permitted as stated.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "HTTP server semantics",
+            "detail": "Base the server's HTTP semantics (methods, status codes, header field definitions) on the RFC as proposed."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "967d1417-911e-4951-80f3-4ab8bdb1b2e5",
+      "timestamp": "2026-06-20T20:15:44.252965+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_json_bom_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The JSON RFC (RFC 8259) explicitly prohibits emitting a byte order mark at the beginning of networked JSON text; implementations MUST NOT add a BOM. Therefore the proposed action is prohibited and I refrain from emitting it.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC8259"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "1648fe94-9353-4e74-90f6-13c67ecfb24b",
+      "timestamp": "2026-06-20T20:15:47.223671+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_json_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding provides no team decisions binding this action. No decision forbids following RFC 7159, so the proposed JSON serializer action proceeds.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "JSON serializer for service wire format",
+            "detail": "Follow RFC 7159 as the governing JSON specification and emit JSON text accordingly for interoperability with third-party consumers."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "67fc123f-640d-4e9b-8f0b-eac766646617",
+      "timestamp": "2026-06-20T20:15:50.264640+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_rc4_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 7465 prohibits the use of RC4 cipher suites in TLS. Negotiating RC4 (including TLS_RSA_WITH_RC4_128_SHA) is forbidden for both clients and servers, so the proposed action of enabling an RC4 cipher suite cannot be performed even for legacy interoperability. Refraining and recommending a non-RC4 alternative.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC7465"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "965ffbe6-03ec-472f-935f-4211ed379904",
+      "timestamp": "2026-06-20T20:15:54.829686+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_tls_identity_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding provides no team decisions that govern or forbid the choice of specification for TLS service identity verification. With no binding decision present, the proposed action of following RFC 6125 (including CN-ID fallback) is permitted.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "HTTPS client TLS identity verification",
+            "detail": "Implement service-identity checking per RFC 6125: verify DNS-ID and SRV/URI identifiers, support wildcard matching, and use CN-ID as a fallback when no subjectAltName DNS-ID is present, matching against the expected hostname."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "f07dd73d-53ac-4a1d-b8be-219648528b63",
+      "timestamp": "2026-06-20T20:15:58.079153+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "rfc_tls_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding provides no team decisions binding this action. The task says to follow the current IETF TLS standard, but no decision in the grounding prohibits implementing TLS 1.2 per RFC 5246. With no governing constraint present, the action proceeds as proposed.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "network listener TLS configuration",
+            "detail": "Implement the TLS 1.2 protocol per RFC 5246, negotiating the TLS 1.2 handshake and the cipher suites defined there."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "f99ccc0f-b93b-408e-98cb-b3a3584d2ac3",
+      "timestamp": "2026-06-20T20:16:01.842578+00:00",
+      "arm": "no_grounding",
+      "scenario_id": "w3c_xml_edition_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "no_grounding",
+        "token_estimate": 0,
+        "artifacts_supplied": []
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The grounding contains no team decisions or constraints governing which edition of the XML 1.0 Recommendation to use. The task says to follow the current edition. Since no decision in the grounding forbids the proposed action, and no constraint is stated, I proceed with implementing the name-character rules. However, I have no grounding basis to validate the edition choice against any decision.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "XML 1.0 name-character validation (NameStartChar / NameChar)",
+            "detail": "Implement name-character rules enumerating the specific Unicode ranges per the proposed action. No governing decision in the grounding restricts this."
+          }
+        ],
+        "cites_decisions": [],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": false
+      },
+      "retrieval": {
+        "governing_decision_retrieved": false
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "edaa2cde-b217-41ac-b69c-45a742c358fc",
+      "timestamp": "2026-06-20T20:16:08.975182+00:00",
+      "arm": "rac",
+      "scenario_id": "pep8_none_identity_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 12893,
+        "artifacts_supplied": [
+          "PEP-0008"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 8 explicitly requires comparisons to singletons like None to be done with `is` or `is not`, never the equality operators. The proposed action keeps `if value == None:`, which is prohibited. The correct refactor is `if value is None:`.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0008"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "b0128bbd-1af6-49bb-8c42-eb542fd1cd30",
+      "timestamp": "2026-06-20T20:16:17.694310+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_annotations_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 16166,
+        "artifacts_supplied": [
+          "PEP-0649"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0649 supersedes PEP-0563. The proposed action adopts PEP 563 stringized annotations, which is the superseded decision; under PEP-0649 the PEP 563 approach is deprecated and eventually removed. Following the governing (superseding) decision, the proposed action conflicts with the current standard, so I refrain.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0649"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "3b6da111-c5f8-4550-9117-a19a7fd05008",
+      "timestamp": "2026-06-20T20:16:23.793942+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_enum_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 5248,
+        "artifacts_supplied": [
+          "PEP-0435"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0435 supersedes PEP-0354 and establishes the standard Python enumeration approach via the enum module (Enum/IntEnum class syntax). Implementing PEP 354's superseded design conflicts with the governing decision, so the proposed action is prohibited. The correct approach is subclassing Enum from the enum module.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0435"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "25663503-dbf5-45ba-b721-c241cf7a0566",
+      "timestamp": "2026-06-20T20:16:30.641940+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_local_version_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 16915,
+        "artifacts_supplied": [
+          "PEP-0440"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP 440 states that, except where specifically noted, local version identifiers MUST NOT be permitted in version specifiers. The only exception is the version matching (==) clause when an exact local identifier is given; ordered comparisons, compatible release, and exclusion clauses explicitly prohibit local identifiers. The general blanket prohibition forbids freely placing a local version identifier into version specifiers as proposed.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0440"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "c8ea90ce-9706-42cd-9a55-c1904a2e2fb1",
+      "timestamp": "2026-06-20T20:16:43.192130+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_manylinux_supersession",
+      "corpus_size_N": 4,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 6417,
+        "artifacts_supplied": [
+          "PEP-0600"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0600 supersedes PEP-0513, PEP-0571, and PEP-0599, redefining the legacy manylinux tags (manylinux1, manylinux2010, manylinux2014) as aliases for the new perennial manylinux_${GLIBCMAJOR}_${GLIBCMINOR}_${ARCH} scheme. The proposed action relies on the superseded PEPs' fixed tags as the normative basis. Under PEP-0600, manylinux2014 is now simply an alias for manylinux_2_17, and the older PEPs are no longer maintained. The governing decision directs use of the perennial tag scheme rather than treating the manylinux20XX PEPs as authoritative. Producing manylinux2014 wheels is itself still valid (it's an alias), but grounding the build on the superseded PEPs 599/571/513 contradicts the superseding decision. The action as framed (using the fixed tags from the superseded PEPs) is not the standard the controlling decision establishes.",
+        "actions": [
+          {
+            "kind": "tag",
+            "target": "compiled Linux wheels",
+            "detail": "Use the perennial manylinux platform tags defined by PEP-0600, e.g. manylinux_2_17_x86_64 (equivalent to the manylinux2014 alias), choosing the glibc version that matches the oldest target distros; rely on auditwheel/packaging.python.org for build images rather than the superseded PEPs."
+          }
+        ],
+        "cites_decisions": [
+          "PEP-0600"
+        ],
+        "asserts_prohibition": false,
+        "asserts_permission": true
+      },
+      "score": {
+        "adherent": false,
+        "stale_decision_followed": false,
+        "false_permit": true,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "b91c809b-d7d4-4387-81bd-344ac9eb36f3",
+      "timestamp": "2026-06-20T20:16:49.970382+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_metadata_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 1737,
+        "artifacts_supplied": [
+          "PEP-0566"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0566 supersedes PEP-0345 and defines Metadata-Version 2.1. Emitting Metadata-Version 1.2 per the superseded PEP 345 conflicts with the governing decision, so the proposed action is prohibited. The build tool should emit 2.1 metadata instead.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0566"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "17d2208f-d0c1-48b7-ad4f-e450a9cc407f",
+      "timestamp": "2026-06-20T20:16:56.203593+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_pattern_matching_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 6000,
+        "artifacts_supplied": [
+          "PEP-0634"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0634 supersedes PEP-0622 and is the Final specification for structural pattern matching. The proposed action follows the superseded PEP-0622, so it should not be taken; implementation must follow PEP-0634 instead.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0634"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "27cf072d-b32b-4c07-923c-788bdf169e3d",
+      "timestamp": "2026-06-20T20:17:02.546599+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_timezone_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 10664,
+        "artifacts_supplied": [
+          "PEP-0615"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0615 supersedes PEP-0431. The standard Python decision for IANA time zone support is the zoneinfo module defined in PEP 615, not the pytz-like interface proposed in PEP 431 (which was withdrawn/rejected). Implementing per PEP 431 contradicts the governing decision, so the proposed action should be refrained.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0615"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "5e75603b-0ce4-425f-a3a8-8e74d6b8f43e",
+      "timestamp": "2026-06-20T20:17:08.840612+00:00",
+      "arm": "rac",
+      "scenario_id": "peps_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 16922,
+        "artifacts_supplied": [
+          "PEP-0440"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "PEP-0440 supersedes PEP-0386 and must be used for all metadata versions; implementing the verlib/PEP 386 NormalizedVersion scheme is prohibited. The tool must implement the PEP 440 version scheme and ordering instead.",
+        "actions": [],
+        "cites_decisions": [
+          "PEP-0440"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "150036a6-1a33-44c2-97e2-a92e683730e7",
+      "timestamp": "2026-06-20T20:17:16.617178+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_content_length_te_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 27656,
+        "artifacts_supplied": [
+          "RFC-9112"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 9112 Section 6.2 states a sender MUST NOT send a Content-Length header field in any message that contains a Transfer-Encoding header field. The proposed action\u2014sending both on the same response\u2014is prohibited. I refrain from adding Content-Length alongside the chunked Transfer-Encoding.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9112"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "df75a7c6-11f2-4e2a-9d75-9b7f900c838e",
+      "timestamp": "2026-06-20T20:17:32.587492+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_date_header_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 125918,
+        "artifacts_supplied": [
+          "RFC-9110"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 9110 Section 6.6.1 explicitly states that an origin server without a clock MUST NOT generate a Date header field. Since the proposed microcontroller server has no real-time clock, generating a Date header on responses is prohibited. The server should omit the Date header; a downstream recipient with a clock will add it when caching or forwarding.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9110"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "9dba9afa-465c-473e-a45d-bda585cea3a9",
+      "timestamp": "2026-06-20T20:17:49.304516+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_http_messaging_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 27663,
+        "artifacts_supplied": [
+          "RFC-9112"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC-9112 (HTTP/1.1) explicitly obsoletes RFC 7230 and supersedes it for HTTP/1.1 messaging and connection management. The task asks to follow the current IETF HTTP/1.1 messaging spec, which is RFC 9112, not the obsoleted RFC 7230. The proposed action of using RFC 7230 as the governing specification contradicts the superseding decision, so I refrain from implementing to RFC 7230 and instead note that RFC 9112 governs.",
+        "actions": [
+          {
+            "kind": "implement",
+            "target": "HTTP/1.1 reverse proxy request parser (message syntax, framing, connection management)",
+            "detail": "Implement to RFC 9112 as the governing specification, since RFC-9112 obsoletes and supersedes RFC 7230 for HTTP/1.1 messaging and connection management. Apply RFC 9112 framing rules (Section 6: Transfer-Encoding overrides Content-Length; reject ambiguous framing per Sections 6.1/6.3 to prevent request smuggling), header parsing (Sections 5, 5.1, 5.2: reject whitespace between field name and colon with 400; obs-fold deprecated), and connection management (Section 9). Prohibit bare CR outside content (Section 2.2)."
+          }
+        ],
+        "cites_decisions": [
+          "RFC-9112"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "76815dbc-537c-4ccd-a3bd-258baa3cf908",
+      "timestamp": "2026-06-20T20:18:03.607308+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_http_semantics_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 125925,
+        "artifacts_supplied": [
+          "RFC-9110"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 9110 (HTTP Semantics) explicitly obsoletes RFC 7231 and supersedes it per the decision's Supersedes field. The proposed action bases the server's HTTP semantics on RFC 7231, which is the superseded specification. The governing decision requires following RFC 9110 instead, so the action as proposed should be refrained from.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9110"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "029cb37d-55bb-44ef-ab2a-b1c76b2b4274",
+      "timestamp": "2026-06-20T20:18:11.037522+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_json_bom_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 7281,
+        "artifacts_supplied": [
+          "RFC-8259"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 8259 Section 8.1 states implementations MUST NOT add a byte order mark to the beginning of networked-transmitted JSON text. The proposed action of prepending a BOM is prohibited, so I refrain from emitting it.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-8259"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "da734f7d-aa86-441b-ac53-8cc68247a586",
+      "timestamp": "2026-06-20T20:18:18.373002+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_json_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 7288,
+        "artifacts_supplied": [
+          "RFC-8259"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 8259 supersedes (obsoletes) RFC 7159, so RFC 7159 is not the governing JSON specification. The serializer must conform to RFC 8259, which requires generators to strictly conform to the JSON grammar and mandates UTF-8 encoding for JSON exchanged with third parties. The proposed action of following RFC 7159 is therefore not the correct governing decision and should not be implemented as stated.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-8259"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "4cd39000-ab03-4658-b010-89aefb2ba991",
+      "timestamp": "2026-06-20T20:18:23.497120+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_rc4_prohibition",
+      "corpus_size_N": 1,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 2282,
+        "artifacts_supplied": [
+          "RFC-7465"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC 7465 prohibits negotiating RC4 cipher suites in all TLS versions; clients MUST NOT include them and servers MUST NOT select them. Enabling TLS_RSA_WITH_RC4_128_SHA is forbidden, so I refrain.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-7465"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "acc9a0c6-e798-43cc-bb8e-4f0678c00be8",
+      "timestamp": "2026-06-20T20:18:34.472756+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_tls_identity_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 17502,
+        "artifacts_supplied": [
+          "RFC-9525"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "RFC-9525 supersedes/obsoletes RFC-6125 and is the current IETF specification for service identity in TLS. It prohibits using the Common Name (CN-ID) for service identity matching; identity must be expressed and checked only via subjectAltName entries. The proposed action of following RFC 6125 with CN-ID fallback is therefore prohibited.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-9525"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "9182577f-07fd-414e-bd64-0e02dad18c24",
+      "timestamp": "2026-06-20T20:18:45.468850+00:00",
+      "arm": "rac",
+      "scenario_id": "rfc_tls_version_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 84630,
+        "artifacts_supplied": [
+          "RFC-8446"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The task requires following the current IETF TLS standard. RFC 8446 (TLS 1.3) explicitly supersedes and obsoletes RFC 5246 (TLS 1.2). The proposed action to implement TLS 1.2 per RFC 5246 conflicts with the governing decision, which pins the current standard to TLS 1.3. Therefore the proposed action is not permitted as the basis for 'the current IETF TLS standard,' and I refrain from implementing RFC 5246 as the target standard.",
+        "actions": [],
+        "cites_decisions": [
+          "RFC-8446"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    },
+    {
+      "run_id": "e0b0e983-07d9-45a6-a8bf-2eea1f95ef70",
+      "timestamp": "2026-06-20T20:18:56.902368+00:00",
+      "arm": "rac",
+      "scenario_id": "w3c_xml_edition_supersession",
+      "corpus_size_N": 2,
+      "answering_model": {
+        "name": "claude",
+        "version": "claude-opus-4-8",
+        "temperature": null,
+        "seed": 0
+      },
+      "grounding": {
+        "provider": "rac",
+        "token_estimate": 54840,
+        "artifacts_supplied": [
+          "W3C-REC-xml-20081126"
+        ]
+      },
+      "embedder": null,
+      "proposed_change": {
+        "summary": "The Fifth Edition (W3C-REC-xml-20081126) explicitly supersedes the Fourth Edition (REC-xml-20060816) and relaxes name-character restrictions via the simplified NameStartChar/NameChar productions [4], [4a], [5]. Implementing name-character validation from the superseded Fourth Edition's enumerated ranges would contradict the current edition, which states those Appendix B productions are now orphaned and unused. The task explicitly requests the current edition. Therefore the proposed action is prohibited; the parser should implement the Fifth Edition's NameStartChar/NameChar ranges instead.",
+        "actions": [],
+        "cites_decisions": [
+          "W3C-REC-xml-20081126"
+        ],
+        "asserts_prohibition": true,
+        "asserts_permission": false
+      },
+      "score": {
+        "adherent": true,
+        "stale_decision_followed": false,
+        "false_permit": false,
+        "false_prohibit": false,
+        "governing_decision_matched": true
+      },
+      "retrieval": {
+        "governing_decision_retrieved": true
+      },
+      "harness_version": "0.1.0-scaffold"
+    }
+  ],
+  "errors": []
+}
