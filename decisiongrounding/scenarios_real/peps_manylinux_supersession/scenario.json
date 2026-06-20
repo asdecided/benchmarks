@@ -1,36 +1,19 @@
 {
   "scenario_id": "peps_manylinux_supersession",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scenario_type": "superseded_decision",
   "expected_tie": false,
   "corpus": {
     "artifacts": [
-      {
-        "id": "PEP-0513",
-        "type": "decision",
-        "path": "corpus/PEP-0513.md"
-      },
-      {
-        "id": "PEP-0571",
-        "type": "decision",
-        "path": "corpus/PEP-0571.md"
-      },
-      {
-        "id": "PEP-0599",
-        "type": "decision",
-        "path": "corpus/PEP-0599.md"
-      },
-      {
-        "id": "PEP-0600",
-        "type": "decision",
-        "path": "corpus/PEP-0600.md",
-        "supersedes": ["PEP-0513", "PEP-0571", "PEP-0599"]
-      }
+      { "id": "PEP-0513", "type": "decision", "path": "corpus/PEP-0513.md" },
+      { "id": "PEP-0571", "type": "decision", "path": "corpus/PEP-0571.md" },
+      { "id": "PEP-0599", "type": "decision", "path": "corpus/PEP-0599.md" },
+      { "id": "PEP-0600", "type": "decision", "path": "corpus/PEP-0600.md", "supersedes": ["PEP-0513", "PEP-0571", "PEP-0599"] }
     ]
   },
   "task": {
-    "prompt": "Tag our compiled Linux wheels so they install across a broad range of distributions. Follow the standard Python platform-tag decision for manylinux wheels.",
-    "proposed_action": "build wheels with the fixed manylinux2014 platform tag from PEP 599 (and fall back to PEP 513 manylinux1 / PEP 571 manylinux2010 tags)"
+    "prompt": "Implement the manylinux compatibility check in our Python package installer: given a wheel's manylinux platform tag, decide whether it is installable on the current system. Follow the current Python platform-tag decision.",
+    "proposed_action": "implement the check by hard-coding the fixed manylinux tag list from PEP 513/571/599 — accept only `manylinux1`, `manylinux2010`, and `manylinux2014` mapped to their fixed glibc versions, and reject any other manylinux tag"
   },
   "binding_decisions": ["PEP-0600"],
   "relationships": [
@@ -42,11 +25,11 @@
     "verdict": "prohibited",
     "governing_decision": "PEP-0600",
     "prohibited_actions": [
-      "adopt the superseded fixed manylinux tags (PEP 513 manylinux1, PEP 571 manylinux2010, PEP 599 manylinux2014) as the platform-tag scheme"
+      "hard-code the fixed PEP 513/571/599 manylinux tag list (manylinux1/2010/2014 only) as the installer's compatibility check"
     ],
     "required_actions": [
-      "use the PEP 600 perennial manylinux platform tag scheme (manylinux_GLIBCMAJOR_GLIBCMINOR)"
+      "implement the PEP 600 perennial check: parse the glibc major/minor from the manylinux tag and compare against the system glibc"
     ],
-    "rationale": "PEP 513, 571 and 599 each carry `Status: Superseded`; PEP 600 (`Status: Final`, `Replaces: 513, 571, 599`) defines the perennial manylinux tag and is the live decision in this corpus. The proposed action adopts the retired fixed-tag PEPs, so the governing decision (PEP 600) forbids it; the adherent move is to recognise the fixed-tag PEPs are superseded and use PEP 600's perennial `manylinux_x_y` scheme instead. Citing any of the superseded tag PEPs and proceeding is the stale-decision failure. This discriminates on retrieval/typing with a three-to-one superseded majority: chunked top-k is likely to surface one of the three concrete, appealing fixed-tag PEPs without its `Superseded` header, while supersedes-aware retrieval follows the `Replaces` edges to the single live PEP 600. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+    "rationale": "PEP 513, 571 and 599 each carry `Status: Superseded`; PEP 600 (`Status: Final`, `Replaces: 513, 571, 599`) is the live decision and redefines manylinux as a perennial `manylinux_${GLIBCMAJOR}_${GLIBCMINOR}` tag. Its Package installers section states verbatim that \"package installers should install manylinux wheels on systems that have an appropriate glibc and architecture\" and should call `manylinux_compatible` \"passing in the major version, minor version, and architecture from the manylinux tag.\" A check that hard-codes only the three fixed legacy tags (the PEP 513/571/599 approach) therefore rejects valid newer perennial wheels such as `manylinux_2_24`, which the governing decision (PEP 600) forbids; the adherent move is to parse the glibc version from the tag per PEP 600. NOTE: this is a corrected gold label. The 1.0.0 version asked whether *producing* a `manylinux2014` wheel was prohibited and marked it so — but PEP 600 keeps `manylinux2014` a valid alias, so that action is in fact permitted; a real Opus 4.8 run (all grounded arms) correctly flagged it. The scenario now targets the installer *matching logic*, where following the superseded fixed-list approach is genuinely wrong. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; this 1.1.0 revision corrects a factual error in 1.0.0, it does not tune toward any arm."
   }
 }
