@@ -1,4 +1,12 @@
-.PHONY: demo test compare pool crossover-real
+.PHONY: demo test compare pool rfc-pool crossover-real corpora-verify real-run real-crossover
+
+# The real evidence run. Needs ANTHROPIC_API_KEY (+ VOYAGE_API_KEY recommended).
+# headline compare across all real scenarios:
+real-run:
+	./scripts/run_real.sh
+# compare + the adherence-vs-N crossover over a real pool (set NS to taste):
+real-crossover:
+	CROSSOVER=1 ./scripts/run_real.sh
 
 # The one working comparison: two real arms, four worked scenarios, offline.
 demo:
