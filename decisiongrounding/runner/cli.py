@@ -20,6 +20,7 @@ import json
 import os
 import shutil
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -33,7 +34,7 @@ from providers import (  # noqa: E402
     build_provider,
     make_answering_model,
 )
-from providers.base import ProposedChange  # noqa: E402
+from providers.base import SCAFFOLD, ProposedChange  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
 from scoring.crossover import build_dataset, emit  # noqa: E402
@@ -268,6 +269,109 @@ def cmd_compare(args) -> int:
     return 1 if errors else 0
 
 
+def cmd_batch(args) -> int:
+    """Same comparison as `compare`, but the answering calls go through the
+    Message Batches API at 50% of standard price. Grounding assembly (rac CLI,
+    embeddings) still runs locally up front; only the held-constant answering
+    model is batched. Asynchronous: submit one batch, poll, then score."""
+    arms = tuple(a.strip() for a in args.arms.split(",") if a.strip())
+    if args.answering != "claude":
+        raise SystemExit(
+            "batch mode requires --answering claude (the Batch API discounts the "
+            "pinned answering model; the offline stub has nothing to batch)."
+        )
+    _preflight(arms, args.answering, args.embedder)
+    scenarios = load_scenarios(args.scenarios)
+    model = _answering_model("claude", args.seed)
+    out_dir = Path(args.out)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    label = "batch-" + "-".join(arms)
+
+    # 1. Assemble every cell's grounding + request locally (rac CLI / embeddings
+    #    happen here). The answering calls are submitted together below.
+    cells: list[dict] = []
+    for arm in arms:
+        for sc in scenarios:
+            provider = _provider(arm, model, args.embedder)
+            provider.prepare(list(sc.corpus))
+            grounding = provider.assemble(sc.task)
+            gov = sc.gold_label.governing_decision
+            emb = getattr(provider, "embedder", None)
+            skel = {
+                "run_id": str(uuid.uuid4()),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "arm": arm,
+                "scenario_id": sc.scenario_id,
+                "corpus_size_N": len(sc.corpus),
+                "answering_model": {
+                    "name": model.name, "version": model.version,
+                    "temperature": model.temperature, "seed": args.seed,
+                },
+                "grounding": {
+                    "provider": arm, "token_estimate": grounding.token_estimate,
+                    "artifacts_supplied": list(grounding.artifacts_supplied),
+                },
+                "embedder": ({"name": emb.name, "dim": emb.dim} if emb is not None else None),
+                "retrieval": {
+                    "governing_decision_retrieved": (
+                        None if gov is None else (gov in grounding.artifacts_supplied)
+                    )
+                },
+                "harness_version": HARNESS_VERSION,
+            }
+            cells.append({
+                "custom_id": f"c{len(cells)}",
+                "params": model.build_request(SCAFFOLD, grounding, sc.task),
+                "scenario": sc,
+                "skel": skel,
+            })
+
+    # 2. Submit one batch (50% of standard token price).
+    client = model._ensure_client()
+    requests = [{"custom_id": c["custom_id"], "params": c["params"]} for c in cells]
+    batch = client.messages.batches.create(requests=requests)
+    print(f"submitted batch {batch.id}: {len(requests)} requests "
+          f"({len(arms)} arms x {len(scenarios)} scenarios) at Batch-API pricing (~50% off)")
+
+    # 3. Poll until the batch ends (usually < 1h; max 24h).
+    while True:
+        b = client.messages.batches.retrieve(batch.id)
+        if b.processing_status == "ended":
+            break
+        rc = getattr(b, "request_counts", None)
+        if rc is not None:
+            print(f"  {b.processing_status}: processing={rc.processing} "
+                  f"succeeded={rc.succeeded} errored={rc.errored}")
+        time.sleep(max(5, args.poll))
+
+    # 4. Collect results by custom_id, parse + score. Results arrive in any order.
+    by_cid = {c["custom_id"]: c for c in cells}
+    results: list[dict] = []
+    errors: list[dict] = []
+    for r in client.messages.batches.results(batch.id):
+        cell = by_cid.get(r.custom_id)
+        if cell is None:
+            continue
+        arm, sid = cell["skel"]["arm"], cell["skel"]["scenario_id"]
+        if r.result.type != "succeeded":
+            errors.append({"arm": arm, "scenario_id": sid, "error": f"batch result: {r.result.type}"})
+            continue
+        try:
+            pc = model.parse_message(r.result.message)
+        except Exception as exc:  # noqa: BLE001 - one cell must not lose the batch
+            errors.append({"arm": arm, "scenario_id": sid, "error": repr(exc)})
+            continue
+        run = dict(cell["skel"])
+        run["proposed_change"] = _pc_to_dict(pc)
+        run["score"] = score(cell["scenario"], pc).as_dict()
+        results.append(run)
+
+    _print_metrics(results)
+    path = _write_report(results, out_dir, label, errors, stamp)
+    print(f"\nwrote {path}")
+    return 1 if errors else 0
+
+
 def cmd_demo(args) -> int:
     arms = tuple(a.strip() for a in args.arms.split(",") if a.strip())
     _preflight(arms, args.answering, args.embedder)
@@ -341,7 +445,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     common = dict()
-    for name in ("run", "compare", "demo"):
+    for name in ("run", "compare", "demo", "batch"):
         sp = sub.add_parser(name)
         sp.add_argument("--scenarios", default=str(_ROOT / "scenarios"))
         sp.add_argument("--out", default=str(_DEFAULT_RESULTS))
@@ -358,6 +462,12 @@ def main(argv: list[str] | None = None) -> int:
             sp.add_argument("--arm", required=True, choices=sorted(ARMS))
         if name == "compare":
             sp.add_argument("--arms", default=",".join(REAL_ARMS))
+        if name == "batch":
+            sp.add_argument("--arms", default="context_dump,naive_rag,no_grounding,rac")
+            sp.add_argument(
+                "--poll", type=int, default=20,
+                help="seconds between Batch-API status polls",
+            )
         if name == "demo":
             sp.add_argument("--arms", default=",".join(REAL_ARMS))
             sp.add_argument(
@@ -380,7 +490,9 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     args = p.parse_args(argv)
-    return {"run": cmd_run, "compare": cmd_compare, "demo": cmd_demo}[args.cmd](args)
+    return {
+        "run": cmd_run, "compare": cmd_compare, "demo": cmd_demo, "batch": cmd_batch,
+    }[args.cmd](args)
 
 
 if __name__ == "__main__":
