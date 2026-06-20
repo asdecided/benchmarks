@@ -19,6 +19,7 @@ import json
 import random
 import re
 from pathlib import Path
+from typing import Callable
 
 from providers import build_provider, make_answering_model
 from providers.base import CorpusArtifact
@@ -125,6 +126,7 @@ def build_dataset(
     pool: list[CorpusArtifact] | None = None,
     pool_dir: str | None = None,
     scenarios_dir: str | None = None,
+    progress: "Callable[[dict], None] | None" = None,
 ) -> dict:
     """Compute per-arm adherence at each N, averaged over discriminating scenarios.
 
@@ -137,6 +139,12 @@ def build_dataset(
     scale N with REAL public-decision distractors — the honest curve. The pool
     must be large enough for the biggest N; otherwise the available real
     distractors cap the corpus and that N's real size is recorded as achieved.
+
+    `progress`: optional callback invoked once per completed cell with a record
+    {record, idx, total, N, arm, scenario_id, adherent, stale_decision_followed,
+    governing_decision_retrieved, token_estimate, usage, error}. The runner uses
+    it to stream a durable `.partial.jsonl` and a live progress line, so a long
+    real sweep is observable and never lost mid-run.
     """
     use_real = pool is not None
     if use_real:
@@ -157,6 +165,8 @@ def build_dataset(
     }
     errors: list[dict] = []
     n_max = max(ns)
+    total_cells = len(ns) * len(arms) * len(discriminating)
+    idx = 0
     for n in ns:
         density = (n - min(ns)) / (n_max - min(ns)) if n_max != min(ns) else 0.0
         for arm in arms:
@@ -165,12 +175,14 @@ def build_dataset(
             token_estimates: list[int] = []
             usages: list[dict] = []
             for sc in discriminating:
+                idx += 1
                 pad = max(0, n - len(sc.corpus))
                 if use_real:
                     distractors = make_real_distractors(pool, pad, sc, seed)
                 else:
                     distractors = make_filler_notes(pad, sc, seed, density)
                 corpus = list(sc.corpus) + distractors
+                cell_error = None
                 try:
                     sc_score, gov_retrieved, tok_est, usage = _run_arm_on_corpus(
                         arm, corpus, sc, answering_model, embedder_spec
@@ -178,8 +190,9 @@ def build_dataset(
                     adherent = sc_score.adherent
                     stale = sc_score.stale_decision_followed
                 except Exception as exc:  # noqa: BLE001 - one cell must not lose the curve
+                    cell_error = repr(exc)
                     errors.append(
-                        {"arm": arm, "scenario_id": sc.scenario_id, "N": n, "error": repr(exc)}
+                        {"arm": arm, "scenario_id": sc.scenario_id, "N": n, "error": cell_error}
                     )
                     adherent = False
                     stale = False
@@ -199,6 +212,23 @@ def build_dataset(
                         "governing_decision_retrieved": gov_retrieved,
                     }
                 )
+                if progress is not None:
+                    progress(
+                        {
+                            "record": "cell",
+                            "idx": idx,
+                            "total": total_cells,
+                            "N": n,
+                            "arm": arm,
+                            "scenario_id": sc.scenario_id,
+                            "adherent": adherent,
+                            "stale_decision_followed": stale,
+                            "governing_decision_retrieved": gov_retrieved,
+                            "token_estimate": tok_est,
+                            "usage": usage,
+                            "error": cell_error,
+                        }
+                    )
             rate = adhered / len(discriminating) if discriminating else 0.0
             governed = [f for f in retrieved_flags if f is not None]
             recall = (sum(1 for f in governed if f) / len(governed)) if governed else None

@@ -405,17 +405,42 @@ def cmd_demo(args) -> int:
             f"\n(real distractors: {len(pool)} public PEP decisions from {args.pool})"
         )
     print("\n== adherence vs corpus size (discriminating scenarios, averaged) ==")
-    dataset = build_dataset(
-        scenarios,
-        arms=arms,
-        ns=ns,
-        seed=args.seed,
-        answering_model_name=args.answering,
-        embedder_spec=args.embedder,
-        pool=pool,
-        pool_dir=(args.pool if args.distractors == "real" else None),
-        scenarios_dir=args.scenarios,
-    )
+    # Stream every completed cell to a durable sidecar AND print a live progress
+    # line, so a long real sweep is observable and never lost mid-run.
+    sweep_partial = out_dir / f"run-{stamp}-crossover.partial.jsonl"
+    sweep_partial.parent.mkdir(parents=True, exist_ok=True)
+    _t0 = time.time()
+    _sweep_fp = sweep_partial.open("a", encoding="utf-8")
+
+    def _on_cell(rec: dict) -> None:
+        _sweep_fp.write(json.dumps(rec) + "\n")
+        _sweep_fp.flush()
+        done, total = rec["idx"], rec["total"]
+        elapsed = time.time() - _t0
+        eta = (elapsed / done) * (total - done) if done else 0
+        flag = "ERR" if rec.get("error") else ("adhere" if rec["adherent"] else "miss")
+        print(
+            f"  [{done:>3}/{total}] {done * 100 // total:>3}%  N={rec['N']:<4} "
+            f"{rec['arm']:<13}{rec['scenario_id']:<34} {flag:<6} "
+            f"eta {eta/60:4.1f}m",
+            file=sys.stderr,
+        )
+
+    try:
+        dataset = build_dataset(
+            scenarios,
+            arms=arms,
+            ns=ns,
+            seed=args.seed,
+            answering_model_name=args.answering,
+            embedder_spec=args.embedder,
+            pool=pool,
+            pool_dir=(args.pool if args.distractors == "real" else None),
+            scenarios_dir=args.scenarios,
+            progress=_on_cell,
+        )
+    finally:
+        _sweep_fp.close()
     for arm in arms:
         row = " ".join(f"N={p['N']}:{p['adherence_rate']:.2f}" for p in dataset["arms"][arm])
         print(f"{arm:<16}{row}")

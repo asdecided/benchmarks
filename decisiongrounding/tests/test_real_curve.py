@@ -69,6 +69,26 @@ def test_build_dataset_with_real_pool_labels_provenance():
     assert len(ds["arms"]["naive_rag"]) == 2
 
 
+def test_build_dataset_progress_callback_fires_once_per_cell():
+    sc_list = load_scenarios(_REAL)
+    disc = [s for s in sc_list if s.scenario_type in
+            ("conflicting_scoped", "prohibition_at_point_of_action", "superseded_decision")]
+    arms = ("context_dump", "naive_rag")
+    ns = (3, 6)
+    seen: list[dict] = []
+    ds = build_dataset(
+        sc_list, arms=arms, ns=ns, seed=0, pool=_pool(30), progress=seen.append
+    )
+    # One cell per (N, arm, discriminating scenario), in order, idx/total correct.
+    expected = len(ns) * len(arms) * len(disc)
+    assert len(seen) == expected
+    assert [r["idx"] for r in seen] == list(range(1, expected + 1))
+    assert all(r["total"] == expected for r in seen)
+    assert seen[0]["record"] == "cell" and "adherent" in seen[0]
+    # The streamed cells reconcile with the final aggregated points.
+    assert len(ds["arms"]["naive_rag"]) == len(ns)
+
+
 def test_build_dataset_real_pool_too_small_raises():
     sc_list = load_scenarios(_REAL)
     with pytest.raises(ValueError, match="pool too small"):
