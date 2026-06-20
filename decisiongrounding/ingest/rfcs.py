@@ -38,11 +38,12 @@ _RFC_URL = "https://www.rfc-editor.org/rfc/rfc{num}.txt"
 # 5246 (TLS 1.2); the edge is stated in 8446's own `Obsoletes:` header.
 TLS_RFCS = (5246, 8446)
 
-# The RFC distractor pool range for the real N-curve. RFCs are dense, so 1..400
-# yields enough real RFC decisions to support N up to 300; the range is the
-# pinned knob and the included set is recorded in provenance.json. Mirrors the
-# PEP pool (ingest/peps.py POOL_RANGE).
-POOL_RANGE = (1, 400)
+# The RFC distractor pool range for the real N-curve. RFCs are dense and
+# abundant (numbering reaches the 9000s), so the range is the lever for a larger
+# pool; 1..1200 yields ~1.1k real RFC decisions, supporting N well past 300. The
+# range is the pinned knob and the included set is recorded in provenance.json.
+# To go bigger: `ingest.rfcs pool build --range 1-9000`. Mirrors ingest/peps.py.
+POOL_RANGE = (1, 1200)
 _DEFAULT_POOL_OUT = Path(__file__).resolve().parent.parent / "scenarios_real" / "rfcs_pool"
 
 SOURCE_TEXT_MARKER = "\n\n## Source Text\n\n"

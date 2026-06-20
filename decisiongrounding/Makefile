@@ -9,7 +9,7 @@ compare:
 	python -m runner.cli compare --arms $(ARMS)
 
 # Build the real distractor pools from their pins (one network pass each:
-# ~519 PEPs, ~371 RFCs). Pick the one matching your scenarios' domain.
+# ~644 PEPs, ~1125 RFCs). Pick the one matching your scenarios' domain.
 pool:
 	python -m ingest.peps pool build
 

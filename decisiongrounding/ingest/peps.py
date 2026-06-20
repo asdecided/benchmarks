@@ -48,9 +48,10 @@ PILOT_PEPS = (386, 440)
 # range is the pinned knob — bumping it is a deliberate, reviewable act, exactly
 # like PINNED_COMMIT — and the exact included set is recorded in provenance.json,
 # so the pool is deterministic and reproducible. 1..700 yields enough real PEPs
-# to support N up to 300; PEPs that 404 at the pin are skipped (see build's
-# skip_missing), so a gap in the numbering never breaks reproducibility.
-POOL_RANGE = (1, 700)
+# to support N well past 300; PEPs that 404 at the pin are skipped (see build's
+# skip_missing), so a gap in the numbering never breaks reproducibility. PEPs are
+# finite (numbering reaches the ~800s at the pin), so this is near the ceiling.
+POOL_RANGE = (1, 900)
 
 
 def pep_id(num: int) -> str:

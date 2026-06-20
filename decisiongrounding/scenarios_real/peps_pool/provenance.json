@@ -5823,6 +5823,1400 @@
       "title": "Additional Fields for the Simple API for Package Indexes",
       "replaces": [],
       "superseded_by": []
+    },
+    {
+      "id": "PEP-0701",
+      "number": 701,
+      "file": "corpus/PEP-0701.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0701.rst",
+      "source_sha256": "85299a5cc95a9fd78cf0f0a992411c114e293364710d8b8f26de3e56a31200f0",
+      "status": "Final",
+      "title": "Syntactic formalization of f-strings",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0702",
+      "number": 702,
+      "file": "corpus/PEP-0702.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0702.rst",
+      "source_sha256": "e65bab2d3b1b91e4d29094fdb3dd4b079f2c12745b019fe6651317881124665f",
+      "status": "Final",
+      "title": "Marking deprecations using the type system",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0703",
+      "number": 703,
+      "file": "corpus/PEP-0703.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0703.rst",
+      "source_sha256": "8dfe19b2ab3b0ee783f922b533fed7b8018d6d90f3cec5534fd7baaa283a3470",
+      "status": "Final",
+      "title": "Making the Global Interpreter Lock Optional in CPython",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0704",
+      "number": 704,
+      "file": "corpus/PEP-0704.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0704.rst",
+      "source_sha256": "580af9a9ad3a875cfc9b1035daf16da0a9f6393a33f6a84b8a849f23549be24d",
+      "status": "Withdrawn",
+      "title": "Require virtual environments by default for package installers",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0705",
+      "number": 705,
+      "file": "corpus/PEP-0705.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0705.rst",
+      "source_sha256": "250e8cf04b058f55e06731b4c01d8c0d5714463d1a20b50b754f3a033ceaba10",
+      "status": "Final",
+      "title": "TypedDict: Read-only items",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0706",
+      "number": 706,
+      "file": "corpus/PEP-0706.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0706.rst",
+      "source_sha256": "4931e97999924c961a4300fcb7f6084304525187c2a910d1e450bf6bd37dde88",
+      "status": "Final",
+      "title": "Filter for tarfile.extractall",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0707",
+      "number": 707,
+      "file": "corpus/PEP-0707.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0707.rst",
+      "source_sha256": "c94fbe10b5da5c1a72b05d29e2604e7c159f7c94c9023423861d3c06bb139173",
+      "status": "Rejected",
+      "title": "A simplified signature for __exit__ and __aexit__",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0708",
+      "number": 708,
+      "file": "corpus/PEP-0708.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0708.rst",
+      "source_sha256": "165dc9d07f7b749e1d470805216dd040baf6174242ad38141dbe297bb0170b43",
+      "status": "Rejected",
+      "title": "Extending the Repository API to Mitigate Dependency Confusion Attacks",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0709",
+      "number": 709,
+      "file": "corpus/PEP-0709.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0709.rst",
+      "source_sha256": "9cf5b3ce457cf41d667cc63667ee3ff1fc48749c000a1b7023e42b36e93ef3e1",
+      "status": "Final",
+      "title": "Inlined comprehensions",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0710",
+      "number": 710,
+      "file": "corpus/PEP-0710.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0710.rst",
+      "source_sha256": "acd02a5d615c28371aee4192ee58f3fedb5f3ae02a8bce80fdc259b4ce530107",
+      "status": "Draft",
+      "title": "Recording the provenance of installed packages",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0711",
+      "number": 711,
+      "file": "corpus/PEP-0711.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0711.rst",
+      "source_sha256": "07057c34bd92c8545603ca90a88ff89b79d1b6e54edccc1d7a14c2adf56f11d6",
+      "status": "Draft",
+      "title": "PyBI: a standard format for distributing Python Binaries",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0712",
+      "number": 712,
+      "file": "corpus/PEP-0712.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0712.rst",
+      "source_sha256": "cdb80bfb28ddffb3d553171ac4c0b6fa790f23dc256ae69dcc495593dfd889d4",
+      "status": "Rejected",
+      "title": "Adding a \"converter\" parameter to dataclasses.field",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0713",
+      "number": 713,
+      "file": "corpus/PEP-0713.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0713.rst",
+      "source_sha256": "72487387511bcbc4d440b1a4579b4e9894696c1c698e429954c0f4a7b7e2020c",
+      "status": "Rejected",
+      "title": "Callable Modules",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0714",
+      "number": 714,
+      "file": "corpus/PEP-0714.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0714.rst",
+      "source_sha256": "f939443af4373a0524e80f079e1fc705edc6f6211de3f0f06ed6f20172fe0c75",
+      "status": "Accepted",
+      "title": "Rename dist-info-metadata in the Simple API",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0715",
+      "number": 715,
+      "file": "corpus/PEP-0715.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0715.rst",
+      "source_sha256": "83dcf241a146439f27c2f04c7e00cc616a22a5305b9534b3ac54237369b4df64",
+      "status": "Final",
+      "title": "Disabling bdist_egg distribution uploads on PyPI",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0718",
+      "number": 718,
+      "file": "corpus/PEP-0718.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0718.rst",
+      "source_sha256": "4cdac0e6d840ea3aa995b2da9bd2e1a0c8c009aac1a8cd767980dc6798a92379",
+      "status": "Draft",
+      "title": "Subscriptable functions",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0719",
+      "number": 719,
+      "file": "corpus/PEP-0719.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0719.rst",
+      "source_sha256": "43046b134517d3ab3dadcb88881cd8c8ad7352f1319a2db1984a3c56593c76a3",
+      "status": "Active",
+      "title": "Python 3.13 Release Schedule",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0720",
+      "number": 720,
+      "file": "corpus/PEP-0720.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0720.rst",
+      "source_sha256": "9df331800328095d22b1ec5c9febca837ff78424f401b4d4ed7b9d5d8d88671c",
+      "status": "Draft",
+      "title": "Cross-compiling Python packages",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0721",
+      "number": 721,
+      "file": "corpus/PEP-0721.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0721.rst",
+      "source_sha256": "ee2b83d15f548bdf44dcd85592a9bbe8506c9dfbcbbded4a4bed474c2fc9458e",
+      "status": "Final",
+      "title": "Using tarfile.data_filter for source distribution extraction",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0722",
+      "number": 722,
+      "file": "corpus/PEP-0722.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0722.rst",
+      "source_sha256": "efbeb4b4bfaa6732220433c25f4bdd9c5ac729b3aca73798b9f131862cf3ac78",
+      "status": "Rejected",
+      "title": "Dependency specification for single-file scripts",
+      "replaces": [],
+      "superseded_by": [
+        "PEP-0723"
+      ]
+    },
+    {
+      "id": "PEP-0723",
+      "number": 723,
+      "file": "corpus/PEP-0723.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0723.rst",
+      "source_sha256": "17de64ccc1b03003dcd031abb0372c6c946ae9bbdc802ae3af7ede4437507e59",
+      "status": "Final",
+      "title": "Inline script metadata",
+      "replaces": [
+        "PEP-0722"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0724",
+      "number": 724,
+      "file": "corpus/PEP-0724.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0724.rst",
+      "source_sha256": "04aa72d77d6b4785136f350e3435c3d2b010418259aee82678bbf5edcc61091e",
+      "status": "Withdrawn",
+      "title": "Stricter Type Guards",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0725",
+      "number": 725,
+      "file": "corpus/PEP-0725.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0725.rst",
+      "source_sha256": "1cc5a79358c839530175bc50aa114dc0f1c98b6af77a3399a061a284820319f1",
+      "status": "Draft",
+      "title": "Specifying external dependencies in pyproject.toml",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0726",
+      "number": 726,
+      "file": "corpus/PEP-0726.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0726.rst",
+      "source_sha256": "b6642cded80f3a200c8d0cf55726f654d8600725932f8918beb2b2df2c277861",
+      "status": "Rejected",
+      "title": "Module ``__setattr__`` and ``__delattr__``",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0727",
+      "number": 727,
+      "file": "corpus/PEP-0727.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0727.rst",
+      "source_sha256": "9b126218a58c3a6088d80d7afae31d30a15d52206baaa67b12abac776af6d873",
+      "status": "Withdrawn",
+      "title": "Documentation in Annotated Metadata",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0728",
+      "number": 728,
+      "file": "corpus/PEP-0728.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0728.rst",
+      "source_sha256": "6cdc5b691939dd3798be37de9a563f6dc5e1b6f71fec11f2ba6c22e477869bbe",
+      "status": "Final",
+      "title": "TypedDict with Typed Extra Items",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0729",
+      "number": 729,
+      "file": "corpus/PEP-0729.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0729.rst",
+      "source_sha256": "34ef90075d348763b1567523fffdcf352a311650f8cfd93352b1b40ef22ad484",
+      "status": "Active",
+      "title": "Typing governance process",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0730",
+      "number": 730,
+      "file": "corpus/PEP-0730.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0730.rst",
+      "source_sha256": "545e0893866056c7756e2714babf5c013adec61f68d7ff0892103a35ed24bfa6",
+      "status": "Final",
+      "title": "Adding iOS as a supported platform",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0731",
+      "number": 731,
+      "file": "corpus/PEP-0731.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0731.rst",
+      "source_sha256": "b6533bac8dafaf446f2ae0f1eb2adb8acca750050c73e9ef90e71a53ab72db5e",
+      "status": "Active",
+      "title": "C API Working Group Charter",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0732",
+      "number": 732,
+      "file": "corpus/PEP-0732.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0732.rst",
+      "source_sha256": "735e951968d24e4fe60af941d8913bd6b4d0a9a12e3e5adb5b1cf838fa73a2f8",
+      "status": "Active",
+      "title": "The Python Documentation Editorial Board",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0733",
+      "number": 733,
+      "file": "corpus/PEP-0733.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0733.rst",
+      "source_sha256": "025ceb5817a8f72cb452ec6afb5c434f52e9462811a2edc4dbf6a493a3a812a2",
+      "status": "Final",
+      "title": "An Evaluation of Python's Public C API",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0734",
+      "number": 734,
+      "file": "corpus/PEP-0734.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0734.rst",
+      "source_sha256": "95a4af606b722194fa1198c282fce5c4aff6f3b30c020218beb9dbec986e8ab3",
+      "status": "Final",
+      "title": "Multiple Interpreters in the Stdlib",
+      "replaces": [
+        "PEP-0554"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0735",
+      "number": 735,
+      "file": "corpus/PEP-0735.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0735.rst",
+      "source_sha256": "a97a2f177de2f629b96f878960d861b5384c011df9c539a605d0be2cc0f2fd25",
+      "status": "Final",
+      "title": "Dependency Groups in pyproject.toml",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0736",
+      "number": 736,
+      "file": "corpus/PEP-0736.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0736.rst",
+      "source_sha256": "2666ba4a098c7f27adb1038fdf0551904c5e75810d665c13f3bf3a458c49c0a1",
+      "status": "Rejected",
+      "title": "Shorthand syntax for keyword arguments at invocation",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0737",
+      "number": 737,
+      "file": "corpus/PEP-0737.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0737.rst",
+      "source_sha256": "a2af3171a08a682ac7c46281fd976ab24f12f5cdd62fe1528d6a2efc9ebaa602",
+      "status": "Final",
+      "title": "C API to format a type fully qualified name",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0738",
+      "number": 738,
+      "file": "corpus/PEP-0738.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0738.rst",
+      "source_sha256": "3bcf0019d216a5ce935e4af0d4e36cb9a0b19cbaab992c5b6722934cb82254fc",
+      "status": "Final",
+      "title": "Adding Android as a supported platform",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0739",
+      "number": 739,
+      "file": "corpus/PEP-0739.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0739.rst",
+      "source_sha256": "680703df6d69f065ef0051b8088073317777aeb17c3bb528bec439c0edeef870",
+      "status": "Accepted",
+      "title": "``build-details.json`` 1.0 \u2014 a static description file for Python build details",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0740",
+      "number": 740,
+      "file": "corpus/PEP-0740.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0740.rst",
+      "source_sha256": "5063ea8ce1b429e90f71ed4ca7a5bb5ff9a8f7a4cd45c54751b5a4ef09aeca89",
+      "status": "Final",
+      "title": "Index support for digital attestations",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0741",
+      "number": 741,
+      "file": "corpus/PEP-0741.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0741.rst",
+      "source_sha256": "d7a389a177daa95ed53692397705313ec4e5d7f513fbb5f6570f1acf876076fa",
+      "status": "Final",
+      "title": "Python Configuration C API",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0742",
+      "number": 742,
+      "file": "corpus/PEP-0742.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0742.rst",
+      "source_sha256": "dd23a67ae82462063d3180f7c4bdf45db0e6ee0cf5b7e6a5215b50ffcef075c8",
+      "status": "Final",
+      "title": "Narrowing types with TypeIs",
+      "replaces": [
+        "PEP-0724"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0743",
+      "number": 743,
+      "file": "corpus/PEP-0743.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0743.rst",
+      "source_sha256": "e7af2b4261f020705081ce9fc45e9af881f251899c66913a50132734e60abaad",
+      "status": "Rejected",
+      "title": "Add Py_OMIT_LEGACY_API to the Python C API",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0744",
+      "number": 744,
+      "file": "corpus/PEP-0744.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0744.rst",
+      "source_sha256": "fbcfb0856a8eaaaa619e8df779487f19406f59021a5d423cb117fbe4e1e1f5d4",
+      "status": "Draft",
+      "title": "JIT Compilation",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0745",
+      "number": 745,
+      "file": "corpus/PEP-0745.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0745.rst",
+      "source_sha256": "6c71d47f011e104a280bade02b4c63478225244eb9533484fc7d17566b3ed4d0",
+      "status": "Active",
+      "title": "Python 3.14 Release Schedule",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0746",
+      "number": 746,
+      "file": "corpus/PEP-0746.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0746.rst",
+      "source_sha256": "f0c63e0686373c08810ac24d64d02afee01c8f53769be88572860e9fea4e974b",
+      "status": "Draft",
+      "title": "Type checking Annotated metadata",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0747",
+      "number": 747,
+      "file": "corpus/PEP-0747.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0747.rst",
+      "source_sha256": "ff3e16a0a5390301e2ef6cbb3fad155b6622c047be61da28503c11d67d5da28e",
+      "status": "Final",
+      "title": "Annotating Type Forms",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0748",
+      "number": 748,
+      "file": "corpus/PEP-0748.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0748.rst",
+      "source_sha256": "8c9c79066e6e3d63dd2b3db1159e5b0106f345ec3530921d81e16f9a71dbe2e8",
+      "status": "Draft",
+      "title": "A Unified TLS API for Python",
+      "replaces": [
+        "PEP-0543"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0749",
+      "number": 749,
+      "file": "corpus/PEP-0749.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0749.rst",
+      "source_sha256": "242e31343465e77e3f55cb1559ca24314acce5ae4533a54d06b88453144b85c5",
+      "status": "Final",
+      "title": "Implementing PEP 649",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0750",
+      "number": 750,
+      "file": "corpus/PEP-0750.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0750.rst",
+      "source_sha256": "b6715100a62130c7550ebbb19b22c7acb90ba01a24b9b1282c771ad2c1073761",
+      "status": "Final",
+      "title": "Template Strings",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0751",
+      "number": 751,
+      "file": "corpus/PEP-0751.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0751.rst",
+      "source_sha256": "f72e50b7c1d1148742ae5a3c938c42eb89d8d8ab0285fe72365917f4c7c57f96",
+      "status": "Final",
+      "title": "A file format to record Python dependencies for installation reproducibility",
+      "replaces": [
+        "PEP-0665"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0752",
+      "number": 752,
+      "file": "corpus/PEP-0752.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0752.rst",
+      "source_sha256": "37850c7e29f2376f6e7dd6291d480e488dadc675c67f92ed6480cd6db6912ac1",
+      "status": "Draft",
+      "title": "Implicit namespaces for package repositories",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0753",
+      "number": 753,
+      "file": "corpus/PEP-0753.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0753.rst",
+      "source_sha256": "159aa30bb80101c3e48a9c2a433acdea748315468eb32186cd7d56cb9a0959d9",
+      "status": "Final",
+      "title": "Uniform project URLs in core metadata",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0754",
+      "number": 754,
+      "file": "corpus/PEP-0754.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0754.rst",
+      "source_sha256": "fde06cb86871103c102041c4cab2d2d29f3d6d77f071b7d19039fe0b40a9e4d2",
+      "status": "Rejected",
+      "title": "IEEE 754 Floating Point Special Values",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0755",
+      "number": 755,
+      "file": "corpus/PEP-0755.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0755.rst",
+      "source_sha256": "ef0c758fb406a1260de994164e262b2c6d12cde15abf10a865dbc25e89938d3a",
+      "status": "Draft",
+      "title": "Implicit namespace policy for PyPI",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0756",
+      "number": 756,
+      "file": "corpus/PEP-0756.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0756.rst",
+      "source_sha256": "7bf6f781c8934414ec5074eab7fa9fd21f379da4e9d997a43d82859e3698fcbe",
+      "status": "Withdrawn",
+      "title": "Add PyUnicode_Export() and PyUnicode_Import() C functions",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0757",
+      "number": 757,
+      "file": "corpus/PEP-0757.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0757.rst",
+      "source_sha256": "08fb48761a0857f7b0117d55ba161ed3072d455a9a975d8db60cc0bff2a3283d",
+      "status": "Final",
+      "title": "C API to import-export Python integers",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0758",
+      "number": 758,
+      "file": "corpus/PEP-0758.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0758.rst",
+      "source_sha256": "c11d5c677b1f25a533d6d17a02128d47f09242df218d74cd7458d78af9b67b3d",
+      "status": "Final",
+      "title": "Allow ``except`` and ``except*`` expressions without parentheses",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0759",
+      "number": 759,
+      "file": "corpus/PEP-0759.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0759.rst",
+      "source_sha256": "3ef444fde8a3c5b57022633778efc69152820ac2b19f7f0e3f793c1c32ae88e4",
+      "status": "Withdrawn",
+      "title": "External Wheel Hosting",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0760",
+      "number": 760,
+      "file": "corpus/PEP-0760.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0760.rst",
+      "source_sha256": "024c7a5777a5c190478aec1e8905ff39a8ab692314ba68b05d3c998d07984026",
+      "status": "Withdrawn",
+      "title": "No More Bare Excepts",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0761",
+      "number": 761,
+      "file": "corpus/PEP-0761.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0761.rst",
+      "source_sha256": "05fa095019d2f20559b146f5a5c5cee9f46e30a79c6db7d52a5b5415b5dd8a39",
+      "status": "Active",
+      "title": "Deprecating PGP signatures for CPython artifacts",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0762",
+      "number": 762,
+      "file": "corpus/PEP-0762.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0762.rst",
+      "source_sha256": "2f67b15fd4e4eef0affad61c9f23858c583d4c655fa0a8a59fc8dcaaee4d96f0",
+      "status": "Final",
+      "title": "REPL-acing the default REPL",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0763",
+      "number": 763,
+      "file": "corpus/PEP-0763.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0763.rst",
+      "source_sha256": "3702f3f6fa2b1c45aa03b229230f9632f4edfee3db6825eeda24de6dab94172e",
+      "status": "Withdrawn",
+      "title": "Limiting deletions on PyPI",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0764",
+      "number": 764,
+      "file": "corpus/PEP-0764.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0764.rst",
+      "source_sha256": "cef5624ac1e90c57482f987d969533654c45533ef31c58938d760e0492320bc4",
+      "status": "Draft",
+      "title": "Inline typed dictionaries",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0765",
+      "number": 765,
+      "file": "corpus/PEP-0765.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0765.rst",
+      "source_sha256": "787acfec6808a90fb0c2293355544ce49738cb944cc25bc449c033ce4a44dd17",
+      "status": "Final",
+      "title": "Disallow return/break/continue that exit a finally block",
+      "replaces": [
+        "PEP-0601"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0766",
+      "number": 766,
+      "file": "corpus/PEP-0766.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0766.rst",
+      "source_sha256": "f98d541d6d70610257aeddec23b678e7c0ed817ec1df458b696dc38db989d620",
+      "status": "Draft",
+      "title": "Explicit Priority Choices Among Multiple Indexes",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0767",
+      "number": 767,
+      "file": "corpus/PEP-0767.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0767.rst",
+      "source_sha256": "336e568f8edf73a3ef5f341ce883f475189eaa7783a3ba10dae78eb4a2dc6634",
+      "status": "Draft",
+      "title": "Annotating Read-Only Attributes",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0768",
+      "number": 768,
+      "file": "corpus/PEP-0768.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0768.rst",
+      "source_sha256": "d927cb3e6d10f8ec70568e953910be1ea4094794b4ac876d8d107e8166228efa",
+      "status": "Final",
+      "title": "Safe external debugger interface for CPython",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0769",
+      "number": 769,
+      "file": "corpus/PEP-0769.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0769.rst",
+      "source_sha256": "71fa2e76ec9d77a008fab52bfb8dd1db9b5dcbc28bf7bfb3d0d46c668d98c99b",
+      "status": "Rejected",
+      "title": "Add a 'default' keyword argument to 'attrgetter', 'itemgetter' and 'getitem'",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0770",
+      "number": 770,
+      "file": "corpus/PEP-0770.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0770.rst",
+      "source_sha256": "8141f491bda0dd0bdf44d9772fc2eb916f5c26733639252ad4259f5a42303d77",
+      "status": "Final",
+      "title": "Improving measurability of Python packages with Software Bill-of-Materials",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0771",
+      "number": 771,
+      "file": "corpus/PEP-0771.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0771.rst",
+      "source_sha256": "fab6ce0e5069c730a778dd127323c946231a5dbea5b7db3c5f3ac9d6ba9e6c3e",
+      "status": "Draft",
+      "title": "Default Extras for Python Software Packages",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0772",
+      "number": 772,
+      "file": "corpus/PEP-0772.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0772.rst",
+      "source_sha256": "03b786c3044d220d649f79a899d51c8e1857ed28601b81615f991bd31f696412",
+      "status": "Accepted",
+      "title": "Packaging Council governance process",
+      "replaces": [
+        "PEP-0609"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0773",
+      "number": 773,
+      "file": "corpus/PEP-0773.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0773.rst",
+      "source_sha256": "313413d0d5c94d1ba1b5207750ca3aca7b255ecac52a9a2eec85aa0809aa6432",
+      "status": "Final",
+      "title": "A Python Installation Manager for Windows",
+      "replaces": [
+        "PEP-0397",
+        "PEP-0486"
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0774",
+      "number": 774,
+      "file": "corpus/PEP-0774.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0774.rst",
+      "source_sha256": "fd1b959e6d609a27256dee022708a481940b106c0ccaa4d0c5ef2c1197e82c1a",
+      "status": "Deferred",
+      "title": "Removing the LLVM requirement for JIT builds",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0775",
+      "number": 775,
+      "file": "corpus/PEP-0775.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0775.rst",
+      "source_sha256": "950308bd74463f7ee4d8cc136576cbb9196b4f5685ddd52b654a36172b26aed2",
+      "status": "Withdrawn",
+      "title": "Make zlib required to build CPython",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0776",
+      "number": 776,
+      "file": "corpus/PEP-0776.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0776.rst",
+      "source_sha256": "6e56b6e52231448efff1df1888bc85b691f69bfafce7497153a2b7e42d44783f",
+      "status": "Active",
+      "title": "Emscripten Support",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0777",
+      "number": 777,
+      "file": "corpus/PEP-0777.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0777.rst",
+      "source_sha256": "b3a400a466c7ec34a3535526f93a42cee786534f807ff5fa6e8cf066c3c61a13",
+      "status": "Draft",
+      "title": "How to Re-invent the Wheel",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0778",
+      "number": 778,
+      "file": "corpus/PEP-0778.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0778.rst",
+      "source_sha256": "f0eb501823c485714e90d42e7a13750a70be778a1b83ac5ea089cd0a534445d6",
+      "status": "Deferred",
+      "title": "Supporting Symlinks in Wheels",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0779",
+      "number": 779,
+      "file": "corpus/PEP-0779.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0779.rst",
+      "source_sha256": "8f63872c90074ae8a73ae75ad1954ac5a5ba9cbd4e1bd4f1b7733fce73faf513",
+      "status": "Final",
+      "title": "Criteria for supported status for free-threaded Python",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0780",
+      "number": 780,
+      "file": "corpus/PEP-0780.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0780.rst",
+      "source_sha256": "f8a86fd69a5b6593f8d6c87449f5e0554fd6e03854306e5777fc2b2537ca62f4",
+      "status": "Draft",
+      "title": "ABI features as environment markers",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0781",
+      "number": 781,
+      "file": "corpus/PEP-0781.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0781.rst",
+      "source_sha256": "7ceffd5bb17eba9bafafddf59bcbca70e60749d0bfb30644932e70ef903f48f7",
+      "status": "Draft",
+      "title": "Make ``TYPE_CHECKING`` a built-in constant",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0782",
+      "number": 782,
+      "file": "corpus/PEP-0782.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0782.rst",
+      "source_sha256": "d0b9af10de6266dd6c04a3439fee5d4629397cc708c2235fe2227f9844c73b17",
+      "status": "Final",
+      "title": "Add PyBytesWriter C API",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0783",
+      "number": 783,
+      "file": "corpus/PEP-0783.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0783.rst",
+      "source_sha256": "9194b102aba7c9b467593d644c36ec5dda358438e6dabbf614783ca87f5419c2",
+      "status": "Accepted",
+      "title": "Emscripten Packaging",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0784",
+      "number": 784,
+      "file": "corpus/PEP-0784.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0784.rst",
+      "source_sha256": "753ccd68cd350f2a62e55d9a237b945d0d7f9e226a2bf8752ab456bac4a7358f",
+      "status": "Final",
+      "title": "Adding Zstandard to the standard library",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0785",
+      "number": 785,
+      "file": "corpus/PEP-0785.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0785.rst",
+      "source_sha256": "bd319f81c062847c77efd324e8c059451908b8fd3705d8044766c0331f9954eb",
+      "status": "Draft",
+      "title": "New methods for easier handling of ``ExceptionGroup``\\ s",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0786",
+      "number": 786,
+      "file": "corpus/PEP-0786.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0786.rst",
+      "source_sha256": "87f5b0cfe0ab18d7bdcdd66e76a7a159eb4aa91500b1b9b89b21f912f0bb4fdf",
+      "status": "Draft",
+      "title": "Precision and modulo-precision flag format specifiers for integer fields",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0787",
+      "number": 787,
+      "file": "corpus/PEP-0787.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0787.rst",
+      "source_sha256": "9652d0a039320e1141b4f674b518666a3fe593c489aa3b2432343da192337198",
+      "status": "Deferred",
+      "title": "Safer subprocess usage using t-strings",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0788",
+      "number": 788,
+      "file": "corpus/PEP-0788.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0788.rst",
+      "source_sha256": "99ddc91eba423790f1629636674b8b610004482fe0db8b2deb18e081d5f20537",
+      "status": "Final",
+      "title": "Protecting the C API from Interpreter Finalization",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0789",
+      "number": 789,
+      "file": "corpus/PEP-0789.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0789.rst",
+      "source_sha256": "265a22bc4e3237b943dfde5b000824212a0c29f8c8196334e6db0c46c2b482f7",
+      "status": "Draft",
+      "title": "Preventing task-cancellation bugs by limiting yield in async generators",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0790",
+      "number": 790,
+      "file": "corpus/PEP-0790.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0790.rst",
+      "source_sha256": "2f3e6b5c4d6103e3f9cd2188e6f3ceda0acb29ea56a36ab0915ea46c4620c027",
+      "status": "Active",
+      "title": "Python 3.15 Release Schedule",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0791",
+      "number": 791,
+      "file": "corpus/PEP-0791.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0791.rst",
+      "source_sha256": "10d003a739cf14220ccfb94a326c22ef2e543609d2401946590a168761059dd5",
+      "status": "Final",
+      "title": "math.integer --- submodule for integer-specific mathematics functions",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0792",
+      "number": 792,
+      "file": "corpus/PEP-0792.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0792.rst",
+      "source_sha256": "3232b76ded928c7659aeedcaba01b20dfd34a51d61ae153aa665e0d0df37a17e",
+      "status": "Final",
+      "title": "Project status markers in the simple index",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0793",
+      "number": 793,
+      "file": "corpus/PEP-0793.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0793.rst",
+      "source_sha256": "735fb3222e5b508765b826805a9e76706cbda4dc599ab5bbb7b9380aa3e9655f",
+      "status": "Accepted",
+      "title": "PyModExport: A new entry point for C extension modules",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0794",
+      "number": 794,
+      "file": "corpus/PEP-0794.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0794.rst",
+      "source_sha256": "3c1c793e1d3f3e23f7667046e1ff7fb8c10fdeb92c82ada2f770f86ac3d4853f",
+      "status": "Accepted",
+      "title": "Import Name Metadata",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0797",
+      "number": 797,
+      "file": "corpus/PEP-0797.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0797.rst",
+      "source_sha256": "a62097973f7d6679caf0e3258acd216339de2676a45c14d1309fae70efd2beb9",
+      "status": "Draft",
+      "title": "Shared Object Proxies",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0798",
+      "number": 798,
+      "file": "corpus/PEP-0798.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0798.rst",
+      "source_sha256": "8cd576ceea01f0b6016427efc99dd02e252f94e12d0bf19aea621a3a00ff7a79",
+      "status": "Final",
+      "title": "Unpacking in Comprehensions",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0799",
+      "number": 799,
+      "file": "corpus/PEP-0799.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0799.rst",
+      "source_sha256": "f51e3b813e9da91113ff6f036ea6aad349ab654f6728db803533ce85f48e44e6",
+      "status": "Accepted",
+      "title": "A dedicated ``profiling`` package for organizing Python profiling tools",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0800",
+      "number": 800,
+      "file": "corpus/PEP-0800.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0800.rst",
+      "source_sha256": "b5476422ceb545a7ae95a2407796e8b9dd818b143150d2339cf08b3f0a575b68",
+      "status": "Final",
+      "title": "Disjoint bases in the type system",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0801",
+      "number": 801,
+      "file": "corpus/PEP-0801.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0801.rst",
+      "source_sha256": "dee96054e2fbf8f9a36b66530dd21f3067deade6e744d4887ce8be3d22408f0b",
+      "status": "Active",
+      "title": "Reserved",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0802",
+      "number": 802,
+      "file": "corpus/PEP-0802.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0802.rst",
+      "source_sha256": "cad466f91e54fb86421011cb4457b927548d633bb2b367967f40bdcfd212d781",
+      "status": "Draft",
+      "title": "Display Syntax for the Empty Set",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0803",
+      "number": 803,
+      "file": "corpus/PEP-0803.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0803.rst",
+      "source_sha256": "c1388204b8f4ad50f06dcf86f815ab354f50579856b29f1a75e15c15204e903f",
+      "status": "Accepted",
+      "title": "\"abi3t\": Stable ABI for Free-Threaded Builds",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0804",
+      "number": 804,
+      "file": "corpus/PEP-0804.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0804.rst",
+      "source_sha256": "cdc4e9830f0ec791b484eec97c5da0f273c59d98fe7ac76efd7f7f2b5cdab6ed",
+      "status": "Draft",
+      "title": "An external dependency registry and name mapping mechanism",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0806",
+      "number": 806,
+      "file": "corpus/PEP-0806.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0806.rst",
+      "source_sha256": "81861a5583069d029749a1178fb5f696220875210ab3317cb696aa753c6087a4",
+      "status": "Rejected",
+      "title": "Mixed sync/async context managers with precise async marking",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0807",
+      "number": 807,
+      "file": "corpus/PEP-0807.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0807.rst",
+      "source_sha256": "65eaa7b4932dc154c1a9b8bbed0ee07b914227a1d2e29fbe66ba2776e543d702",
+      "status": "Draft",
+      "title": "Index support for Trusted Publishing",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0808",
+      "number": 808,
+      "file": "corpus/PEP-0808.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0808.rst",
+      "source_sha256": "0b0ffbf71b064876b7ee98e1721bb71b733efa4d78df6ccda6a0edc9ab6fb6e0",
+      "status": "Accepted",
+      "title": "Including static values in dynamic metadata",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0809",
+      "number": 809,
+      "file": "corpus/PEP-0809.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0809.rst",
+      "source_sha256": "5a6a7517118e1b6286acbad0fc33a17300a9fb5b44eff25c3364bc8eba38abc2",
+      "status": "Draft",
+      "title": "Stable ABI for the Future",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0810",
+      "number": 810,
+      "file": "corpus/PEP-0810.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0810.rst",
+      "source_sha256": "7f901253abb442d3642e1def1133ca1cb2da9e988888804bd7d0d21cc6f8a2c9",
+      "status": "Accepted",
+      "title": "Explicit lazy imports",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0811",
+      "number": 811,
+      "file": "corpus/PEP-0811.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0811.rst",
+      "source_sha256": "47ec03575c8c3d239e9ea186f0706bd86654e9a5f2ca8e7e9fa229e17d110774",
+      "status": "Active",
+      "title": "Defining Python Security Response Team membership and responsibilities",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0813",
+      "number": 813,
+      "file": "corpus/PEP-0813.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0813.rst",
+      "source_sha256": "175d23dee28246403e294a428bb17b25b3fe4bf6580a6973cc6bf8f53646d919",
+      "status": "Draft",
+      "title": "The Pretty Print Protocol",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0814",
+      "number": 814,
+      "file": "corpus/PEP-0814.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0814.rst",
+      "source_sha256": "b806c68cf7789a2ede4619f790b885a45d04ccf808126e93284b024c63066793",
+      "status": "Final",
+      "title": "Add frozendict built-in type",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0815",
+      "number": 815,
+      "file": "corpus/PEP-0815.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0815.rst",
+      "source_sha256": "60bc98f83a99ba2725ac0f22d11f3689086ffd8f4a63254b25d4fab5980d9b5b",
+      "status": "Final",
+      "title": "Deprecate ``RECORD.jws`` and ``RECORD.p7s``",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0816",
+      "number": 816,
+      "file": "corpus/PEP-0816.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0816.rst",
+      "source_sha256": "838e4dbe28ccf4b496d9560d4da62f0f97f75d88460875d5b552a875617e7956",
+      "status": "Active",
+      "title": "WASI Support",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0817",
+      "number": 817,
+      "file": "corpus/PEP-0817.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0817.rst",
+      "source_sha256": "278e80cdf11496ee6432e38d334d906b7192a978398f920d1be5e01470c74ed5",
+      "status": "Draft",
+      "title": "Wheel Variants: Beyond Platform Tags",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0818",
+      "number": 818,
+      "file": "corpus/PEP-0818.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0818.rst",
+      "source_sha256": "c50fcc37c7dbe6427b7b488a3ed11d2ea8cfbb72b065a5df4f9e598ab265ebf3",
+      "status": "Draft",
+      "title": "Adding the Core of the Pyodide Foreign Function Interface to Python",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0819",
+      "number": 819,
+      "file": "corpus/PEP-0819.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0819.rst",
+      "source_sha256": "ee56ecb6f436b46014822a7e2f3ff859ce6df520dfb9209243df012426c425d8",
+      "status": "Draft",
+      "title": "JSON Package Metadata",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0820",
+      "number": 820,
+      "file": "corpus/PEP-0820.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0820.rst",
+      "source_sha256": "37a412a61f90dda6f1248e3cf2f5fc5ea075eecb02d72e22b2487dec4c660044",
+      "status": "Accepted",
+      "title": "PySlot: Unified slot system for the C API",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0821",
+      "number": 821,
+      "file": "corpus/PEP-0821.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0821.rst",
+      "source_sha256": "fd6c9fab728f23db757334d78eb4e8b914f85dde116933a898505b1039be4a31",
+      "status": "Draft",
+      "title": "Support for unpacking TypedDicts in Callable type hints",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0822",
+      "number": 822,
+      "file": "corpus/PEP-0822.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0822.rst",
+      "source_sha256": "171c6fb3967702aa6d9138475e93646ec1cb62391ed7247d00be98bf001cc63c",
+      "status": "Draft",
+      "title": "Dedented Multiline String (d-string)",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0825",
+      "number": 825,
+      "file": "corpus/PEP-0825.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0825.rst",
+      "source_sha256": "5973b70967e0730cf2883f44c832d1f879ecb0d74deb1dd43f400d4b746ef415",
+      "status": "Draft",
+      "title": "Wheel Variants: Package Format",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0826",
+      "number": 826,
+      "file": "corpus/PEP-0826.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0826.rst",
+      "source_sha256": "945b119e69f66ec41998c2926cd22f74d392e1b850dc2178c13202394d2a4b9e",
+      "status": "Active",
+      "title": "Python 3.16 Release Schedule",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0827",
+      "number": 827,
+      "file": "corpus/PEP-0827.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0827.rst",
+      "source_sha256": "d1f19d8e2a1c2c8b823d8f354fd7020c0417880fb67d7aba0bdb1c4fe9e4f563",
+      "status": "Draft",
+      "title": "Type Manipulation",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0828",
+      "number": 828,
+      "file": "corpus/PEP-0828.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0828.rst",
+      "source_sha256": "72a93456fd9862c6fed4a548da54f5be263ccbf15196ea9e43c23e38860b383e",
+      "status": "Draft",
+      "title": "Supporting 'yield from' in asynchronous generators",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0829",
+      "number": 829,
+      "file": "corpus/PEP-0829.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0829.rst",
+      "source_sha256": "70f9f436aa3dca5472fb843ffb3926d1a90d83ce076cd54428e84646149858c1",
+      "status": "Final",
+      "title": "Package Startup Configuration Files",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0830",
+      "number": 830,
+      "file": "corpus/PEP-0830.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0830.rst",
+      "source_sha256": "3a3ae9da761aaae18e120b20afece84d2ebfe16b2dff573327e07a2683fa48d9",
+      "status": "Draft",
+      "title": "Add timestamps to exceptions and tracebacks",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0831",
+      "number": 831,
+      "file": "corpus/PEP-0831.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0831.rst",
+      "source_sha256": "d6fdcd6267268d1bf789de0e8835c89d994acf08d816d60df44265783f2e3e1d",
+      "status": "Final",
+      "title": "Frame Pointers Everywhere: Enabling System-Level Observability for Python",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0832",
+      "number": 832,
+      "file": "corpus/PEP-0832.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0832.rst",
+      "source_sha256": "230689c1fb9c01e09b647519dd6b4365faac643e1b85da42dd7e82b0797a13f3",
+      "status": "Draft",
+      "title": "Virtual environment discovery",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0833",
+      "number": 833,
+      "file": "corpus/PEP-0833.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0833.rst",
+      "source_sha256": "215106b8399a64738f5cff3e785ef01b80503a9e65a5a49c24ad3e79e32d1499",
+      "status": "Accepted",
+      "title": "Freezing the HTML simple repository API",
+      "replaces": [],
+      "superseded_by": []
     }
   ],
   "supersedes_edges": [
@@ -5965,6 +7359,51 @@
       "source": "PEP-0699",
       "type": "supersedes",
       "target": "PEP-0509"
+    },
+    {
+      "source": "PEP-0723",
+      "type": "supersedes",
+      "target": "PEP-0722"
+    },
+    {
+      "source": "PEP-0734",
+      "type": "supersedes",
+      "target": "PEP-0554"
+    },
+    {
+      "source": "PEP-0742",
+      "type": "supersedes",
+      "target": "PEP-0724"
+    },
+    {
+      "source": "PEP-0748",
+      "type": "supersedes",
+      "target": "PEP-0543"
+    },
+    {
+      "source": "PEP-0751",
+      "type": "supersedes",
+      "target": "PEP-0665"
+    },
+    {
+      "source": "PEP-0765",
+      "type": "supersedes",
+      "target": "PEP-0601"
+    },
+    {
+      "source": "PEP-0772",
+      "type": "supersedes",
+      "target": "PEP-0609"
+    },
+    {
+      "source": "PEP-0773",
+      "type": "supersedes",
+      "target": "PEP-0397"
+    },
+    {
+      "source": "PEP-0773",
+      "type": "supersedes",
+      "target": "PEP-0486"
     }
   ]
 }
