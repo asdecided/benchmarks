@@ -111,6 +111,14 @@ override with `--embedder voyage:<model>`. Each report records the embedder id +
 dimension and the installed `anthropic`/`voyageai` versions (`backend_versions`)
 so a run says exactly what produced it.
 
+For repeat or large runs, `python -m runner.cli batch …` runs the same
+comparison through the **Message Batches API at ~50% of standard token price**.
+It assembles every arm's grounding locally (rac CLI, embeddings) up front, then
+submits all answering calls as one batch and polls to completion (asynchronous —
+usually under an hour). The trade vs `compare` is the live, abortable per-cell
+feedback; for the first exploratory run prefer `compare`, for bulk runs prefer
+`batch`. (`compare`/`run`/`demo` remain synchronous and streamed.)
+
 A real run is expensive, so the runner protects your spend two ways. It
 **preflights** the configuration before doing any work — a missing
 `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`, backend package, or `rac` CLI fails fast

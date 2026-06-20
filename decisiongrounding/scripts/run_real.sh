@@ -67,9 +67,13 @@ echo "  answering=claude  embedder=$EMBEDDER  scenarios=$SCENARIOS ($n_scen)  se
 echo "  compare cost ~= $n_arms arms x $n_scen scenarios = $((n_arms * n_scen)) answering-model calls"
 
 # 6. Headline result: every arm on every real scenario at base corpus size.
-#    Results stream to results/run-*.partial.jsonl and finalise to results/run-*.json;
-#    a transient API error on one cell is recorded and skipped, never losing the rest.
-python3 -m runner.cli compare \
+#    Default (compare): synchronous, streams to results/run-*.partial.jsonl and
+#    finalises to results/run-*.json; a transient error on one cell is recorded
+#    and skipped, never losing the rest. BATCH=1: same comparison via the Batch
+#    API at ~50% of standard price (asynchronous — submit, poll, then score).
+HEADLINE_CMD="compare"
+[ "${BATCH:-0}" = "1" ] && HEADLINE_CMD="batch"
+python3 -m runner.cli "$HEADLINE_CMD" \
   --arms "$ARMS" --scenarios "$SCENARIOS" \
   --answering claude --embedder "$EMBEDDER" --seed "$SEED"
 

@@ -4,6 +4,9 @@
 # headline compare across all real scenarios:
 real-run:
 	./scripts/run_real.sh
+# same headline via the Batch API (~50% of standard price; asynchronous):
+real-batch:
+	BATCH=1 ./scripts/run_real.sh
 # compare + the adherence-vs-N crossover over a real pool (set NS to taste):
 real-crossover:
 	CROSSOVER=1 ./scripts/run_real.sh
