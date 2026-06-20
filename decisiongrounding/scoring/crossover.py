@@ -149,6 +149,7 @@ def build_dataset(
     per_scenario: dict[str, dict[str, list[dict]]] = {
         arm: {s.scenario_id: [] for s in discriminating} for arm in arms
     }
+    errors: list[dict] = []
     n_max = max(ns)
     for n in ns:
         density = (n - min(ns)) / (n_max - min(ns)) if n_max != min(ns) else 0.0
@@ -162,16 +163,26 @@ def build_dataset(
                 else:
                     distractors = make_filler_notes(pad, sc, seed, density)
                 corpus = list(sc.corpus) + distractors
-                sc_score, gov_retrieved = _run_arm_on_corpus(
-                    arm, corpus, sc, answering_model, embedder_spec
-                )
-                adhered += 1 if sc_score.adherent else 0
+                try:
+                    sc_score, gov_retrieved = _run_arm_on_corpus(
+                        arm, corpus, sc, answering_model, embedder_spec
+                    )
+                    adherent = sc_score.adherent
+                    stale = sc_score.stale_decision_followed
+                except Exception as exc:  # noqa: BLE001 - one cell must not lose the curve
+                    errors.append(
+                        {"arm": arm, "scenario_id": sc.scenario_id, "N": n, "error": repr(exc)}
+                    )
+                    adherent = False
+                    stale = False
+                    gov_retrieved = None
+                adhered += 1 if adherent else 0
                 retrieved_flags.append(gov_retrieved)
                 per_scenario[arm][sc.scenario_id].append(
                     {
                         "N": n,
-                        "adherent": sc_score.adherent,
-                        "stale_decision_followed": sc_score.stale_decision_followed,
+                        "adherent": adherent,
+                        "stale_decision_followed": stale,
                         "governing_decision_retrieved": gov_retrieved,
                     }
                 )
@@ -198,6 +209,7 @@ def build_dataset(
         "embedder": embedder_spec,
         "arms": {arm: points[arm] for arm in arms},
         "per_scenario": per_scenario,
+        "errors": errors,
     }
 
 
