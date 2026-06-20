@@ -100,11 +100,18 @@ class Provider(ABC):
     def prepare(self, corpus: list[CorpusArtifact]) -> None:
         """Assemble this arm's grounding from the corpus (called once)."""
 
+    def assemble(self, task: Task) -> GroundingContext:
+        """Return this arm's grounding for the task, WITHOUT calling the answering
+        model. Base arms fix their grounding in prepare(); task-dependent arms
+        (naive_rag, rac) override this. Splitting assembly from answering lets the
+        runner build every prompt first and batch the answering calls."""
+        if self._grounding is None:
+            raise RuntimeError(f"{self.name}: prepare() must run before assemble()")
+        return self._grounding
+
     def respond(self, task: Task) -> ProposedChange:
         """Answer the task using the held-constant scaffold + answering model."""
-        if self._grounding is None:
-            raise RuntimeError(f"{self.name}: prepare() must run before respond()")
-        return self.answering_model.respond(SCAFFOLD, self._grounding, task)
+        return self.answering_model.respond(SCAFFOLD, self.assemble(task), task)
 
     @property
     def grounding(self) -> GroundingContext:

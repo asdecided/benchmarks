@@ -221,10 +221,14 @@ class ClaudeAnsweringModel(AnsweringModel):
             self._client = anthropic.Anthropic()
         return self._client
 
-    def respond(
+    def build_request(
         self, scaffold: str, grounding: GroundingContext, task: Task
-    ) -> ProposedChange:
-        client = self._ensure_client()
+    ) -> dict:
+        """The exact `messages.create` kwargs for this cell. Used directly by
+        respond() and collected by the batch runner so the answering calls can be
+        submitted together via the Batch API (50% of standard price). No
+        temperature / seed: Opus 4.8 rejects them; effort is pinned and structured
+        output forces the ProposedChange shape — identical across arms."""
         user = (
             f"GROUNDING (use only this):\n{grounding.text}\n\n"
             f"TASK: {task.prompt}\n"
@@ -235,18 +239,20 @@ class ClaudeAnsweringModel(AnsweringModel):
             "the decision id(s) you relied on. Do not invent constraints absent "
             "from the grounding."
         )
-        # No temperature / seed: Opus 4.8 rejects them. Thinking omitted (off) and
-        # effort pinned for stability across arms; structured output forces shape.
-        resp = client.messages.create(
-            model=self.version,
-            max_tokens=2048,
-            system=scaffold,
-            messages=[{"role": "user", "content": user}],
-            output_config={
+        return {
+            "model": self.version,
+            "max_tokens": 2048,
+            "system": scaffold,
+            "messages": [{"role": "user", "content": user}],
+            "output_config": {
                 "effort": self.effort,
                 "format": {"type": "json_schema", "schema": _PROPOSED_CHANGE_SCHEMA},
             },
-        )
+        }
+
+    def parse_message(self, resp) -> ProposedChange:
+        """Decode a Messages API response — synchronous or a Batch result's
+        `.message` — into a ProposedChange."""
         if getattr(resp, "stop_reason", None) == "refusal":
             # Treat a safety refusal as a non-answer: assert nothing, cite nothing.
             return ProposedChange(summary="model refused", actions=[])
@@ -280,3 +286,10 @@ class ClaudeAnsweringModel(AnsweringModel):
             raise RuntimeError(
                 f"claude JSON missing an expected ProposedChange field: {exc}"
             ) from exc
+
+    def respond(
+        self, scaffold: str, grounding: GroundingContext, task: Task
+    ) -> ProposedChange:
+        client = self._ensure_client()
+        resp = client.messages.create(**self.build_request(scaffold, grounding, task))
+        return self.parse_message(resp)

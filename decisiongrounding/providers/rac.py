@@ -45,7 +45,6 @@ def _query_tokens(text: str) -> list[str]:
     return seen
 
 from .base import (
-    SCAFFOLD,
     CorpusArtifact,
     GroundingContext,
     Provider,
@@ -158,9 +157,9 @@ class RacProvider(Provider):
         if finalizer is not None:
             finalizer()
 
-    def respond(self, task: Task):
+    def assemble(self, task: Task) -> GroundingContext:
         if self._dir is None:
-            raise RuntimeError("rac arm: prepare() must run before respond()")
+            raise RuntimeError("rac arm: prepare() must run before assemble()")
         # 1. Typed candidate decisions. `rac find` substring-matches ID/title and
         # ANDs multi-word queries, so we query one salient task term at a time and
         # union the hits, ranking by how many terms hit each decision (then by
@@ -186,7 +185,7 @@ class RacProvider(Provider):
             artifacts_supplied=tuple(resolved),
             token_estimate=estimate_tokens(text),
         )
-        return self.answering_model.respond(SCAFFOLD, self._grounding, task)
+        return self._grounding
 
 
 def _extract_supersedes_edges(rels_json: dict) -> list[tuple[str, str]]:

@@ -21,7 +21,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .base import (
-    SCAFFOLD,
     CorpusArtifact,
     GroundingContext,
     Provider,
@@ -79,7 +78,7 @@ class NaiveRagProvider(Provider):
         # Grounding is task-dependent for RAG; assembled lazily in respond().
         self._grounding = GroundingContext(text="", artifacts_supplied=(), token_estimate=0)
 
-    def respond(self, task: Task):
+    def assemble(self, task: Task) -> GroundingContext:
         query = self.embedder.embed(
             f"{task.prompt}\n{task.proposed_action}", input_type="query"
         )
@@ -94,4 +93,4 @@ class NaiveRagProvider(Provider):
             artifacts_supplied=tuple(dict.fromkeys(c.artifact_id for c in top)),
             token_estimate=estimate_tokens(text),
         )
-        return self.answering_model.respond(SCAFFOLD, self._grounding, task)
+        return self._grounding
