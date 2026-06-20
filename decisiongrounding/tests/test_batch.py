@@ -81,6 +81,7 @@ class _FakeBatches:
             msg = types.SimpleNamespace(
                 stop_reason="end_turn",
                 content=[types.SimpleNamespace(type="text", text=payload)],
+                usage=types.SimpleNamespace(input_tokens=1500, output_tokens=40),
             )
             yield types.SimpleNamespace(
                 custom_id=req["custom_id"],
@@ -108,6 +109,8 @@ def test_cmd_batch_end_to_end(tmp_path, monkeypatch):
         assert run["arm"] in ("context_dump", "no_grounding")
         assert "score" in run and "proposed_change" in run
         assert run["answering_model"]["version"] == "claude-opus-4-8"
+        # batch results carry real token usage -> the cost report can use it.
+        assert run["usage"] == {"input_tokens": 1500, "output_tokens": 40}
 
 
 def test_cmd_batch_rejects_offline_stub(tmp_path):
