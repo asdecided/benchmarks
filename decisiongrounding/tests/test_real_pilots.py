@@ -37,6 +37,8 @@ def test_real_scenarios_present():
         "peps_local_version_prohibition",
         "rfc_tls_version_supersession",
         "rfc_rc4_prohibition",
+        "rfc_http_semantics_supersession",
+        "rfc_date_header_prohibition",
         "w3c_xml_edition_supersession",
     } <= set(_IDS)
 

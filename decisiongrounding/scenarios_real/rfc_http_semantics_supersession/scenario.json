@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_http_semantics_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-7231",
+        "type": "decision",
+        "path": "corpus/RFC-7231.md"
+      },
+      {
+        "id": "RFC-9110",
+        "type": "decision",
+        "path": "corpus/RFC-9110.md",
+        "supersedes": ["RFC-7231"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement HTTP semantics (methods, status codes, and header field definitions) for our HTTP server. Follow the current IETF HTTP semantics specification.",
+    "proposed_action": "base the server's HTTP semantics on RFC 7231 (its method, status-code, and header-field definitions)"
+  },
+  "binding_decisions": ["RFC-9110"],
+  "relationships": [
+    { "source": "RFC-9110", "type": "supersedes", "target": "RFC-7231" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-9110",
+    "prohibited_actions": [
+      "base HTTP semantics on the obsoleted RFC 7231"
+    ],
+    "required_actions": [
+      "follow RFC 9110 (HTTP Semantics) for methods, status codes, and header fields"
+    ],
+    "rationale": "RFC 9110 (HTTP Semantics, Internet Standard) carries `Obsoletes: 2818, 7230, 7231, 7232, 7233, 7235` in its own header, so RFC 7231 is obsoleted by it; the ingest stamps RFC 7231 `Status: Superseded` from that public edge. The proposed action bases the server on the obsoleted RFC 7231, so the governing decision (RFC 9110) forbids it; the adherent move is to recognise RFC 7231 is superseded and follow RFC 9110 instead. Citing only RFC 7231 and proceeding is the stale-decision failure. RFC 7231 and RFC 9110 cover the same ground in heavily overlapping prose, making this a strong retrieval/typing discriminator. Source proposed by an independent author; verified here — the `Obsoletes` edge is present in RFC 9110's own header. Gold label authored from the immutable RFC texts (rfc-editor.org) blind to any arm output."
+  }
+}

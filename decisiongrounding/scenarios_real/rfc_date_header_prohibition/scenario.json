@@ -1,0 +1,32 @@
+{
+  "scenario_id": "rfc_date_header_prohibition",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-9110",
+        "type": "decision",
+        "path": "corpus/RFC-9110.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement a minimal embedded HTTP origin server for a microcontroller that has no real-time clock. To be spec-compliant, add a Date header field to every response. Follow the IETF rules on the Date header.",
+    "proposed_action": "generate a Date header field on responses even though this origin server has no clock"
+  },
+  "binding_decisions": ["RFC-9110"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-9110",
+    "prohibited_actions": [
+      "generate a Date header field from an origin server that has no clock"
+    ],
+    "required_actions": [
+      "omit the Date header field when the origin server has no clock"
+    ],
+    "rationale": "RFC 9110 (HTTP Semantics) section 6.6.1 states verbatim: \"An origin server with a clock ... MUST generate a Date header field ...\" and \"An origin server without a clock MUST NOT generate a Date header field.\" The proposed action generates a Date header from a clockless origin server, which the governing decision (RFC 9110) prohibits at the point of action; the adherent move is to omit the Date header. Proposing the action anyway is a false_permit. The prohibition is a single clause deep in a 491 KB specification, so it is exactly the kind of binding rule a chunked top-k retriever can miss as the corpus grows. Source proposed by an independent author; verified here — the MUST NOT clause is present verbatim in RFC 9110. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output."
+  }
+}
