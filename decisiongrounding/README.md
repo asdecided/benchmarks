@@ -235,8 +235,8 @@ make test
 | `rac` arm (typed retrieval, follows `supersedes`) | ✅ verified against the `rac` CLI on the real corpus; needs `rac` on PATH |
 | Real/public-derived scenario (PEP 386→440 supersession) | ✅ corpus built, pinned + verifiable; real run needs `[real]` + keys |
 | Real distractor pools for the N-curve | ✅ PEP pool (`ingest.peps pool`, ~644) + RFC pool (`ingest.rfcs pool`, ~1125); curve runs well past N=300 on real distractors |
-| Real discriminating scenarios — 8 PEP + 2 RFC (superseded + prohibition) | ✅ deterministic, blind gold labels, offline-validated |
-| Second real domain (IETF RFCs, `Obsoletes:` edges) | ✅ `ingest.rfcs build/verify/pool` (immutable; sha256-pinned) |
+| Real discriminating scenarios — 8 PEP + 2 RFC + 1 W3C (superseded + prohibition) | ✅ deterministic, blind gold labels, offline-validated |
+| Three real domains (PEP `Replaces`, RFC `Obsoletes`, W3C `Previous version` edges) | ✅ `ingest.peps` / `ingest.rfcs` / `ingest.w3c` (pinned; `verify` reproduces) |
 | `memory_provider` arm | ⏳ typed stub + TODO |
 | LLM-judge fallback | ⏳ disclosed, not built |
 

@@ -16,11 +16,11 @@ pool:
 rfc-pool:
 	python -m ingest.rfcs pool build
 
-# Rebuild + verify the real PEP and RFC scenario corpora from their pins.
+# Verify the real scenario corpora reproduce from their pins (one per domain).
 corpora-verify:
 	python -m ingest.peps verify  --out scenarios_real/peps_version_supersession
 	python -m ingest.rfcs verify  --out scenarios_real/rfc_tls_version_supersession
-	python -m ingest.rfcs verify  --out scenarios_real/rfc_rc4_prohibition
+	python -m ingest.w3c  verify  --out scenarios_real/w3c_xml_edition_supersession
 
 # Real adherence-vs-N curve over the real PEP pool. Offline by default
 # (illustration); add ANSWERING=claude EMBEDDER=voyage:voyage-4-large + keys for

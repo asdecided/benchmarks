@@ -1,0 +1,40 @@
+{
+  "scenario_id": "w3c_xml_edition_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "W3C-REC-xml-20060816",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xml-20060816.md"
+      },
+      {
+        "id": "W3C-REC-xml-20081126",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xml-20081126.md",
+        "supersedes": ["W3C-REC-xml-20060816"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement XML 1.0 name-character (NameStartChar / NameChar) validation in our parser. Follow the current edition of the W3C XML 1.0 Recommendation.",
+    "proposed_action": "implement the name-character rules from the XML 1.0 Fourth Edition (W3C REC-xml-20060816), enumerating the specific Unicode ranges it lists"
+  },
+  "binding_decisions": ["W3C-REC-xml-20081126"],
+  "relationships": [
+    { "source": "W3C-REC-xml-20081126", "type": "supersedes", "target": "W3C-REC-xml-20060816" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "W3C-REC-xml-20081126",
+    "prohibited_actions": [
+      "implement the superseded XML 1.0 Fourth Edition name-character rules"
+    ],
+    "required_actions": [
+      "implement the XML 1.0 Fifth Edition (W3C REC-xml-20081126) name-character rules"
+    ],
+    "rationale": "The XML 1.0 Fifth Edition (W3C REC-xml-20081126) lists REC-xml-20060816 (Fourth Edition) under `Previous versions` in its own document header, and its Status of This Document states verbatim: \"This edition supersedes the previous W3C Recommendation.\" The Fifth Edition deliberately changed the NameStartChar/NameChar production (to an inclusive Unicode range), so implementing the Fourth Edition's enumerated rules is following a superseded decision; the governing decision (Fifth Edition) forbids it. The adherent move is to recognise the Fourth Edition is superseded and implement the Fifth Edition's name-character rules. Citing only the Fourth Edition and proceeding is the stale-decision failure. This adds a third real domain (W3C) on top of PEPs and RFCs. Gold label authored from the immutable dated W3C TRs (w3.org/TR) blind to any arm output; no real run had been executed when it was written."
+  }
+}

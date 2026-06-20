@@ -1,0 +1,42 @@
+{
+  "source": "w3.org/TR",
+  "immutable": true,
+  "specs": [
+    {
+      "id": "W3C-REC-xml-20060816",
+      "segment": "REC-xml-20060816",
+      "file": "corpus/W3C-REC-xml-20060816.md",
+      "url": "https://www.w3.org/TR/2006/REC-xml-20060816/",
+      "source_sha256": "0bb5a4aebc9c9b7bb8f4167942ba74a610e7249242b6169ea998bb346fe4f296",
+      "status": "Recommendation",
+      "title": "Extensible Markup Language (XML) 1.0 (Fourth Edition)",
+      "previous_versions": [
+        "PER-xml-20060614"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "W3C-REC-xml-20081126",
+      "segment": "REC-xml-20081126",
+      "file": "corpus/W3C-REC-xml-20081126.md",
+      "url": "https://www.w3.org/TR/2008/REC-xml-20081126/",
+      "source_sha256": "f58a4b9e1e5b8bac13fb55c4e5c7c8c5e2c176aa45ee68e2f1ab2498511927ec",
+      "status": "Recommendation",
+      "title": "Extensible Markup Language (XML) 1.0 (Fifth Edition)",
+      "previous_versions": [
+        "PER-xml-20080205",
+        "REC-xml-20060816"
+      ],
+      "replaces": [
+        "W3C-REC-xml-20060816"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "W3C-REC-xml-20081126",
+      "type": "supersedes",
+      "target": "W3C-REC-xml-20060816"
+    }
+  ]
+}
