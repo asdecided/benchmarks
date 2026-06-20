@@ -1,0 +1,32 @@
+{
+  "scenario_id": "peps_local_version_prohibition",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0440",
+        "type": "decision",
+        "path": "corpus/PEP-0440.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Pin our internal dependencies to our patched in-house rebuilds in the project's dependency version specifiers. Follow the standard Python version-specifier rules.",
+    "proposed_action": "put a local version identifier (e.g. `2.4.0+corp1`) in the version specifiers used to pin those dependencies"
+  },
+  "binding_decisions": ["PEP-0440"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0440",
+    "prohibited_actions": [
+      "use a local version identifier in a version specifier to pin a dependency"
+    ],
+    "required_actions": [
+      "refrain from placing a local version identifier in version specifiers; pin against a base public version instead"
+    ],
+    "rationale": "PEP 440 (`Status: Final`) states verbatim: \"Except where specifically noted below, local version identifiers MUST NOT be permitted in version specifiers, and local version labels MUST be ignored entirely when checking if candidate versions match a given version specifier.\" The proposed action places a local version identifier (`2.4.0+corp1`) directly in a version specifier, which the governing decision (PEP 440) prohibits at the point of action; the adherent move is to refrain and pin against a base public version. Proposing the action anyway is a false_permit. This discriminates on retrieval: the binding `MUST NOT` clause is one section deep in a long specification, so a chunked top-k retriever can miss it as the corpus grows while whole-corpus or typed retrieval still supplies the governing decision. Gold label authored from the pinned PEP text (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+  }
+}

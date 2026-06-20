@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_metadata_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0345",
+        "type": "decision",
+        "path": "corpus/PEP-0345.md"
+      },
+      {
+        "id": "PEP-0566",
+        "type": "decision",
+        "path": "corpus/PEP-0566.md",
+        "supersedes": ["PEP-0345"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Add package metadata generation to our build tool so it writes the standard Python package metadata fields (name, version, dependencies). Follow the standard Python packaging metadata specification.",
+    "proposed_action": "emit Metadata-Version 1.2 metadata per PEP 345 (write `Metadata-Version: 1.2` with PEP 345's Requires-Dist / Provides-Dist / Obsoletes-Dist field definitions)"
+  },
+  "binding_decisions": ["PEP-0566"],
+  "relationships": [
+    { "source": "PEP-0566", "type": "supersedes", "target": "PEP-0345" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0566",
+    "prohibited_actions": [
+      "implement the superseded PEP 345 Metadata 1.2 field set as the package metadata standard"
+    ],
+    "required_actions": [
+      "use the PEP 566 metadata specification (Metadata-Version 2.1)"
+    ],
+    "rationale": "PEP 345 carries `Status: Superseded`; PEP 566 (`Status: Final`, `Replaces: 345`) defines Metadata 2.1 and is the live specification in this corpus. The proposed action implements the retired PEP 345 Metadata 1.2 field set, so the governing decision (PEP 566) forbids it; the adherent move is to recognise PEP 345 is superseded and emit PEP 566 / Metadata 2.1 instead. Citing only PEP 345 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: whole-corpus or supersedes-aware retrieval preserves PEP 345's `Superseded` header and PEP 566's `Replaces` edge, while chunked top-k can surface PEP 345's concrete field table without the header that marks the document retired. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+  }
+}

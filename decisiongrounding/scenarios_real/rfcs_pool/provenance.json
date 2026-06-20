@@ -1,0 +1,4281 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-0001",
+      "number": 1,
+      "file": "corpus/RFC-0001.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc1.txt",
+      "source_sha256": "a61eb4ac9d40ac189b17214417ae6d29d4edabd86cadd31f44728faed3e600c0",
+      "category": "",
+      "title": "7 April 1969",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0002",
+      "number": 2,
+      "file": "corpus/RFC-0002.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc2.txt",
+      "source_sha256": "bc8ab60eefef60b8796bbc6a6b6fed7b9f1983d7d9661e4067da04043a444215",
+      "category": "",
+      "title": "[unknown title]",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0003",
+      "number": 3,
+      "file": "corpus/RFC-0003.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc3.txt",
+      "source_sha256": "fc6b8d93a449fe48d21d5519632b79f4d40a08077e134ed2bd529595485040bd",
+      "category": "",
+      "title": "DOCUMENTATION CONVENTIONS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0004",
+      "number": 4,
+      "file": "corpus/RFC-0004.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc4.txt",
+      "source_sha256": "fb9d695bf83d189a747027bc26e8ec9fc801ae47d7c4f9df4b565dde99fc8d22",
+      "category": "Informational",
+      "title": "Network Timetable",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0005",
+      "number": 5,
+      "file": "corpus/RFC-0005.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc5.txt",
+      "source_sha256": "109fae38984d28398fc1e7b9aedff78aeb43989cc4245d30f93f1f698e883d48",
+      "category": "",
+      "title": "DEL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0006",
+      "number": 6,
+      "file": "corpus/RFC-0006.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc6.txt",
+      "source_sha256": "4b0f9cfe85c725af6c86eb1fa1fa1d8634146d2bbb9d2e45ab9958b28938fd14",
+      "category": "",
+      "title": "CONVERSATION WITH BOB KAHN",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0007",
+      "number": 7,
+      "file": "corpus/RFC-0007.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc7.txt",
+      "source_sha256": "62598ffa96ad84a0da3b2cb2d4c66d45b7c1c965580636b784713bd7c9c37df9",
+      "category": "",
+      "title": "Host-Imp Interface",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0010",
+      "number": 10,
+      "file": "corpus/RFC-0010.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc10.txt",
+      "source_sha256": "3fd9694cf3fba6f2576b17b4945605215a2fda4b7319d6c1ac60de555e4e4220",
+      "category": "",
+      "title": "DOCUMENTATION CONVENTIONS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0011",
+      "number": 11,
+      "file": "corpus/RFC-0011.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc11.txt",
+      "source_sha256": "d96b84500b39612d98355ecac695914d85cb045baf0c2baf9222773e17798bbb",
+      "category": "",
+      "title": "August 1969",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0012",
+      "number": 12,
+      "file": "corpus/RFC-0012.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc12.txt",
+      "source_sha256": "2fdca517206485064092599ae2bbcf1da82f4b93ab97d882e134df63dde9be4e",
+      "category": "",
+      "title": "IMP-HOST INTERFACE FLOW DIAGRAMS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0013",
+      "number": 13,
+      "file": "corpus/RFC-0013.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc13.txt",
+      "source_sha256": "8dc41faaae2bfc245d3c92a7165a4e10d2c3294e11377a8a06e2f351bc58b785",
+      "category": "",
+      "title": "20 August 1969",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0015",
+      "number": 15,
+      "file": "corpus/RFC-0015.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc15.txt",
+      "source_sha256": "94bdec8b5ed210f847792ed53dde43402c97599b4f31c00fdaf8b80937ed5bd4",
+      "category": "",
+      "title": "25 September 1969",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0016",
+      "number": 16,
+      "file": "corpus/RFC-0016.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc16.txt",
+      "source_sha256": "48de931d1ce8fd67d57e0254d8b62b039338d20802f3cd4a4ee0d04e73007f91",
+      "category": "",
+      "title": "M.I.T.",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0017",
+      "number": 17,
+      "file": "corpus/RFC-0017.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc17.txt",
+      "source_sha256": "980f8dbada8a983ca7a230154a3a94fbfd79871b675e7538b437b95021b319b5",
+      "category": "Informational",
+      "title": "Some Questions Re: HOST-IMP Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0018",
+      "number": 18,
+      "file": "corpus/RFC-0018.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc18.txt",
+      "source_sha256": "8411639f13b811ac9122bbadf52dc37d124cc7bc0356b2c5cd360ddbc2fa2c71",
+      "category": "September 1969",
+      "title": "[This RFC has been restored to on-line status by Elmar K. Bins]",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0019",
+      "number": 19,
+      "file": "corpus/RFC-0019.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc19.txt",
+      "source_sha256": "b8952db280927dc69778e3af4cd2ba0be2095b6b59c49f26d40f0e941955e262",
+      "category": "",
+      "title": "7 October 1969",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0020",
+      "number": 20,
+      "file": "corpus/RFC-0020.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc20.txt",
+      "source_sha256": "714d11bfcbc001f98cd8a92291a19e3f670c2236ad02771092e0eea826acd13a",
+      "category": "",
+      "title": "October 16, 1969",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0021",
+      "number": 21,
+      "file": "corpus/RFC-0021.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc21.txt",
+      "source_sha256": "2f5e3b43155553ffb14476dd671e75dd4c628f051e9b7dc7284995207b238d76",
+      "category": "",
+      "title": "SDC                             UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0022",
+      "number": 22,
+      "file": "corpus/RFC-0022.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc22.txt",
+      "source_sha256": "52b0f5eb99de5ea422f184e3ccd9d5958c1277aa612881ca06b664ccdd2b6880",
+      "category": "",
+      "title": "October 17, 1969",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0023",
+      "number": 23,
+      "file": "corpus/RFC-0023.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc23.txt",
+      "source_sha256": "0020397b29590d7fd51f1ec0b5b8ea78bc97414a68581c06066d74adefd7aacb",
+      "category": "",
+      "title": "TRANSMISSION OF MULTIPLE CONTROL MESSAGES",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0024",
+      "number": 24,
+      "file": "corpus/RFC-0024.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc24.txt",
+      "source_sha256": "2a2bf76ad47fed978f2670d00f766b246ba4cb44dd930277cbaf0ab906eab2fe",
+      "category": "",
+      "title": "DOCUMENTATION CONVENTIONS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0025",
+      "number": 25,
+      "file": "corpus/RFC-0025.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc25.txt",
+      "source_sha256": "4cf1a1c5e079a9eb4a07efc4673929d5e6629e3621ae4a448b9210ce7666c999",
+      "category": "",
+      "title": "NO HIGH LINK NUMBERS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0027",
+      "number": 27,
+      "file": "corpus/RFC-0027.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc27.txt",
+      "source_sha256": "3087c73c4ead8647a7df0b5578d73793fba3ba82644ba1d2e17f5adf1e942cb1",
+      "category": "",
+      "title": "DOCUMENTATION CONVENTIONS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0028",
+      "number": 28,
+      "file": "corpus/RFC-0028.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc28.txt",
+      "source_sha256": "053444850402e09a29f61265d9cbfc4b2d8500024434cb66e54b7897c3666020",
+      "category": "",
+      "title": "TIME STANDARDS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0029",
+      "number": 29,
+      "file": "corpus/RFC-0029.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc29.txt",
+      "source_sha256": "7c9e902b7c120b99a773b819f24b24c3877bb79bc43ea4798e014d30f28c052b",
+      "category": "",
+      "title": "",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0030",
+      "number": 30,
+      "file": "corpus/RFC-0030.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc30.txt",
+      "source_sha256": "66d4d8f152ec3a785679e1e411ed81f29e97c95a65d6464bf0d322d272e49d0d",
+      "category": "",
+      "title": "DOCUMENTATION CONVENTIONS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0031",
+      "number": 31,
+      "file": "corpus/RFC-0031.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc31.txt",
+      "source_sha256": "bb60bc24f8f9d04111a210d4b54cf88c7988c179ba10eb2a4793d5b51f31a2f1",
+      "category": "",
+      "title": "BINARY MESSAGE FORMS IN COMPUTER NETWORKS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0032",
+      "number": 32,
+      "file": "corpus/RFC-0032.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc32.txt",
+      "source_sha256": "9502803125302823cf8d0533de392660b7910cb43617ef64c45333bb8f830af6",
+      "category": "",
+      "title": "[ This RFC was put into machine readable form for entry ]",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0033",
+      "number": 33,
+      "file": "corpus/RFC-0033.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc33.txt",
+      "source_sha256": "b938d0318b1001a2567cb76980c892c18bee9a09cd4371a091fd1e7dc5dd4c63",
+      "category": "",
+      "title": "S. Carr",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0034",
+      "number": 34,
+      "file": "corpus/RFC-0034.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc34.txt",
+      "source_sha256": "9f1789ff8f30c9b62683ea1c53ece3eca4c93715bf4846dc2f0f429d3a38fd1f",
+      "category": "",
+      "title": "First word --",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0035",
+      "number": 35,
+      "file": "corpus/RFC-0035.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc35.txt",
+      "source_sha256": "f6ecbdddcf247f7af998ca670e5175fcdc142cbf3d01e25ab31accee5d8c71c1",
+      "category": "Informational",
+      "title": "Network Meeting",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0036",
+      "number": 36,
+      "file": "corpus/RFC-0036.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc36.txt",
+      "source_sha256": "fe7445e0b77d0338a0d6070f8f09d91a6d1966986305f73c51a30334140fea91",
+      "category": "",
+      "title": "Protocol Notes",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0037",
+      "number": 37,
+      "file": "corpus/RFC-0037.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc37.txt",
+      "source_sha256": "8187ffa1e705796ea6949e3be100c19d243e666e6a9f158ba991fd2556ba88de",
+      "category": "",
+      "title": "20 March 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0038",
+      "number": 38,
+      "file": "corpus/RFC-0038.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc38.txt",
+      "source_sha256": "0d12fcf7ac07b9fe64e92ac538179f3c176878429ffbd59817cc9795ba18c899",
+      "category": "",
+      "title": "20 March 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0039",
+      "number": 39,
+      "file": "corpus/RFC-0039.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc39.txt",
+      "source_sha256": "1d41962ba447617c25966522c2257fc0ed1f02465cb4603955289fd7ec8c9f78",
+      "category": "",
+      "title": "RAND",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0040",
+      "number": 40,
+      "file": "corpus/RFC-0040.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc40.txt",
+      "source_sha256": "0364b9d8986b45e1d45d70d549fcbdb6bb42bda55a4eabaf6b4da6941e468260",
+      "category": "",
+      "title": "RAND",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0041",
+      "number": 41,
+      "file": "corpus/RFC-0041.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc41.txt",
+      "source_sha256": "93f332b0ece837ccda5538189d2c1ca730c83028899383f3e61187329114b7a9",
+      "category": "",
+      "title": "30 March 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0042",
+      "number": 42,
+      "file": "corpus/RFC-0042.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc42.txt",
+      "source_sha256": "ba2c826790cae67eb7b4f4ff0f8fe608f620d29f789969c06abbc8da696c8e35",
+      "category": "",
+      "title": "31 March 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0043",
+      "number": 43,
+      "file": "corpus/RFC-0043.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc43.txt",
+      "source_sha256": "b6fc6c8e185ef122f3a2b025f9e66a5f4242bdec789d2e467c07bbcfef4deebb",
+      "category": "",
+      "title": "8 April 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0044",
+      "number": 44,
+      "file": "corpus/RFC-0044.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc44.txt",
+      "source_sha256": "67ba3f3f3f132241a11eba2e71ee2b5bcab8fa65753e68650e36f762231d7866",
+      "category": "",
+      "title": "A. Landsberg",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0045",
+      "number": 45,
+      "file": "corpus/RFC-0045.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc45.txt",
+      "source_sha256": "4ff435342cdb7e755f1bb8aab75b66079493b79ee2d78e82d55aa1dc94f646aa",
+      "category": "",
+      "title": "UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0046",
+      "number": 46,
+      "file": "corpus/RFC-0046.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc46.txt",
+      "source_sha256": "7688c5b3fd3ff58317d97f5d13162ee5f40db4f75d050300e64fc449db808b5a",
+      "category": "",
+      "title": "17 April 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0047",
+      "number": 47,
+      "file": "corpus/RFC-0047.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc47.txt",
+      "source_sha256": "e391651993dcaba078f3a22b710e5f4ab2a81602f0c0a990c17fc830cf940310",
+      "category": "",
+      "title": "S. Crocker",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0048",
+      "number": 48,
+      "file": "corpus/RFC-0048.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc48.txt",
+      "source_sha256": "65655cf4f478ec133e96731b905916d48f18de81dc916bd2802b13aa9a06a152",
+      "category": "",
+      "title": "UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0049",
+      "number": 49,
+      "file": "corpus/RFC-0049.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc49.txt",
+      "source_sha256": "5c985b055e72a3454d18ecb3b72964b1b8834865775ac83e5ac9d2f3ea19e77f",
+      "category": "",
+      "title": "Edwin W. Meyer, Jr.",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0050",
+      "number": 50,
+      "file": "corpus/RFC-0050.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc50.txt",
+      "source_sha256": "8bee3c51a1bf76a8751a7089153150bf4e95a725a1b897e98a242232a8a1b5f2",
+      "category": "",
+      "title": "E. Harslen",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0052",
+      "number": 52,
+      "file": "corpus/RFC-0052.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc52.txt",
+      "source_sha256": "22131764c351d7e97fe21fee789d6272737e02358a66108810dd6d6336d421a2",
+      "category": "",
+      "title": "Revised",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0053",
+      "number": 53,
+      "file": "corpus/RFC-0053.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc53.txt",
+      "source_sha256": "eb4f123e6f2447850b19d20ad19e683d19fec70a0cef5718310c6e436bcc1a4c",
+      "category": "",
+      "title": "9 June 70",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0054",
+      "number": 54,
+      "file": "corpus/RFC-0054.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc54.txt",
+      "source_sha256": "9ba0e193cf623df9893e21cc7cfc1866213cb74a2fbf7580cc8f29472af40460",
+      "category": "",
+      "title": "Mike Kraley (Harvard)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0055",
+      "number": 55,
+      "file": "corpus/RFC-0055.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc55.txt",
+      "source_sha256": "37bf673c93090553eea9db8a50c5d0ddc4e68306137fb9945b1363a580283398",
+      "category": "",
+      "title": "Harvard",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0056",
+      "number": 56,
+      "file": "corpus/RFC-0056.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc56.txt",
+      "source_sha256": "3310d769794b3e592f5a7f41089c0e61e875c31daebd22ef25e02c8d071ff13b",
+      "category": "",
+      "title": "Bob Flegel (Utah)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0057",
+      "number": 57,
+      "file": "corpus/RFC-0057.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc57.txt",
+      "source_sha256": "0f0ed220b1815c7cab6208c2907855d70095cb901959d0c7f7b43efb04425b1c",
+      "category": "",
+      "title": "June 19, 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0058",
+      "number": 58,
+      "file": "corpus/RFC-0058.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc58.txt",
+      "source_sha256": "070edb77302dd17d9efe4cf8a381ef5b7203b2ac9f1c482b2fe01e202c53c470",
+      "category": "",
+      "title": "June 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0059",
+      "number": 59,
+      "file": "corpus/RFC-0059.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc59.txt",
+      "source_sha256": "8360eb4d157066c60295d7f61911dcfd1225ec96b24cea1d5124a637dc49db95",
+      "category": "",
+      "title": "Edwin W. Meyer, Jr.",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0060",
+      "number": 60,
+      "file": "corpus/RFC-0060.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc60.txt",
+      "source_sha256": "e0c366d284800f31a006621754d67fe2e788ebd8c1b5810ceb6fcc962f5eb983",
+      "category": "",
+      "title": "13 July 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0061",
+      "number": 61,
+      "file": "corpus/RFC-0061.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc61.txt",
+      "source_sha256": "590ea3af32032240f7371d6286db9118c7df4eb07c2505c26242a8c67f471282",
+      "category": "",
+      "title": "July 17, 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0062",
+      "number": 62,
+      "file": "corpus/RFC-0062.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc62.txt",
+      "source_sha256": "27b66a9784eeb3c4a6faab39402861a094cff8b251c8fcc9444e6f244f212f6b",
+      "category": "",
+      "title": "A System for Interprocess Communication",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0063",
+      "number": 63,
+      "file": "corpus/RFC-0063.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc63.txt",
+      "source_sha256": "7b392f3accabe5a3e274e0d0de6f16afee42ca5fc8233ee9a679d65087e7d3d1",
+      "category": "",
+      "title": "Belated Network Meeting Report",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0064",
+      "number": 64,
+      "file": "corpus/RFC-0064.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc64.txt",
+      "source_sha256": "7120994cd00840f9659042f6d12d1fddbadf6d4a22959b4abe2c26759e8872ef",
+      "category": "",
+      "title": "Getting Rid of Marking",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0065",
+      "number": 65,
+      "file": "corpus/RFC-0065.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc65.txt",
+      "source_sha256": "cfd7a202fcba65e0338c05caccc78724c4ea91799954f4dc6bb02c4ef6e79762",
+      "category": "",
+      "title": "August 29, 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0066",
+      "number": 66,
+      "file": "corpus/RFC-0066.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc66.txt",
+      "source_sha256": "71597122f1cc46cf503a31a0cb402017afaff0c385bb01e570fd057acdc97e05",
+      "category": "",
+      "title": "26 August 70",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0067",
+      "number": 67,
+      "file": "corpus/RFC-0067.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc67.txt",
+      "source_sha256": "e5f0e4807e648de289b42f68d74691eb024ebdfdad08d895b3d4f489fe2de0e3",
+      "category": "",
+      "title": "[IMPORTANT]",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0068",
+      "number": 68,
+      "file": "corpus/RFC-0068.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc68.txt",
+      "source_sha256": "da87003aa72be23e60835d480db69f2fa74ef4d7382d396d5739f093845f0b63",
+      "category": "",
+      "title": "UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0069",
+      "number": 69,
+      "file": "corpus/RFC-0069.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc69.txt",
+      "source_sha256": "f2f6b90d85023796b1e34a3ce277c7a8cfaa9923f7441d6a07ae44b01befcc3d",
+      "category": "",
+      "title": "Distribution List Change for M.I.T.",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0070",
+      "number": 70,
+      "file": "corpus/RFC-0070.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc70.txt",
+      "source_sha256": "bd609a78fcefb2a5acf6e20b9bf5352c09789b5c97a82aa1c5752a343d823304",
+      "category": "",
+      "title": "15 October 70",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0071",
+      "number": 71,
+      "file": "corpus/RFC-0071.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc71.txt",
+      "source_sha256": "6bb3940362d9e7cb7f63d9b0d7dc0121f17a80a4782a2d494bb2f53f0fb3d91a",
+      "category": "",
+      "title": "UCLA-CCN",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0072",
+      "number": 72,
+      "file": "corpus/RFC-0072.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc72.txt",
+      "source_sha256": "46a9a1e47c76b7bd285d36d694f0cd16d1420b0ebfd1ba2c5fc50cab81166aa5",
+      "category": "",
+      "title": "September 28, 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0073",
+      "number": 73,
+      "file": "corpus/RFC-0073.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc73.txt",
+      "source_sha256": "eb50ea3ebbeae1dc52be5317dbcba1c9ba80455a0d5403ae9d589070d3a824dd",
+      "category": "",
+      "title": "25 Sept. 70",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0074",
+      "number": 74,
+      "file": "corpus/RFC-0074.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc74.txt",
+      "source_sha256": "944560a7a39d71b8864807f33679fe83210dd4d608d9d9ce900d8f25dec72492",
+      "category": "",
+      "title": "October 16, 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0075",
+      "number": 75,
+      "file": "corpus/RFC-0075.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc75.txt",
+      "source_sha256": "3637450520c03033b8c19f752c286e86121c8373b250d0d0babf3b158f6d35c0",
+      "category": "",
+      "title": "14 Oct. 70",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0076",
+      "number": 76,
+      "file": "corpus/RFC-0076.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc76.txt",
+      "source_sha256": "7639b0ed87d08a131618492c0cc6541dee2fe25816bb76f5d6d36497d6ff5ad2",
+      "category": "",
+      "title": "University of Illinois",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0077",
+      "number": 77,
+      "file": "corpus/RFC-0077.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc77.txt",
+      "source_sha256": "658dfd420506341508946f61415350cc4882f919b34f3a2b96d23d7e984ab25a",
+      "category": "",
+      "title": "Network Meeting Report",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0078",
+      "number": 78,
+      "file": "corpus/RFC-0078.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc78.txt",
+      "source_sha256": "97752261b434bc17e8368077577dcd46217bfe7ec7bad846ca93ed3a06738343",
+      "category": "",
+      "title": "NCP Status Report:  UCSB/RAND",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0079",
+      "number": 79,
+      "file": "corpus/RFC-0079.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc79.txt",
+      "source_sha256": "65ddcaa49140c8b2217c847f684aceb989439db46a22c706428a8b07a9572c1e",
+      "category": "",
+      "title": "Logger Protocol Error",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0080",
+      "number": 80,
+      "file": "corpus/RFC-0080.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc80.txt",
+      "source_sha256": "6d21252a86ebe5e109eb95b7c5cd8c753f5a19720b7f8bcca6002195c9b956c1",
+      "category": "",
+      "title": "1 December 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0081",
+      "number": 81,
+      "file": "corpus/RFC-0081.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc81.txt",
+      "source_sha256": "865f11b0b8eb516af0eb7ac35fda984289420338f858c5c29afe83cd0f4c0bf1",
+      "category": "Informational",
+      "title": "December 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0082",
+      "number": 82,
+      "file": "corpus/RFC-0082.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc82.txt",
+      "source_sha256": "68d765903ac68a2d44372fa3f5c298cfbc3805b449976ffc85c5ee257d6e341b",
+      "category": "",
+      "title": "Network Meeting Notes",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0083",
+      "number": 83,
+      "file": "corpus/RFC-0083.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc83.txt",
+      "source_sha256": "2eb18fbd72f3922abfe7f32ef1884ea697c8f7d448e1adf682a93597a0e462d7",
+      "category": "",
+      "title": "RAND",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0084",
+      "number": 84,
+      "file": "corpus/RFC-0084.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc84.txt",
+      "source_sha256": "b80b4c8e537b0818a8aa6d912c9a749f0aa7f176462758a4c68859776662b306",
+      "category": "",
+      "title": "LIST OF NWG/RFC's 1-80",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0085",
+      "number": 85,
+      "file": "corpus/RFC-0085.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc85.txt",
+      "source_sha256": "789b307c5833b893ac2a51f1d6eaa87e7b9fe9f97bfdda7c30f3353bf947057d",
+      "category": "",
+      "title": "NETWORK WORKING GROUP MEETING.",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0086",
+      "number": 86,
+      "file": "corpus/RFC-0086.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc86.txt",
+      "source_sha256": "b289d182a5cd694208e6cd09645ea6657312acc215a76784979c705ba4dbec52",
+      "category": "",
+      "title": "Proposal for a Network Standard Format",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0087",
+      "number": 87,
+      "file": "corpus/RFC-0087.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc87.txt",
+      "source_sha256": "b69be3c2ee96adc86194cb4b54193a4d6a9f8aff161d71a4429ad6bae346cb70",
+      "category": "",
+      "title": "TOPIC FOR DISCUSSION AT THE NEXT NETWORK WORKING GROUP MEETING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0088",
+      "number": 88,
+      "file": "corpus/RFC-0088.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc88.txt",
+      "source_sha256": "01392d6523383b23faa9003c2bb013cbe1850c3e3b1d3a953118c39b9e5e8f9b",
+      "category": "",
+      "title": "13 January 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0089",
+      "number": 89,
+      "file": "corpus/RFC-0089.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc89.txt",
+      "source_sha256": "d0469b84de0cfc558cb8a02838f46ca9a5220179e81e78331ca311309b80c265",
+      "category": "",
+      "title": "SOME HISTORIC MOMENTS IN NETWORKING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0090",
+      "number": 90,
+      "file": "corpus/RFC-0090.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc90.txt",
+      "source_sha256": "6bb8bac748f86d5e1168e6831121dc63479357f67071f141ac778ab91963b429",
+      "category": "",
+      "title": "CCN AS A NETWORK SERVICE CENTER",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0091",
+      "number": 91,
+      "file": "corpus/RFC-0091.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc91.txt",
+      "source_sha256": "048ea84b79ac291a367cc632df8400d41267f1baed4b95f44173a933e3819930",
+      "category": "",
+      "title": "December 27, 1970",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0093",
+      "number": 93,
+      "file": "corpus/RFC-0093.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc93.txt",
+      "source_sha256": "7ebacd9ecf44365308b69cde4691abafdb0dee8f2d05dab9dea104d2b8a11e73",
+      "category": "",
+      "title": "Initial Connection Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0094",
+      "number": 94,
+      "file": "corpus/RFC-0094.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc94.txt",
+      "source_sha256": "3c74e4b81f91d58d1cb9f394eae06fc92c39a3599a6d38a2414c3af869cbbe15",
+      "category": "",
+      "title": "Some Thoughts on Network Graphics",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0095",
+      "number": 95,
+      "file": "corpus/RFC-0095.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc95.txt",
+      "source_sha256": "57b804aa7b152a4711f2adc27c9dfc3e826a63daa4a4bd316b0678ea27cfc713",
+      "category": "",
+      "title": "NIC 5731",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0096",
+      "number": 96,
+      "file": "corpus/RFC-0096.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc96.txt",
+      "source_sha256": "1e657876bfc0c11255e27d0f6592bd379741098f2a7bad8023aac8038af2bb6e",
+      "category": "Informational",
+      "title": "12 February 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0097",
+      "number": 97,
+      "file": "corpus/RFC-0097.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc97.txt",
+      "source_sha256": "05546ee77c6e4daef960dc97d2f43bb3bf37df7cba7ffcc3b1355d13abbba339",
+      "category": "",
+      "title": "Richard W. Watson",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0098",
+      "number": 98,
+      "file": "corpus/RFC-0098.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc98.txt",
+      "source_sha256": "0b8c1f95ce7e3d80db62c7e57fc52630676c51158c21ccee4689f6fa6764df7e",
+      "category": "",
+      "title": "Logger Protocol Proposal",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0099",
+      "number": 99,
+      "file": "corpus/RFC-0099.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc99.txt",
+      "source_sha256": "8fcc59fb77321090a1c9f5748c08594384a674e7a24e1ea19385326278750bf9",
+      "category": "",
+      "title": "NETWORK MEETING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0100",
+      "number": 100,
+      "file": "corpus/RFC-0100.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc100.txt",
+      "source_sha256": "1078a85a0e45ec76e30652b27a9157c02263cf852b582c8162de06526a0889dc",
+      "category": "",
+      "title": "Categorization and Guide to NWG/RFCs",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0101",
+      "number": 101,
+      "file": "corpus/RFC-0101.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc101.txt",
+      "source_sha256": "fe838ca03346e66ddb5e6c999ffdad5533afa85a484c752726a0fd939b46e1b3",
+      "category": "",
+      "title": "NOTES ON THE NETWORK WORKING GROUP MEETING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0102",
+      "number": 102,
+      "file": "corpus/RFC-0102.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc102.txt",
+      "source_sha256": "dea960fca87c6dfac1b9deaf3b89a59156089d55e4dc7db7fe3652f5c9d24802",
+      "category": "",
+      "title": "OUTPUT OF THE HOST/HOST PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0103",
+      "number": 103,
+      "file": "corpus/RFC-0103.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc103.txt",
+      "source_sha256": "1dd09d9ea4ac5b85df56ea344ffb646399eb82bb4067a43ce8c7b3415c5f417e",
+      "category": "",
+      "title": "NWG RFC 103",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0104",
+      "number": 104,
+      "file": "corpus/RFC-0104.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc104.txt",
+      "source_sha256": "1f83de2116913d4fd91980ad6926f95f976212c9c1a373c42ad25e901f359be3",
+      "category": "",
+      "title": "C. Crocker",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0105",
+      "number": 105,
+      "file": "corpus/RFC-0105.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc105.txt",
+      "source_sha256": "f7cb4e650b3ee31cf1544f28460aec5cded874491215561713f5bf7dfe9609ea",
+      "category": "Informational",
+      "title": "Santa Barbara, California",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0106",
+      "number": 106,
+      "file": "corpus/RFC-0106.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc106.txt",
+      "source_sha256": "018c3d693740e8672a3363071a584bb40c2850567feee201fbcd900f1432e383",
+      "category": "",
+      "title": "RDS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0107",
+      "number": 107,
+      "file": "corpus/RFC-0107.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc107.txt",
+      "source_sha256": "bbac6681c7a05a29d0feba6c2991cd4bdfe320093a20f0458ba8d603648dd533",
+      "category": "",
+      "title": "Output of the Host-Host Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0108",
+      "number": 108,
+      "file": "corpus/RFC-0108.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc108.txt",
+      "source_sha256": "f74e534d2cd648458b03888a3081ba651f35012900f728ef9081524bfe03ce50",
+      "category": "",
+      "title": "Addendum to NWG Meeting Notes, NIC (5762)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0109",
+      "number": 109,
+      "file": "corpus/RFC-0109.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc109.txt",
+      "source_sha256": "eb942d35e46bdc5586ebd95912ac5d594da4263205d47b7fe4073dd7b8610a3f",
+      "category": "",
+      "title": "Level III Server Protocol for the Lincoln Laboratory",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0110",
+      "number": 110,
+      "file": "corpus/RFC-0110.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc110.txt",
+      "source_sha256": "948a63458fed5ba7e8fb351d194147e5ae63bf9156564b8a7aa8a4398f257811",
+      "category": "",
+      "title": "Conventions for Using an IBM 2741 Terminal as a User Console for",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0111",
+      "number": 111,
+      "file": "corpus/RFC-0111.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc111.txt",
+      "source_sha256": "54abc2af54a4abc319a665f076c7d9bd428324f50d7c9e1dc2d70e4655718e30",
+      "category": "",
+      "title": "Pressure from the Chairman",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0112",
+      "number": 112,
+      "file": "corpus/RFC-0112.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc112.txt",
+      "source_sha256": "680827cdad2bcd318cacfd67bb3435688dbfcaace493ae343fe1b54b68833486",
+      "category": "",
+      "title": "User/Server Site Protocol Network HOST Questionnaire",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0113",
+      "number": 113,
+      "file": "corpus/RFC-0113.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc113.txt",
+      "source_sha256": "3064412c38fdda655f7e74ec57f3f6db58f6255595d85c190ce3492c5a33c84f",
+      "category": "",
+      "title": "J. E. White",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0114",
+      "number": 114,
+      "file": "corpus/RFC-0114.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc114.txt",
+      "source_sha256": "0369cdaab2759cdeb8887e13501e0b15f775c4a1e30ae8f67759b357fa173892",
+      "category": "",
+      "title": "A FILE TRANSFER PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0115",
+      "number": 115,
+      "file": "corpus/RFC-0115.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc115.txt",
+      "source_sha256": "45038b4510457d1a3c8d7fbdb4ca1ddc58b36b649967eb60e98aa75925efc88f",
+      "category": "",
+      "title": "16 April 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0116",
+      "number": 116,
+      "file": "corpus/RFC-0116.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc116.txt",
+      "source_sha256": "7a3262ae8672ee6d7f811c3be5ba30e9271a75767130b9bbfbe1d482e8dfef53",
+      "category": "",
+      "title": "STRUCTURE OF THE MAY NWG MTG.",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0117",
+      "number": 117,
+      "file": "corpus/RFC-0117.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc117.txt",
+      "source_sha256": "7d18379c4fe2f543708165addc771d8f0c285fc454ed67cca9b846a1d0f2cbf2",
+      "category": "",
+      "title": "Some Comments on the Official Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0118",
+      "number": 118,
+      "file": "corpus/RFC-0118.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc118.txt",
+      "source_sha256": "84ff6616496f76aa7fae29c141f126ffc042cdb51eebadbc1b267ec39d03c8be",
+      "category": "",
+      "title": "RECOMMENDATIONS FOR FACILITY DOCUMENTATION",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0119",
+      "number": 119,
+      "file": "corpus/RFC-0119.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc119.txt",
+      "source_sha256": "b4a28730f93a391827b60717b5727466804b2be77dedb517f6cf1ba99b9f4a94",
+      "category": "",
+      "title": "NETWORK FORTRAN SUBPROGRAMS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0120",
+      "number": 120,
+      "file": "corpus/RFC-0120.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc120.txt",
+      "source_sha256": "bad82e4acd4742bd9eb83e7b312afc764b14ab477b76ddf9dc00a6d567eba573",
+      "category": "",
+      "title": "NETWORK PL1 SUBPROGRAMS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0121",
+      "number": 121,
+      "file": "corpus/RFC-0121.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc121.txt",
+      "source_sha256": "e2d420cf1ed4dcc385eedc504bc01f4d1264ca662d317cf56a238a78add2f910",
+      "category": "",
+      "title": "NETWORK ON-LINE OPERATORS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0122",
+      "number": 122,
+      "file": "corpus/RFC-0122.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc122.txt",
+      "source_sha256": "c1ae77df7af31f3775f4e8a94dfea0e2124d0b79740675a154322795fafd28d1",
+      "category": "",
+      "title": "NETWORK SPECIFICATIONS FOR UCSB's",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0123",
+      "number": 123,
+      "file": "corpus/RFC-0123.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc123.txt",
+      "source_sha256": "627ab3494c85f3e0cc7b7c0838b7dd89d14ab33a7c1003419a8425bad321de74",
+      "category": "",
+      "title": "A Proferred Official ICP",
+      "obsoletes": [
+        "RFC-0066",
+        "RFC-0080"
+      ],
+      "replaces": [
+        "RFC-0066",
+        "RFC-0080"
+      ]
+    },
+    {
+      "id": "RFC-0124",
+      "number": 124,
+      "file": "corpus/RFC-0124.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc124.txt",
+      "source_sha256": "9d974cf5b687f00a8df4c339e19850d8919d0185e8d1ef8abd09822b9fdbb0e2",
+      "category": "",
+      "title": "Typographical Error in RFC 107",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0125",
+      "number": 125,
+      "file": "corpus/RFC-0125.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc125.txt",
+      "source_sha256": "55064bd45e29de52e53d1d92372a87fe731f16e11008e9ddb369ee2757acd0d1",
+      "category": "",
+      "title": "NETWORK WORKING GROUP",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0126",
+      "number": 126,
+      "file": "corpus/RFC-0126.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc126.txt",
+      "source_sha256": "0bbedf4640ee73a042ebaa18a9e178266d8ecd119508ee851ca8bbb066f9667a",
+      "category": "D.6",
+      "title": "Ames Graphics Facilities at Ames Research Center",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0127",
+      "number": 127,
+      "file": "corpus/RFC-0127.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc127.txt",
+      "source_sha256": "80d4959c2a90f94fe0c27c04424f5f16837796d4c98d81832f61e6ef51eef8e5",
+      "category": "",
+      "title": "Comments on RFC 123",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0128",
+      "number": 128,
+      "file": "corpus/RFC-0128.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc128.txt",
+      "source_sha256": "d447d3a97b417d62e31026509f62f68b265a5f5a897990e0141909aaa3540f40",
+      "category": "C.2, D.",
+      "title": "BYTES",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0129",
+      "number": 129,
+      "file": "corpus/RFC-0129.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc129.txt",
+      "source_sha256": "d5eb98953d1d1ed742e7545e6b2ade0203fde9f9d0d5f2aece4f13f26a4b9db3",
+      "category": "",
+      "title": "E.    Meyer-MIT",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0130",
+      "number": 130,
+      "file": "corpus/RFC-0130.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc130.txt",
+      "source_sha256": "b593dd955d65947b20269116a5d03e372869fb4e8cd87dd9695ec508bcc63284",
+      "category": "",
+      "title": "RESPONSE TO RFC #111 (PRESSURE FROM THE CHAIRMAN)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0131",
+      "number": 131,
+      "file": "corpus/RFC-0131.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc131.txt",
+      "source_sha256": "5a185926fb0f81dc64a27be47791edc236da8907310f34b3654ddbcd402120f2",
+      "category": "",
+      "title": "April 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0132",
+      "number": 132,
+      "file": "corpus/RFC-0132.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc132.txt",
+      "source_sha256": "1965e12b747fd55aabfdb320161d9d0716a6a9afbc0e1d2823ae96f82da6a84b",
+      "category": "",
+      "title": "TYPOGRAPHICAL ERROR IN RFC 107",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0133",
+      "number": 133,
+      "file": "corpus/RFC-0133.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc133.txt",
+      "source_sha256": "244b4df2b3ee78dcad30fcac0e39db51845647368c8a822faea36a222401d494",
+      "category": "",
+      "title": "FILE TRANSFER AND ERROR RECOVERY",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0134",
+      "number": 134,
+      "file": "corpus/RFC-0134.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc134.txt",
+      "source_sha256": "430d3fe77588feb8fcd9618bb0f255a9655da34fbb4081bada1a37976f2a4919",
+      "category": "",
+      "title": "Network Graphics Meeting",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0135",
+      "number": 135,
+      "file": "corpus/RFC-0135.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc135.txt",
+      "source_sha256": "8359c7fb84cf9795cc2a9da4c043bf4d9481dcec53c0f5fe3b319122e22308f3",
+      "category": "",
+      "title": "Response to NWG/RFC #110",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0136",
+      "number": 136,
+      "file": "corpus/RFC-0136.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc136.txt",
+      "source_sha256": "5319b9f60d00dc929a7a343d3578d8eccecafaf3a6e473f1e3bc42031076aa26",
+      "category": "",
+      "title": "Host Accounting and Administrative Procedures",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0137",
+      "number": 137,
+      "file": "corpus/RFC-0137.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc137.txt",
+      "source_sha256": "588758aa7a1370fe2d7ef65965e638c8147acfa0ae2b2e74b04ff36d2fc11753",
+      "category": "",
+      "title": "TELNET Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0138",
+      "number": 138,
+      "file": "corpus/RFC-0138.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc138.txt",
+      "source_sha256": "5a75c3355f6ff652ff595307584b7f2d91f7b0d857a2acbc0d9dad0252e3825d",
+      "category": "",
+      "title": "UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0139",
+      "number": 139,
+      "file": "corpus/RFC-0139.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc139.txt",
+      "source_sha256": "9baf784906663285d6744e70e9cd7ac2b6205d426e8f357995e9e869f16aa238",
+      "category": "",
+      "title": "Discussion of TELNET Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0140",
+      "number": 140,
+      "file": "corpus/RFC-0140.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc140.txt",
+      "source_sha256": "407fb0815bf22670cd8a81ecb174558db87e7354a8bb10bc329d28ee2f133d10",
+      "category": "",
+      "title": "AGENDA FOR THE MAY NWG MEETING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0141",
+      "number": 141,
+      "file": "corpus/RFC-0141.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc141.txt",
+      "source_sha256": "f2ccb290cbb21e65466c8622ed70dce13e06bcaacd8b303ea6de2a30cdf155d0",
+      "category": "",
+      "title": "29 April 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0142",
+      "number": 142,
+      "file": "corpus/RFC-0142.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc142.txt",
+      "source_sha256": "9a41f3f12a1375f1e210279bf8c4db641f0ebaf48e276b10392c7d633a07a4b1",
+      "category": "",
+      "title": "Time-out Mechanism in the Host-Host Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0143",
+      "number": 143,
+      "file": "corpus/RFC-0143.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc143.txt",
+      "source_sha256": "3499a4233a5ddcf5223dd248e7bc63d4d063f4f4e31d708e3ef262bcf7873935",
+      "category": "",
+      "title": "Regarding Proferred Official ICP",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0144",
+      "number": 144,
+      "file": "corpus/RFC-0144.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc144.txt",
+      "source_sha256": "be72c8b1b6649d59438038fd7b8d5af455b91ed751847b089bdf9fb48b7d7ecf",
+      "category": "",
+      "title": "Data Sharing on Computer Networks",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0145",
+      "number": 145,
+      "file": "corpus/RFC-0145.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc145.txt",
+      "source_sha256": "47e71525bd1c5f3aa5e1a1b9b3c6cc80e115760c29db518c3ffaab963983d210",
+      "category": "",
+      "title": "Initial Connection Protocol Control Commands",
+      "obsoletes": [
+        "RFC-0127"
+      ],
+      "replaces": [
+        "RFC-0127"
+      ]
+    },
+    {
+      "id": "RFC-0146",
+      "number": 146,
+      "file": "corpus/RFC-0146.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc146.txt",
+      "source_sha256": "2b902457bdba36e34b3e4c4f0933edfa605f2b4a4e9795f5b1faeffb73b997fd",
+      "category": "",
+      "title": "12 May 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0147",
+      "number": 147,
+      "file": "corpus/RFC-0147.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc147.txt",
+      "source_sha256": "6a4558e654ffe745136e6776cb01fbb866dd2105287fcbe8466844e5bb97d329",
+      "category": "C1, C3, D1, H",
+      "title": "Network Working Group",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0148",
+      "number": 148,
+      "file": "corpus/RFC-0148.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc148.txt",
+      "source_sha256": "97c951072d38fa4ee1df05908a8d6b24add4ab7022ca03d36f0b7852e68b6954",
+      "category": "",
+      "title": "Comments on RFC #123",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0149",
+      "number": 149,
+      "file": "corpus/RFC-0149.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc149.txt",
+      "source_sha256": "6310d3db880f7401148ba3fe63bd2a1ae243f1c88eb8d418eb167571813c17a6",
+      "category": "",
+      "title": "The Best Laid Plans . . .",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0150",
+      "number": 150,
+      "file": "corpus/RFC-0150.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc150.txt",
+      "source_sha256": "a50f42a8cf3a85705c5ddeb5c23148687d4a50a95b9faaabd9fd584e43161b94",
+      "category": "",
+      "title": "It is our hypothesis that the goals of interprocess communication",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0151",
+      "number": 151,
+      "file": "corpus/RFC-0151.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc151.txt",
+      "source_sha256": "a95d51c3dea57b3c97f59e83828fb99f48c35e8bb7fd56c54dff72a33011c3e4",
+      "category": "",
+      "title": "SDC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0152",
+      "number": 152,
+      "file": "corpus/RFC-0152.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc152.txt",
+      "source_sha256": "8b0f23264fd6dd936970e65c0baea970cb5bf0aadefca14c1dfe210b5f02e32c",
+      "category": "G.3",
+      "title": "SRI ARTIFICIAL INTELLIGENCE STATUS REPORT",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0153",
+      "number": 153,
+      "file": "corpus/RFC-0153.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc153.txt",
+      "source_sha256": "244d6391852eda2f2afbf965d2b1f1a8de82cb99c652cb919611cfb71394b742",
+      "category": "",
+      "title": "15 May 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0154",
+      "number": 154,
+      "file": "corpus/RFC-0154.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc154.txt",
+      "source_sha256": "31f7dedaf8a8633c20af7d1b2a8daff9e3192044b1ad5e0efa8fcf7a1756626f",
+      "category": "",
+      "title": "Exposition Style",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0155",
+      "number": 155,
+      "file": "corpus/RFC-0155.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc155.txt",
+      "source_sha256": "d3573b9bb61c99df7993d94ffa02d98d8dc4d4bfecfdd0c27d705d4b0c27a90f",
+      "category": "",
+      "title": "LIST TO RECEIVE RFC'S",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0156",
+      "number": 156,
+      "file": "corpus/RFC-0156.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc156.txt",
+      "source_sha256": "b4636e0d8dbaeb334c7b337a6c51feac74a8eb02c7efd11b5c903ec343614dc7",
+      "category": "G.5",
+      "title": "--checkout of the NCP by the latter part of May",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0157",
+      "number": 157,
+      "file": "corpus/RFC-0157.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc157.txt",
+      "source_sha256": "9d9a2b239b6d3d32f04094a045b617f139621df040c3979d55a7c3f048d57a11",
+      "category": "",
+      "title": "Invitation to the Second Symposium on Problems in",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0158",
+      "number": 158,
+      "file": "corpus/RFC-0158.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc158.txt",
+      "source_sha256": "7c6e10cd7e9e9b474786416301a7414c3b71baf1e23113ea607047ecb6461fd3",
+      "category": "",
+      "title": "TELNET Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0160",
+      "number": 160,
+      "file": "corpus/RFC-0160.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc160.txt",
+      "source_sha256": "b3164faf408e44e003d27a3ebda4afdd976d794b96b6a5476d54ce385c1d19c6",
+      "category": "",
+      "title": "RFC Brief List       18 May 1971     RFC 160       NIC 6771",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0161",
+      "number": 161,
+      "file": "corpus/RFC-0161.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc161.txt",
+      "source_sha256": "036fb330b54f0313b45447c8bd2941c90bc3e1d08ba486092b3ea99f4b949b29",
+      "category": "",
+      "title": "A SOLUTION TO THE RACE CONDITION IN THE ICP",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0162",
+      "number": 162,
+      "file": "corpus/RFC-0162.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc162.txt",
+      "source_sha256": "8a0f9015a666553ed8c2a4f78a2b8f7ee0e1594a6d653037f74c6e027f4a06df",
+      "category": "",
+      "title": "NETBUGGER3",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0163",
+      "number": 163,
+      "file": "corpus/RFC-0163.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc163.txt",
+      "source_sha256": "576958ab7701f5144921b1ea73ff866c67137e953b4eda39d048905274a0255c",
+      "category": "",
+      "title": "DATA TRANSFER PROTOCOLS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0164",
+      "number": 164,
+      "file": "corpus/RFC-0164.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc164.txt",
+      "source_sha256": "1fd66fc7ef298240a8739d3154bef52d99bec20bbe314b3793aadb5ab834008a",
+      "category": "",
+      "title": "MINUTES OF NETWORK WORKING GROUP MEETING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0165",
+      "number": 165,
+      "file": "corpus/RFC-0165.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc165.txt",
+      "source_sha256": "add13dcd757ff702a6fb9de4397744d4f93e070b92f2395ff3ceed7dbe5e983e",
+      "category": "",
+      "title": "A Preferred Official Initial Connection Protocol*",
+      "obsoletes": [
+        "RFC-0123",
+        "RFC-0143",
+        "RFC-0145"
+      ],
+      "replaces": [
+        "RFC-0123",
+        "RFC-0143",
+        "RFC-0145"
+      ]
+    },
+    {
+      "id": "RFC-0166",
+      "number": 166,
+      "file": "corpus/RFC-0166.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc166.txt",
+      "source_sha256": "d06510f5a934e68a1b6bdd3fd6d9e0215ae36f2dd0b21d16cd9c0ea73da2c44f",
+      "category": "",
+      "title": "UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0167",
+      "number": 167,
+      "file": "corpus/RFC-0167.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc167.txt",
+      "source_sha256": "e63f286c90fccc598a210bc84ace1a1aa8fab596b9685311230f7125ed0b8424",
+      "category": "",
+      "title": "Network Working Group",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0168",
+      "number": 168,
+      "file": "corpus/RFC-0168.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc168.txt",
+      "source_sha256": "381a42a5204fe8e627b7a8acdca103a3aa0dea15cf68348e53ff54f68f896b03",
+      "category": "",
+      "title": "A. Initial Distribution List",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0169",
+      "number": 169,
+      "file": "corpus/RFC-0169.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc169.txt",
+      "source_sha256": "295fadcf72b47973777b7341f6db8201e7467a797e7867bf8c151c87e9e0170b",
+      "category": "",
+      "title": "IEEE Computer Society Workshop",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0170",
+      "number": 170,
+      "file": "corpus/RFC-0170.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc170.txt",
+      "source_sha256": "c4f5537c75d2832f2f1a20e4095dc79c00c38e4ca8723e8fa8f389af457ac31f",
+      "category": "",
+      "title": "Specifications                  5 May 1969        4694    8",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0171",
+      "number": 171,
+      "file": "corpus/RFC-0171.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc171.txt",
+      "source_sha256": "2b5b6e4694174696fc19aef14c361e87dcf3ea67bea04a1173ce7038a0f07251",
+      "category": "",
+      "title": "BBN",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0172",
+      "number": 172,
+      "file": "corpus/RFC-0172.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc172.txt",
+      "source_sha256": "160564edc3160cd4b1c81768d4e25867085608d200155e915ddcc738332eb394",
+      "category": "",
+      "title": "Alex McKenzie, BBN",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0173",
+      "number": 173,
+      "file": "corpus/RFC-0173.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc173.txt",
+      "source_sha256": "9e896921cb626f47d739703a6d23ae4317da18a98e51c0003da7b44a896355f7",
+      "category": "",
+      "title": "Network Data Management Committee Meeting Announcement",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0174",
+      "number": 174,
+      "file": "corpus/RFC-0174.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc174.txt",
+      "source_sha256": "068897dbc9303aa31f333b3c633432b4edbc9c0bb0e1d19b027987a048874a6d",
+      "category": "",
+      "title": "UCLA-Computer Science Graphics Overview",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0175",
+      "number": 175,
+      "file": "corpus/RFC-0175.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc175.txt",
+      "source_sha256": "3c6b875e5f87ac3b07569c57d70d486516e2df68eb666d954769901019fa855e",
+      "category": "",
+      "title": "Comments on \"Socket Conventions Reconsidered\"",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0176",
+      "number": 176,
+      "file": "corpus/RFC-0176.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc176.txt",
+      "source_sha256": "79d3fdec4e99644362247f994a42e6bedc4993c78685d68f9a2d9b4cf7b7e04b",
+      "category": "",
+      "title": "14 June 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0177",
+      "number": 177,
+      "file": "corpus/RFC-0177.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc177.txt",
+      "source_sha256": "923fcf84cae670652e21cbd7273a32b30d4734b96377d5c9a25dc13da508e91f",
+      "category": "",
+      "title": "A DEVICE INDEPENDENT GRAPHICAL DISPLAY DESCRIPTION",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0178",
+      "number": 178,
+      "file": "corpus/RFC-0178.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc178.txt",
+      "source_sha256": "f89578fbd593eb101b8715d36d5587f17609936eb88ccf2161d29fa3be034409",
+      "category": "",
+      "title": "NETWORK GRAPHIC ATTENTION HANDLING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0179",
+      "number": 179,
+      "file": "corpus/RFC-0179.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc179.txt",
+      "source_sha256": "f68e8552027076d627126c4fc131634bacd0635ccb7b3807ebf62d3d7ddf9069",
+      "category": "C.9",
+      "title": "LINK NUMBER ASSIGNMENTS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0180",
+      "number": 180,
+      "file": "corpus/RFC-0180.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc180.txt",
+      "source_sha256": "d09b24552911a23b98bba3d8f67255d813e398c13aadd30e04db0ef419f38548",
+      "category": "",
+      "title": "File System Questionnaire",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0181",
+      "number": 181,
+      "file": "corpus/RFC-0181.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc181.txt",
+      "source_sha256": "c3584b12760d068d3203a896cc309317e2b3830812af7a1d57fb3bdc7461f587",
+      "category": "",
+      "title": "NETWORK WORKING GROUP",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0182",
+      "number": 182,
+      "file": "corpus/RFC-0182.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc182.txt",
+      "source_sha256": "248ddbe62ed53f2c60d24410c54774e73e873c27633e26af15dfecb40e0127b1",
+      "category": "",
+      "title": "25-JUN-71",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0183",
+      "number": 183,
+      "file": "corpus/RFC-0183.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc183.txt",
+      "source_sha256": "af18b925e5f3a147277f51976599c4770db34b28958706887fca2e86a153e47d",
+      "category": "",
+      "title": "The EBCDIC Codes and Their Mapping to ASCII",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0184",
+      "number": 184,
+      "file": "corpus/RFC-0184.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc184.txt",
+      "source_sha256": "d2345b712eac737991fe79ee0ae78a62fecc84e4c9a1f0a430a8b8957d7381fa",
+      "category": "D.6",
+      "title": "Proposed Graphic Display Modes",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0185",
+      "number": 185,
+      "file": "corpus/RFC-0185.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc185.txt",
+      "source_sha256": "1d1843a2204bd3c826c4f76618a71a937845662f1853e065f03186cd7cc001ca",
+      "category": "",
+      "title": "7-JUL-71",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0186",
+      "number": 186,
+      "file": "corpus/RFC-0186.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc186.txt",
+      "source_sha256": "dc9fcd801eacbe603632d58ba6dfe1fa856f741ddf20bcf81d284fd7dc5a564f",
+      "category": "",
+      "title": "A Network Graphics Loader",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0187",
+      "number": 187,
+      "file": "corpus/RFC-0187.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc187.txt",
+      "source_sha256": "55cc5e15ccd41d576e11cbb1f77d685c643c7381b9725b199152f4d607c04e96",
+      "category": "",
+      "title": "A NETWORK/440 PROTOCOL CONCEPT",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0188",
+      "number": 188,
+      "file": "corpus/RFC-0188.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc188.txt",
+      "source_sha256": "10902cf67df9d7239d763638a0302aae18d5f0a0fde7060a4551351497922e97",
+      "category": "",
+      "title": "IBM",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0189",
+      "number": 189,
+      "file": "corpus/RFC-0189.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc189.txt",
+      "source_sha256": "e06d55c9a7f5c557ecb6f5f45381925e62ba8b8b28268866efb658b53e7dfbf6",
+      "category": "D",
+      "title": "INTERIM NETRJS SPECIFICATIONS",
+      "obsoletes": [
+        "RFC-0088"
+      ],
+      "replaces": [
+        "RFC-0088"
+      ]
+    },
+    {
+      "id": "RFC-0190",
+      "number": 190,
+      "file": "corpus/RFC-0190.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc190.txt",
+      "source_sha256": "15d7eff9a3b3698ebfd7e9ea7be5f8cf979cc08030f515f26d9dbe97a6edc42f",
+      "category": "",
+      "title": "DEC PDP-10 -- IMLAC COMMUNICATION SYSTEM",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0191",
+      "number": 191,
+      "file": "corpus/RFC-0191.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc191.txt",
+      "source_sha256": "c05e035f362751a1316caa6f109c5b4bbc9665265fa9ffbab974f7d36762ee5a",
+      "category": "",
+      "title": "13-JUL-71",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0192",
+      "number": 192,
+      "file": "corpus/RFC-0192.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc192.txt",
+      "source_sha256": "2bf63eb803c41c81289fbd02e26eb73c7640d383a8838b94775f1c0396770050",
+      "category": "",
+      "title": "Some Factors which a Network Graphics Protocol must Consider",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0193",
+      "number": 193,
+      "file": "corpus/RFC-0193.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc193.txt",
+      "source_sha256": "f3b6a5c126f2102333b8fd1ff17d62f56302c1e0c40638dd4971a7e2cc214a3f",
+      "category": "",
+      "title": "NETWORK CHECKOUT",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0194",
+      "number": 194,
+      "file": "corpus/RFC-0194.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc194.txt",
+      "source_sha256": "992d3cf5c1d3834a87858dd226205fc512bebd7ce8a4e8a01864047f5548f15e",
+      "category": "D.4",
+      "title": "Vint Cerf - UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0195",
+      "number": 195,
+      "file": "corpus/RFC-0195.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc195.txt",
+      "source_sha256": "9ccbb54a21473b5e683ef07761c286d51305b0a26c13cb99b3c5e591982ba71b",
+      "category": "",
+      "title": "Data Computers -- Data Descriptions and Access Language",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0196",
+      "number": 196,
+      "file": "corpus/RFC-0196.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc196.txt",
+      "source_sha256": "1b62aa7d122518017dbac32bee3bf7e42b1d69d760ea35d1a2dc625c4abdde2b",
+      "category": "",
+      "title": "A MAIL BOX PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0197",
+      "number": 197,
+      "file": "corpus/RFC-0197.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc197.txt",
+      "source_sha256": "8769f9f521515cf97b3874d93e816a6ce38ec4e8e76e842f0cd52eedf4936c85",
+      "category": "",
+      "title": "INITIAL CONNECTION PROTOCOL--REVIEWED",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0198",
+      "number": 198,
+      "file": "corpus/RFC-0198.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc198.txt",
+      "source_sha256": "4704be984852f1bc95401decb242f8994ee84700722b66003329c10a88ba9fc7",
+      "category": "",
+      "title": "SITE CERTIFICATION - LINCOLN LABS 360/67",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0199",
+      "number": 199,
+      "file": "corpus/RFC-0199.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc199.txt",
+      "source_sha256": "4849330084205690a5fdac63723586dde26c4ae0ead61c3f7ffed098723134a1",
+      "category": "",
+      "title": "SUGGESTIONS FOR A NETWORK DATA-TABLET GRAPHICS PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0200",
+      "number": 200,
+      "file": "corpus/RFC-0200.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc200.txt",
+      "source_sha256": "76aa559910608a31c0d78837a8d122bc8185cbddb158e1ee3914d74bbc0f3ce9",
+      "category": "",
+      "title": "RFC List by Number",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0202",
+      "number": 202,
+      "file": "corpus/RFC-0202.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc202.txt",
+      "source_sha256": "2b39b7aa521609d56a9492f2119ce9a02bd32a4118dddfd8449ac3501ded35d0",
+      "category": "",
+      "title": "bytes as allowed by                   bit bytes.",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0203",
+      "number": 203,
+      "file": "corpus/RFC-0203.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc203.txt",
+      "source_sha256": "6deeaddab994de4ad43cbeccf39d86f31a790fc056426564c499ac394a8e562f",
+      "category": "",
+      "title": "Achieving Reliable Communication",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0204",
+      "number": 204,
+      "file": "corpus/RFC-0204.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc204.txt",
+      "source_sha256": "3c49bdc0b8e385bf740fbb62aebd181942677d84e6568b55d66d9aab79436e9c",
+      "category": "",
+      "title": "Sockets in use",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0205",
+      "number": 205,
+      "file": "corpus/RFC-0205.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc205.txt",
+      "source_sha256": "5eaa9ab068ebc5a949944ebc2fcc6a060caf43f7d5dccc1ad7848b6ed3064a6d",
+      "category": "",
+      "title": "NETCRT - A CHARACTER DISPLAY PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0206",
+      "number": 206,
+      "file": "corpus/RFC-0206.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc206.txt",
+      "source_sha256": "318d4587f642ea857268939c1ff710e0a50efb1d8e4542d174316a8b074902fe",
+      "category": "",
+      "title": "A User TELNET",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0207",
+      "number": 207,
+      "file": "corpus/RFC-0207.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc207.txt",
+      "source_sha256": "19c1b00bfdecbf271d0bacb8e855f274dcb2368e585d4f5744084209ff389abc",
+      "category": "",
+      "title": "A SEPTEMBER NETWORK WORKING GROUP MEETING",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0208",
+      "number": 208,
+      "file": "corpus/RFC-0208.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc208.txt",
+      "source_sha256": "8de9ac52fa7a9699a1666bf2c51e1bf392b58a54c053d2eb5ca5ac5a2b85fa17",
+      "category": "",
+      "title": "ADDRESS TABLES",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0209",
+      "number": 209,
+      "file": "corpus/RFC-0209.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc209.txt",
+      "source_sha256": "1c038d1594b5e825cdbaeb45af6bc75880f99ee399dd6b2c9aac6102a5f7ac61",
+      "category": "",
+      "title": "HOST/IMP Interface Documentation",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0210",
+      "number": 210,
+      "file": "corpus/RFC-0210.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc210.txt",
+      "source_sha256": "75703820480834d4f8137eebf7d0810c4fee7aed65590a8d2a819c179adf3f27",
+      "category": "",
+      "title": "Improvement of Flow Control",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0211",
+      "number": 211,
+      "file": "corpus/RFC-0211.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc211.txt",
+      "source_sha256": "7a55576e22408067980459d2c82a8d862f4837e39619f4359909c037ad3b22cb",
+      "category": "",
+      "title": "ARPA Network Mailing Lists",
+      "obsoletes": [
+        "RFC-0168"
+      ],
+      "replaces": [
+        "RFC-0168"
+      ]
+    },
+    {
+      "id": "RFC-0212",
+      "number": 212,
+      "file": "corpus/RFC-0212.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc212.txt",
+      "source_sha256": "9569b30b2a929db9f59e19c04fb30968f5a784aec313a927151fdb883e62d20e",
+      "category": "",
+      "title": "NWG Meeting On Network Usage",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0213",
+      "number": 213,
+      "file": "corpus/RFC-0213.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc213.txt",
+      "source_sha256": "5d1253d1459f94067df58c91ccab2dd5a166bde37d3e6380285de7557e4b31c9",
+      "category": "",
+      "title": "IMP System Change Notification",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0214",
+      "number": 214,
+      "file": "corpus/RFC-0214.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc214.txt",
+      "source_sha256": "04e514c5257b2f1a8368919ed3c7906dd11067e4d835ce4870d8ad4676bcccb4",
+      "category": "F",
+      "title": "NETWORK CHECKOUT",
+      "obsoletes": [
+        "RFC-0193",
+        "RFC-0198"
+      ],
+      "replaces": [
+        "RFC-0193",
+        "RFC-0198"
+      ]
+    },
+    {
+      "id": "RFC-0215",
+      "number": 215,
+      "file": "corpus/RFC-0215.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc215.txt",
+      "source_sha256": "965d92b5d44b12148e314d377b7f76de2bdbd473ca56ab6a909bf5b6509de8c7",
+      "category": "",
+      "title": "NCP, ICP, and TELNET:",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0216",
+      "number": 216,
+      "file": "corpus/RFC-0216.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc216.txt",
+      "source_sha256": "0cd26747f285199072f6f45380499df0c05b1238fb9e78fbfaf4d1d38bf5ba98",
+      "category": "",
+      "title": "Telnet Access To UCSB's Online System",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0217",
+      "number": 217,
+      "file": "corpus/RFC-0217.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc217.txt",
+      "source_sha256": "979d0e42fade653a7e4b15374eb18bd8065e96da5aa0f98711c28edb0594bb8f",
+      "category": "",
+      "title": "Specification Changes for",
+      "obsoletes": [
+        "RFC-0074"
+      ],
+      "replaces": [
+        "RFC-0074"
+      ]
+    },
+    {
+      "id": "RFC-0218",
+      "number": 218,
+      "file": "corpus/RFC-0218.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc218.txt",
+      "source_sha256": "d78977439aefd7f959552cda961ca476054dcfa2e9b8443fe52087508e6596bb",
+      "category": "",
+      "title": "To help us expand our role as NCC, we will be changing the",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0219",
+      "number": 219,
+      "file": "corpus/RFC-0219.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc219.txt",
+      "source_sha256": "2c11d2b4b1f90d6b6cbb7290c816158138817440120248145b085418b7197b74",
+      "category": "",
+      "title": "User's View of the Datacomputer",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0221",
+      "number": 221,
+      "file": "corpus/RFC-0221.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc221.txt",
+      "source_sha256": "8b1948777f278e4d692c8b0ef0c0c7c3018e3f116dade6166f21fa508a0f717d",
+      "category": "",
+      "title": "A Mail Box Protocol, Version-2",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0222",
+      "number": 222,
+      "file": "corpus/RFC-0222.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc222.txt",
+      "source_sha256": "b1b4c4c539b76afd6dde97c7f4238836f38977d3f38a5431dbabd97b943862e8",
+      "category": "",
+      "title": "As described in RFC's #207 and #212, the next meeting of the ARPA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0223",
+      "number": 223,
+      "file": "corpus/RFC-0223.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc223.txt",
+      "source_sha256": "1a9f4d4c53e80d01e5f32bd04c314c418ed46933db0bad55d34b62ed1ed27bc3",
+      "category": "G.2",
+      "title": "SRI-ARC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0224",
+      "number": 224,
+      "file": "corpus/RFC-0224.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc224.txt",
+      "source_sha256": "870b247f171ee6255b2a5bed1002544489c00a5108b6057638b3d98170f31d6a",
+      "category": "",
+      "title": "Comments on Mailbox Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0225",
+      "number": 225,
+      "file": "corpus/RFC-0225.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc225.txt",
+      "source_sha256": "ec1a773351ceddf09644e2d360dedd6879cb27c64c5d54a639ff3ca28d60bf09",
+      "category": "D.6",
+      "title": "RAND/UCSB NETWORK GRAPHICS EXPERIMENT",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0226",
+      "number": 226,
+      "file": "corpus/RFC-0226.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc226.txt",
+      "source_sha256": "ac793de89815e1a361fa2bfa55f386b0715bb64b7f3b6805a26bf34eff95fbd7",
+      "category": "",
+      "title": "STANDARDIZATION OF HOST MNEUMONICS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0227",
+      "number": 227,
+      "file": "corpus/RFC-0227.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc227.txt",
+      "source_sha256": "10a228373b96fd7d9979abac332587b2b2a0ce7449af42f847ba088dd26fe3e0",
+      "category": "",
+      "title": "DATA TRANSFER RATES (RAND/UCLA)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0228",
+      "number": 228,
+      "file": "corpus/RFC-0228.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc228.txt",
+      "source_sha256": "2e76799b3fe76cc49ad32e42acad523ee92f0933bc5fa10561f0b2b2e4fa2096",
+      "category": "",
+      "title": "CLARIFICATION",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0229",
+      "number": 229,
+      "file": "corpus/RFC-0229.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc229.txt",
+      "source_sha256": "b2ccdf5aa746d02da1ef4f6bdd9dae62beecb7b08ec253adac0b61e4786b1766",
+      "category": "",
+      "title": "STANDARD HOST NAMES",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0230",
+      "number": 230,
+      "file": "corpus/RFC-0230.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc230.txt",
+      "source_sha256": "1f5f37e25340da42bac2dce8cebffc4ad3a43a59c935006812ca3815fadefc2f",
+      "category": "C5",
+      "title": "TOWARD RELIABLE OPERATION",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0231",
+      "number": 231,
+      "file": "corpus/RFC-0231.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc231.txt",
+      "source_sha256": "631e3363696bdc003774c94bd255213d46f83521fcbb7c5e62a3a853bf28ecec",
+      "category": "",
+      "title": "SERVICE CENTER STANDARDS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0232",
+      "number": 232,
+      "file": "corpus/RFC-0232.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc232.txt",
+      "source_sha256": "beba57f88c3b24bf8064cc4a8cca4a17889f6e66c33de60b10b4408da6ac6fd7",
+      "category": "",
+      "title": "September 23, 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0233",
+      "number": 233,
+      "file": "corpus/RFC-0233.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc233.txt",
+      "source_sha256": "3c4e1cba57fdda3e9aefff5b730f0267a25fd484d7dd801ac77da2a125b8df91",
+      "category": "",
+      "title": "Standardization of Host Call Letters",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0234",
+      "number": 234,
+      "file": "corpus/RFC-0234.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc234.txt",
+      "source_sha256": "8d2fa8dd401892909cc02d5d87bd2bda4558536cc16c6f412b4beae4bbc01a05",
+      "category": "",
+      "title": "Network Working Group Meeting Schedule",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0235",
+      "number": 235,
+      "file": "corpus/RFC-0235.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc235.txt",
+      "source_sha256": "ed4cffde92ab44c5e96f5ee4897fa01ee5f58b6d7eadb8f3cef777c4baee7a84",
+      "category": "",
+      "title": "SITE STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0236",
+      "number": 236,
+      "file": "corpus/RFC-0236.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc236.txt",
+      "source_sha256": "f1c1c5f05e9cf50d810428500493e711e20e4f01384856b2475dc229a367b179",
+      "category": "",
+      "title": "STANDARD HOST NAMES",
+      "obsoletes": [
+        "RFC-0229"
+      ],
+      "replaces": [
+        "RFC-0229"
+      ]
+    },
+    {
+      "id": "RFC-0237",
+      "number": 237,
+      "file": "corpus/RFC-0237.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc237.txt",
+      "source_sha256": "af44fbbcbbbbc6e77e204a005bb0b0d85bceca916bf9a9883cfed2ca72bf8f84",
+      "category": "",
+      "title": "The Nic's View of Standard Host Names",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0238",
+      "number": 238,
+      "file": "corpus/RFC-0238.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc238.txt",
+      "source_sha256": "c9ff9a2cdf47e1f74ff7e93e5d227119775414f641da7b94735575d0e543ec33",
+      "category": "",
+      "title": "COMMENTS ON DTP AND FTP PROPOSALS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0239",
+      "number": 239,
+      "file": "corpus/RFC-0239.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc239.txt",
+      "source_sha256": "a0f6035830b35366b2c156f54990dcaf117488b20a685e78040f3c2c79e70c0c",
+      "category": "",
+      "title": "HOST MNEMONICS PROPOSED IN RFC #226",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0240",
+      "number": 240,
+      "file": "corpus/RFC-0240.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc240.txt",
+      "source_sha256": "916a29991b25e7765efaf613525097f0bbca090f76843a7ddf1a78061d7b5769",
+      "category": "",
+      "title": "SITE STATUS",
+      "obsoletes": [
+        "RFC-0235"
+      ],
+      "replaces": [
+        "RFC-0235"
+      ]
+    },
+    {
+      "id": "RFC-0241",
+      "number": 241,
+      "file": "corpus/RFC-0241.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc241.txt",
+      "source_sha256": "d171af664e4ef87cc7e4e617d13f5fa4b57c18c3a91978bf91894afdb5bec3d9",
+      "category": "",
+      "title": "CONNECTING COMPUTERS TO MLC PORTS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0242",
+      "number": 242,
+      "file": "corpus/RFC-0242.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc242.txt",
+      "source_sha256": "ffa1413cc19d0c00aaf9d594ce59ae00b0b8968c7d4628f78c2475d0628a09bb",
+      "category": "",
+      "title": "DATA DESCRIPTIVE LANGUAGE FOR SHARED DATA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0243",
+      "number": 243,
+      "file": "corpus/RFC-0243.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc243.txt",
+      "source_sha256": "60b42700d640cfef2407ad3262171c681b31ed7cd0f86d6d4cf63d6f2e1dadd8",
+      "category": "T",
+      "title": "October 5, 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0245",
+      "number": 245,
+      "file": "corpus/RFC-0245.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc245.txt",
+      "source_sha256": "0777ce28b69e5d7e51286fd128df668fce7ab05ccc6045d775c6db502f7daf48",
+      "category": "",
+      "title": "Reservations for Network Working Group Meeting",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0246",
+      "number": 246,
+      "file": "corpus/RFC-0246.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc246.txt",
+      "source_sha256": "c7a4e6c3ac59cb5000b215883caaff03febb5448e20a0896eb80ec2ba4f1a2c4",
+      "category": "",
+      "title": "Network Graphics Meeting",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0247",
+      "number": 247,
+      "file": "corpus/RFC-0247.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc247.txt",
+      "source_sha256": "b4de9a05d72fe5f46476c1f0c31cea9564939fd8f013f4e7863838b045aa5b54",
+      "category": "",
+      "title": "Proferred Set of Standard Host Names",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0249",
+      "number": 249,
+      "file": "corpus/RFC-0249.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc249.txt",
+      "source_sha256": "ec2430e746f754529f1fce50902275655ea4ef0707a1eed5c2327a2abbbe9cf9",
+      "category": "",
+      "title": "NIC 7690",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0250",
+      "number": 250,
+      "file": "corpus/RFC-0250.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc250.txt",
+      "source_sha256": "0f2a608399b3890293ffff5ca1ed6b15150eb2973dd710fdbbea0a288ca08133",
+      "category": "",
+      "title": "Some Thoughts on File Transfer",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0251",
+      "number": 251,
+      "file": "corpus/RFC-0251.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc251.txt",
+      "source_sha256": "db8a6bd88a13b9802efed1b593ffafe1d30887802f35a635b2e71270afcfc30b",
+      "category": "",
+      "title": "WEATHER DATA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0252",
+      "number": 252,
+      "file": "corpus/RFC-0252.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc252.txt",
+      "source_sha256": "7d281bb310b00ddd5da70cb52f722365cb1e3b679e09054e2970dd95f9824b08",
+      "category": "F, G.3",
+      "title": "The purpose of this RFC is to report on the recent status of most",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0253",
+      "number": 253,
+      "file": "corpus/RFC-0253.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc253.txt",
+      "source_sha256": "431ecf2f3cc0a24bfcfb8a821d3b8dc5e2cd17ec1814ae41997a6424955c2758",
+      "category": "",
+      "title": "Second Network Graphics Meeting Details",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0254",
+      "number": 254,
+      "file": "corpus/RFC-0254.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc254.txt",
+      "source_sha256": "5792cb7d4a3d2fbc72fc1cb32b152aae6a485b617cd75919d150366320198a6a",
+      "category": "",
+      "title": "SCENARIOS FOR USING ARPANET COMPUTERS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0255",
+      "number": 255,
+      "file": "corpus/RFC-0255.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc255.txt",
+      "source_sha256": "2ed6f829968ceda7a59e545e3c1f9e19737701769222df230622451f241b9395",
+      "category": "",
+      "title": "This RFC reports on the status of most Network Hosts from October 12",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0256",
+      "number": 256,
+      "file": "corpus/RFC-0256.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc256.txt",
+      "source_sha256": "df92e8e2ad231e3af4c6f36c0aee92026efa6674af0342c4cdee92e5eefabc08",
+      "category": "",
+      "title": "IMPSYS Change Notification",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0263",
+      "number": 263,
+      "file": "corpus/RFC-0263.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc263.txt",
+      "source_sha256": "81452f3b885aab8016cdff9b5db2e47399761c53856e51fd4206d9102a73c881",
+      "category": "",
+      "title": "\"VERY DISTANT\" HOST INTERFACE",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0264",
+      "number": 264,
+      "file": "corpus/RFC-0264.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc264.txt",
+      "source_sha256": "476bcb1fc90a56362a00e33acff05da43fc53eb41a745f34ef392ee0f11ce063",
+      "category": "",
+      "title": "UCLA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0265",
+      "number": 265,
+      "file": "corpus/RFC-0265.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc265.txt",
+      "source_sha256": "dfe1bcb8a67a2970ab76d5cb83d002430ca5421110efec0c67d9c79aca7c39d9",
+      "category": "",
+      "title": "Eric Narslem, Rand",
+      "obsoletes": [
+        "RFC-0172"
+      ],
+      "replaces": [
+        "RFC-0172"
+      ]
+    },
+    {
+      "id": "RFC-0266",
+      "number": 266,
+      "file": "corpus/RFC-0266.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc266.txt",
+      "source_sha256": "b09d59fd11a3e6b6ea42f400b8e04b08fa355ac52aec0f351b855c04064a56fe",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0267",
+      "number": 267,
+      "file": "corpus/RFC-0267.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc267.txt",
+      "source_sha256": "98bfb5618085c15d70df72d873850e4bf9f4815ce59c8fa7baef8381d8f96ff9",
+      "category": "",
+      "title": "This RFC reports on the status of most Network Hosts from November",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0268",
+      "number": 268,
+      "file": "corpus/RFC-0268.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc268.txt",
+      "source_sha256": "b5016c3a8734a966d5d705826a5081ac8bf8259e6e9c15a47de3cc61338a7d40",
+      "category": "",
+      "title": "Graphics Facilities Information",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0269",
+      "number": 269,
+      "file": "corpus/RFC-0269.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc269.txt",
+      "source_sha256": "b39163a9e0cec43b4ca16d739e642d525794e580df1fb5b5db1e1550ded45ef3",
+      "category": "",
+      "title": "Some Experience with File Transfer",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0270",
+      "number": 270,
+      "file": "corpus/RFC-0270.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc270.txt",
+      "source_sha256": "f495960f580300e8931b8696710abe1aa42edd4f1759c703325c34a095cafaed",
+      "category": "",
+      "title": "CORRECTION TO BBN REPORT NO. 1822",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0271",
+      "number": 271,
+      "file": "corpus/RFC-0271.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc271.txt",
+      "source_sha256": "25d96bb8d643f232faf30614d9126af907c64a2d4838a671bf8bd5c156b8fff1",
+      "category": "",
+      "title": "IMP System Change Notification",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0273",
+      "number": 273,
+      "file": "corpus/RFC-0273.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc273.txt",
+      "source_sha256": "711e962f05bd5dbed147e11003c466769286c487f97b4f8d3902dfa7fc2aba7a",
+      "category": "",
+      "title": "MORE ON STANDARD HOST NAMES",
+      "obsoletes": [
+        "RFC-7662"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0274",
+      "number": 274,
+      "file": "corpus/RFC-0274.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc274.txt",
+      "source_sha256": "02108a55d544af3dc26bc3ecd39d82a3524f49635cc217626c6621643bcf15a4",
+      "category": "",
+      "title": "ESTABLISHING A LOCAL GUIDE FOR NETWORK USAGE",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0276",
+      "number": 276,
+      "file": "corpus/RFC-0276.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc276.txt",
+      "source_sha256": "403c7019a3869bdc28046dd549d72a2cfc1d8d72c88e3737e16ac4bfc5b6be65",
+      "category": "",
+      "title": "SRI-ARC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0278",
+      "number": 278,
+      "file": "corpus/RFC-0278.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc278.txt",
+      "source_sha256": "f2872307bbc2d4336e3288b44259cce727ad15c36b40fde56c4ef878b466f3c9",
+      "category": "",
+      "title": "John Melvin, SRI-ARC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0280",
+      "number": 280,
+      "file": "corpus/RFC-0280.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc280.txt",
+      "source_sha256": "82b9cb94505a6c5c922af2cbf3e0f2d235bae7b34554b6dabfff40b1bec464c5",
+      "category": "",
+      "title": "SRI-ARC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0281",
+      "number": 281,
+      "file": "corpus/RFC-0281.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc281.txt",
+      "source_sha256": "4b244fbbc2da97d65497fc3e183dc1a3c1bd7c6f64bdfc053376c8453472a351",
+      "category": "D.7",
+      "title": "A suggested Addition to File Transfer Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0282",
+      "number": 282,
+      "file": "corpus/RFC-0282.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc282.txt",
+      "source_sha256": "74942f5672f39a103c1429226a44d042e387351eb2e086a62edda97e7bcc7dd5",
+      "category": "",
+      "title": "GRAPHICS MEETING REPORT",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0283",
+      "number": 283,
+      "file": "corpus/RFC-0283.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc283.txt",
+      "source_sha256": "0127a7e973610987eaa7d1a8f4e28a9193fda1f8b4df06ce22c005b5a445cc18",
+      "category": "",
+      "title": "NETRJT -- Remote Job Service Protocol for TIPS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0285",
+      "number": 285,
+      "file": "corpus/RFC-0285.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc285.txt",
+      "source_sha256": "e75b1fdf7dede284d1c93d33c91283590df7193f35b08487f1578e528b02d8b6",
+      "category": "",
+      "title": "Network Graphics",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0286",
+      "number": 286,
+      "file": "corpus/RFC-0286.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc286.txt",
+      "source_sha256": "29fc404a401eea4332108b3b12f44554d509548ab023e1ad318707b5e9992940",
+      "category": "",
+      "title": "Network Library Information System",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0287",
+      "number": 287,
+      "file": "corpus/RFC-0287.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc287.txt",
+      "source_sha256": "a285fdb9606ddef463390b5068ff5f0f49490240c7c41dbe2ad19b4fafb25c99",
+      "category": "",
+      "title": "Status of Network Hosts",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0288",
+      "number": 288,
+      "file": "corpus/RFC-0288.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc288.txt",
+      "source_sha256": "db41837d80f651f917f5b41645b2b85b8df786a6711821000e78fec644d647dc",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0289",
+      "number": 289,
+      "file": "corpus/RFC-0289.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc289.txt",
+      "source_sha256": "ece7924ff64a654a1538cc1e625aa9c1aaceea2e952dc4c8caff88dc7824018c",
+      "category": "",
+      "title": "SRI-ARC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0290",
+      "number": 290,
+      "file": "corpus/RFC-0290.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc290.txt",
+      "source_sha256": "d2b381c64e1d7f4c6a834bfb7d1029b0be1df7a3cabb799fdc268ae511b72f26",
+      "category": "",
+      "title": "COMPUTER NETWORKS AND DATE SHARING: A BIBLIOGRAPHY",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0291",
+      "number": 291,
+      "file": "corpus/RFC-0291.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc291.txt",
+      "source_sha256": "7a7b1af69e2c151891db1298c0fe7aaafb187e7b983fbe5dc6ae24e712f1a574",
+      "category": "",
+      "title": "Data Management Meeting Announcement",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0292",
+      "number": 292,
+      "file": "corpus/RFC-0292.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc292.txt",
+      "source_sha256": "cc84251611c711446efa7b0892f7e8bb0d85330a5611b633f2c05c147043f97e",
+      "category": "",
+      "title": "GRAPHICS PROTOCOL - LEVEL 0 ONLY",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0293",
+      "number": 293,
+      "file": "corpus/RFC-0293.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc293.txt",
+      "source_sha256": "eaffc99b912925bece12dfd7fb63d453376042e1b2cece1b36a0a2a919908ef4",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0294",
+      "number": 294,
+      "file": "corpus/RFC-0294.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc294.txt",
+      "source_sha256": "9e32d05bab4138f1b26d03ec87516ff26a5e1652d85ed36e13249a64ee8e00bb",
+      "category": "",
+      "title": "As mentioned in RFC 265, the opcode of '00' is set aside for the",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0295",
+      "number": 295,
+      "file": "corpus/RFC-0295.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc295.txt",
+      "source_sha256": "faff9d3cd04b84625803fcf40326307a76d82cc6ee92196bf378f003aef680b4",
+      "category": "",
+      "title": "12 October, 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0296",
+      "number": 296,
+      "file": "corpus/RFC-0296.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc296.txt",
+      "source_sha256": "c4536efe9fc9c284667924de3fcd18695d7b64ff593e29e551530728949ead16",
+      "category": "",
+      "title": "DS-1 DISPLAY SYSTEM",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0297",
+      "number": 297,
+      "file": "corpus/RFC-0297.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc297.txt",
+      "source_sha256": "92801da7a09f3e7c202508c299b211ad8a2ddf6ea57cd0c305a602042ca47a0f",
+      "category": "",
+      "title": "TIP Message Buffers",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0298",
+      "number": 298,
+      "file": "corpus/RFC-0298.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc298.txt",
+      "source_sha256": "ee092313f479f96ddda6158592e4cb490017d1b458dbfe7d6ee4babe049a39c9",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0299",
+      "number": 299,
+      "file": "corpus/RFC-0299.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc299.txt",
+      "source_sha256": "4edb3e4ce2e14f082ce2fb9a98e8d10c2c63ad3931624f55ca72a61e2daf6693",
+      "category": "",
+      "title": "Dorothy Hopkin",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0300",
+      "number": 300,
+      "file": "corpus/RFC-0300.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc300.txt",
+      "source_sha256": "e79ec35dde46d1163674992d8c767fbfbcdcddd048d937e8c6f415a4a4345c35",
+      "category": "",
+      "title": "ARPA NETWORK MAILING LISTS",
+      "obsoletes": [
+        "RFC-0211"
+      ],
+      "replaces": [
+        "RFC-0211"
+      ]
+    },
+    {
+      "id": "RFC-0301",
+      "number": 301,
+      "file": "corpus/RFC-0301.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc301.txt",
+      "source_sha256": "b6a2c45ba19c1d8475f7526886c690fb52ff25645619d4d7df3145ed9c8fe620",
+      "category": "",
+      "title": "BBN IMP (#5) AND NCC SCHEDULE MARCH 4, 1971",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0302",
+      "number": 302,
+      "file": "corpus/RFC-0302.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc302.txt",
+      "source_sha256": "438fb1850352d3dccebea89fb87ccf61bf255491919b853ea78360d29a26cc74",
+      "category": "",
+      "title": "Roland F. Bryan",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0303",
+      "number": 303,
+      "file": "corpus/RFC-0303.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc303.txt",
+      "source_sha256": "ed8b3509ef180c40c4d131bde76c0878512fe6ba7aab73a5dbb51d4dbd087ace",
+      "category": "",
+      "title": "ARPA Network Mailing Lists",
+      "obsoletes": [
+        "RFC-0300"
+      ],
+      "replaces": [
+        "RFC-0300"
+      ]
+    },
+    {
+      "id": "RFC-0304",
+      "number": 304,
+      "file": "corpus/RFC-0304.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc304.txt",
+      "source_sha256": "9537949ca54f5c68dbadf1d9a14f5e2d6070c639fec86cf910dc3dc1de79831f",
+      "category": "",
+      "title": "A Data Management System Proposal",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0305",
+      "number": 305,
+      "file": "corpus/RFC-0305.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc305.txt",
+      "source_sha256": "a8630d72973cc20477e06a9b348da927e40a4dfd0a8ef94bdc4a654749f321c7",
+      "category": "",
+      "title": "UNKNOWN HOST NUMBERS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0306",
+      "number": 306,
+      "file": "corpus/RFC-0306.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc306.txt",
+      "source_sha256": "1a0b4f5bcc24d2ceacdb2188e64a35f56a30218a06d73a916c042aa0b16c2805",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0307",
+      "number": 307,
+      "file": "corpus/RFC-0307.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc307.txt",
+      "source_sha256": "e7c2dc6177b307eacd6cedf28d8b1beaf79d61dba80ac601a6781887945e1500",
+      "category": "",
+      "title": "USING NETWORK REMOTE JOB ENTRY",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0308",
+      "number": 308,
+      "file": "corpus/RFC-0308.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc308.txt",
+      "source_sha256": "b80f0c669235893d24c092444ac964f4ed52ef59d20c43bc907eff3e293d59f7",
+      "category": "",
+      "title": "ARPANET HOST AVAILABILITY DATA",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0309",
+      "number": 309,
+      "file": "corpus/RFC-0309.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc309.txt",
+      "source_sha256": "ea1b12f949b2d541333a3aa30fa05a4835e57b6f4a4a1c4301eff222e9f95df3",
+      "category": "",
+      "title": "DATA AND FILE TRANSFER WORKSHOP ANNOUNCEMENT",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0310",
+      "number": 310,
+      "file": "corpus/RFC-0310.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc310.txt",
+      "source_sha256": "324f94bda881829fcef9a30fd0607108eb59788703cb699dda01cbd32b5cd0e1",
+      "category": "",
+      "title": "Another Look At Data And File Transfer Protocols",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0311",
+      "number": 311,
+      "file": "corpus/RFC-0311.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc311.txt",
+      "source_sha256": "8fa75b643862d011f61a6096d158bbe2fee56fedc0eca7eb6511dd9c9eec62f7",
+      "category": "",
+      "title": "UCSB Computer",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0312",
+      "number": 312,
+      "file": "corpus/RFC-0312.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc312.txt",
+      "source_sha256": "34a27d5fadf86181c5fca1a5844e03997aff8c3d2221c21477c6b3ef8b38c3f8",
+      "category": "",
+      "title": "Proposed Change in IMP-to-Host Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0313",
+      "number": 313,
+      "file": "corpus/RFC-0313.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc313.txt",
+      "source_sha256": "c55b4038c2e3754c620c105006522fa3dcb4fafeab65cb2f4e54d51789747987",
+      "category": "",
+      "title": "COMPUTER BASED INSTRUCTION",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0314",
+      "number": 314,
+      "file": "corpus/RFC-0314.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc314.txt",
+      "source_sha256": "60e23e7b65f7c495ac327d89272f193e8ed73f64dae421f52c3ed648cad8649d",
+      "category": "",
+      "title": "The next network graphics working group meeting has definitely",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0315",
+      "number": 315,
+      "file": "corpus/RFC-0315.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc315.txt",
+      "source_sha256": "004a6db8cb8e0f0ad9481f9f80812e67b460c4af17e3d9be500f280d4c0b96d3",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0316",
+      "number": 316,
+      "file": "corpus/RFC-0316.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc316.txt",
+      "source_sha256": "07a2dfc79e256c3387bc029a6a29649e623d9138bcdae237e3c4af2ec079f2ba",
+      "category": "",
+      "title": "February 23 & 24, 1972",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0317",
+      "number": 317,
+      "file": "corpus/RFC-0317.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc317.txt",
+      "source_sha256": "99f319ff73f6ce6a1042d07eb731910d0386f701e7a792ff8f71dcc863038dc0",
+      "category": "",
+      "title": "Official Host-Host Protocol Modification:  Assigned Link Numbers",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0318",
+      "number": 318,
+      "file": "corpus/RFC-0318.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc318.txt",
+      "source_sha256": "fd9d4e32ee2ab6d63b3c7ba0593662696d8cdf8fc817b799161a922972f362d4",
+      "category": "",
+      "title": "Telnet Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0319",
+      "number": 319,
+      "file": "corpus/RFC-0319.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc319.txt",
+      "source_sha256": "6019c538d3ba928da22919e5491d49a28a9382289a7b5d3f7d66e8faa7592b28",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0320",
+      "number": 320,
+      "file": "corpus/RFC-0320.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc320.txt",
+      "source_sha256": "52045ec9adc5352b9f3193d7ffaa609f1464ae1711f92be9be9a9b8c9506b3bc",
+      "category": "",
+      "title": "Workshop on Hard Copy Line Graphics",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0321",
+      "number": 321,
+      "file": "corpus/RFC-0321.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc321.txt",
+      "source_sha256": "c14abddf8d9c3137fe824c6722c7bd2e2b3225f326534c99c8a3bb2105639de1",
+      "category": "",
+      "title": "CBI Networking Activity at MITRE",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0322",
+      "number": 322,
+      "file": "corpus/RFC-0322.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc322.txt",
+      "source_sha256": "9dc3f7430db155781dbeba6627a0007c1251773026b476e5a8a698d815c4ce68",
+      "category": "",
+      "title": "26 March 72",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0323",
+      "number": 323,
+      "file": "corpus/RFC-0323.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc323.txt",
+      "source_sha256": "43927261b825f36ce69ea56808be7fc2b9f4678ef107e00e3962adf08089e031",
+      "category": "",
+      "title": "Formation of Network Measurement Group (NMG)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0324",
+      "number": 324,
+      "file": "corpus/RFC-0324.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc324.txt",
+      "source_sha256": "37c795564a5817e2d5cf0e755f7f30368e846fb16586ebc0851a573baa3f4ec7",
+      "category": "",
+      "title": "RJE Protocol Meeting",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0325",
+      "number": 325,
+      "file": "corpus/RFC-0325.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc325.txt",
+      "source_sha256": "d1fc7c8dc1786ec58aacefaa4056bed4a84af6f1eb06a9bffbac6a319746b3a2",
+      "category": "",
+      "title": "Network Remote Job Entry Program - NETRJS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0326",
+      "number": 326,
+      "file": "corpus/RFC-0326.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc326.txt",
+      "source_sha256": "ff9ecc8b500cce402442a88c8cb1528bbd791837bfc0888785980701404a6770",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0327",
+      "number": 327,
+      "file": "corpus/RFC-0327.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc327.txt",
+      "source_sha256": "2eb288fb66d312b5e367b0c0acb9e9700894b0635f2c75b97962e360221eba5b",
+      "category": "",
+      "title": "DATA AND FILE TRANSFER WORKSHOP NOTES",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0328",
+      "number": 328,
+      "file": "corpus/RFC-0328.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc328.txt",
+      "source_sha256": "91d3a9865a84a51dbddcbc242cd8fea160e2b5d3b6aaa69b58b29835b5236d9b",
+      "category": "",
+      "title": "UCLA-NMC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0329",
+      "number": 329,
+      "file": "corpus/RFC-0329.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc329.txt",
+      "source_sha256": "a0b4182970a9ad0bc18748c81ada3dbb530b30899d4b6d606420c0560ab39e06",
+      "category": "",
+      "title": "ARPA NETWORK MAILING LISTS",
+      "obsoletes": [
+        "RFC-0303"
+      ],
+      "replaces": [
+        "RFC-0303"
+      ]
+    },
+    {
+      "id": "RFC-0330",
+      "number": 330,
+      "file": "corpus/RFC-0330.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc330.txt",
+      "source_sha256": "b1863c80393c84efc4a4ed8049e77e7f6c9a944dde70a4f540e2e9265cb42a32",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0331",
+      "number": 331,
+      "file": "corpus/RFC-0331.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc331.txt",
+      "source_sha256": "aeacd63b5aa48ebdd33bf2b0d0d55f2c70e0af62ee8973ffebf3f8d393c0ce9f",
+      "category": "B.1",
+      "title": "IMP System Change Notification",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0332",
+      "number": 332,
+      "file": "corpus/RFC-0332.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc332.txt",
+      "source_sha256": "44aa891ef156fc9279f01c6da3b807edb80bc8180fc7d06507c664c644073dd2",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0333",
+      "number": 333,
+      "file": "corpus/RFC-0333.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc333.txt",
+      "source_sha256": "9f1c6181729bb5c5160d0f2719828200c41f8321aa960a2666fb56e6a78a120d",
+      "category": "C9 (experimentation)",
+      "title": "15 May 1972",
+      "obsoletes": [
+        "RFC-0062"
+      ],
+      "replaces": [
+        "RFC-0062"
+      ]
+    },
+    {
+      "id": "RFC-0334",
+      "number": 334,
+      "file": "corpus/RFC-0334.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc334.txt",
+      "source_sha256": "54c7e3b403045cd4d4a313ffad058f94b4a666a3370811bbf83779ceec68ff2b",
+      "category": "",
+      "title": "Network Use on MAY 8",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0335",
+      "number": 335,
+      "file": "corpus/RFC-0335.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc335.txt",
+      "source_sha256": "4d55b04387e928de653d190ee72bbcd979a0fb4cdc67fd586005882e9a64fe13",
+      "category": "",
+      "title": "1 May 1972",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0336",
+      "number": 336,
+      "file": "corpus/RFC-0336.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc336.txt",
+      "source_sha256": "5c5d008d813d34510e1f00d6ab901f9fecc3a48a8e50badd69129fe7c960f6d7",
+      "category": "",
+      "title": "Level 0 Graphic Input Protocol",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0338",
+      "number": 338,
+      "file": "corpus/RFC-0338.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc338.txt",
+      "source_sha256": "a82b349ad4c255cb741197eea6b5ca8933f659b9b093013552a53966f756cf5d",
+      "category": "",
+      "title": "EBCDIC/ASCII MAPPING FOR NETWORK RJE",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0339",
+      "number": 339,
+      "file": "corpus/RFC-0339.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc339.txt",
+      "source_sha256": "1ce51383cba312f9e29add69d50c340ec5f929c86389842c3f6ae8c208bf31ee",
+      "category": "",
+      "title": "MLTNET - A \"MULTI-TELNET\" SUBSYSTEM FOR TENEX",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0340",
+      "number": 340,
+      "file": "corpus/RFC-0340.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc340.txt",
+      "source_sha256": "1085f32c1fbc03289b52eb7c19f16e238b2862b9279eb4e3b49ce287d59b17b2",
+      "category": "",
+      "title": "PROPOSED TELNET CHANGES",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0342",
+      "number": 342,
+      "file": "corpus/RFC-0342.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc342.txt",
+      "source_sha256": "067aedcc05bf9219b8ddfc46b22b39bd71ee408c6d7931a0643a4c48165b0e68",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0343",
+      "number": 343,
+      "file": "corpus/RFC-0343.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc343.txt",
+      "source_sha256": "c371d613f94a4cf80bd4fd223ad05edf4724c259cddf36601a51278321ba0477",
+      "category": "B.1",
+      "title": "IMP System Change Notification",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0344",
+      "number": 344,
+      "file": "corpus/RFC-0344.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc344.txt",
+      "source_sha256": "88a46b92c71e185fb64d9328acff0fc8916c51f0f66151ce92eaa5136339b3f0",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0345",
+      "number": 345,
+      "file": "corpus/RFC-0345.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc345.txt",
+      "source_sha256": "e96983868fba90c5d52da2c845efe26432751ec563fd1ce839f1fd677f3406a5",
+      "category": "",
+      "title": "May 26, 1972",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0346",
+      "number": 346,
+      "file": "corpus/RFC-0346.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc346.txt",
+      "source_sha256": "d6dd20962c6c2597911c628fc8c0bd4aef1c48805fa3ab55da40b1d0227cfcc7",
+      "category": "",
+      "title": "UCLA-NMC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0347",
+      "number": 347,
+      "file": "corpus/RFC-0347.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc347.txt",
+      "source_sha256": "ddb8127b0a6ee560a30f7638835b8530d18967002ad0142dd6bd693a5400110e",
+      "category": "",
+      "title": "UCLA-NMC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0348",
+      "number": 348,
+      "file": "corpus/RFC-0348.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc348.txt",
+      "source_sha256": "caaf51c02126a17c7090711a95b7d3d7eafe3bad092fafc0a258cb93e814659e",
+      "category": "",
+      "title": "UCLA-NMC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0349",
+      "number": 349,
+      "file": "corpus/RFC-0349.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc349.txt",
+      "source_sha256": "84434577a77e99a8bea20bf7eec21883a4398ba3a3d55672efd048db186f1af4",
+      "category": "",
+      "title": "UCLA-NMC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0350",
+      "number": 350,
+      "file": "corpus/RFC-0350.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc350.txt",
+      "source_sha256": "d4f7bdb62a2b5ef6ebfd8853a1a83c9d1c301836e511b53b2c78367ea6d4d201",
+      "category": "",
+      "title": "For the past year UCSB has provided free use of the UCSB",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0351",
+      "number": 351,
+      "file": "corpus/RFC-0351.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc351.txt",
+      "source_sha256": "4c99dda8f8c8fe454e36ded0d4760956d012cc763420a44b36855c26d39c0042",
+      "category": "",
+      "title": "(Graphics)Information form for the ARPANET Graphics",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0352",
+      "number": 352,
+      "file": "corpus/RFC-0352.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc352.txt",
+      "source_sha256": "e21605866e520e69df8bd0a9d3afef31ae8780a603804d0f072f208a6d7e704d",
+      "category": "",
+      "title": "5 June 1972",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0353",
+      "number": 353,
+      "file": "corpus/RFC-0353.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc353.txt",
+      "source_sha256": "fc7679f3fb7c7fc7c8444484cf370d53410db6b18389dda5ee6cacccb9cb9ba0",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0354",
+      "number": 354,
+      "file": "corpus/RFC-0354.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc354.txt",
+      "source_sha256": "cd1bcbdaf31d4c2dc5ffe268b8875013fd795a24eca3ad06460cde77c230782e",
+      "category": "",
+      "title": "THE FILE TRANSFER PROTOCOL",
+      "obsoletes": [
+        "RFC-0264"
+      ],
+      "replaces": [
+        "RFC-0264"
+      ]
+    },
+    {
+      "id": "RFC-0355",
+      "number": 355,
+      "file": "corpus/RFC-0355.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc355.txt",
+      "source_sha256": "04316d307a8f47ddb6d0c29b6e373f264a29ac4e23b7291a953900040304a633",
+      "category": "Local Echoing, Remote Echoing, Satellite",
+      "title": "RESPONSE TO NWG/RFC 346",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0356",
+      "number": 356,
+      "file": "corpus/RFC-0356.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc356.txt",
+      "source_sha256": "77e4c17740c426521f8fc6d329c6200680f476ee02e82d03e9d0edbc66a6538f",
+      "category": "",
+      "title": "ARPA NETWORK CONTROL CENTER",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0357",
+      "number": 357,
+      "file": "corpus/RFC-0357.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc357.txt",
+      "source_sha256": "45dd198f64a6bd138bd13e127ffd1392cff8a241075383506f21618951f06d01",
+      "category": "",
+      "title": "ILLIAC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0359",
+      "number": 359,
+      "file": "corpus/RFC-0359.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc359.txt",
+      "source_sha256": "b47584ee960b90d052497783885cf4468b93ebaf565c1dc330b0d0936ffb85c3",
+      "category": "B.1",
+      "title": "I M P O R T A N T",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0360",
+      "number": 360,
+      "file": "corpus/RFC-0360.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc360.txt",
+      "source_sha256": "865ce3278c9a3e188356cd87d110252bb16502f436ea6d3b77b1743325e5780c",
+      "category": "Protocols, RJE",
+      "title": "PROPOSED REMOTE JOB ENTRY PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0361",
+      "number": 361,
+      "file": "corpus/RFC-0361.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc361.txt",
+      "source_sha256": "4cf1dec8833e6a11342966800ef17e3b3e028684dfa5b503ca91b688fda582da",
+      "category": "",
+      "title": "In response to RFCs 347 and 348, ECHO and DISCARD, MIT-DMCG",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0362",
+      "number": 362,
+      "file": "corpus/RFC-0362.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc362.txt",
+      "source_sha256": "e826a90f491063bd93138529132d13c14725d07e3ad5cf99bafc0294a936397b",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0363",
+      "number": 363,
+      "file": "corpus/RFC-0363.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc363.txt",
+      "source_sha256": "65311e2ef26e3ed657dcd37ba93f20a7e35c1246f8e64dd6cab396369bddbfee",
+      "category": "",
+      "title": "ARPA NETWORK MAILING LISTS",
+      "obsoletes": [
+        "RFC-0329"
+      ],
+      "replaces": [
+        "RFC-0329"
+      ]
+    },
+    {
+      "id": "RFC-0364",
+      "number": 364,
+      "file": "corpus/RFC-0364.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc364.txt",
+      "source_sha256": "65f6891074a8afc2ff29e3a42a94730d293c37776f8e7b516a8f8793f50c07eb",
+      "category": "",
+      "title": "Serving Remote Users on the ARPANET",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0365",
+      "number": 365,
+      "file": "corpus/RFC-0365.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc365.txt",
+      "source_sha256": "c308be883f920b42c467dc65037cbc7098f8c7b622d75a5ca4327eb2a024ec32",
+      "category": "",
+      "title": "A LETTER TO ALL TIP USERS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0366",
+      "number": 366,
+      "file": "corpus/RFC-0366.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc366.txt",
+      "source_sha256": "4e5d3896f507c9a12cfd83094b79a199ece8f81abeb3fed57a6638b78b0a1cda",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0367",
+      "number": 367,
+      "file": "corpus/RFC-0367.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc367.txt",
+      "source_sha256": "cc658ca1680ef6de783e30c8e067842c026c01e5ea9ac4229585261ff5b72da3",
+      "category": "F, G.3",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0368",
+      "number": 368,
+      "file": "corpus/RFC-0368.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc368.txt",
+      "source_sha256": "e85e86fbf56ab27731c1fb13ca9c7df048bb596d3c93da3f55f6e98b6fdb2549",
+      "category": "",
+      "title": "COMMENTS ON",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0369",
+      "number": 369,
+      "file": "corpus/RFC-0369.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc369.txt",
+      "source_sha256": "6258b002b31b6a50c8121c8a17fabb40347724ef89771a27f503f5a7d8bfbe05",
+      "category": "",
+      "title": "EVALUATION OF ARPANET SERVICES",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0370",
+      "number": 370,
+      "file": "corpus/RFC-0370.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc370.txt",
+      "source_sha256": "ae06be0b137579c9d6b126a383d9264f761f136deeb04520f66029aff7e699c8",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0371",
+      "number": 371,
+      "file": "corpus/RFC-0371.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc371.txt",
+      "source_sha256": "d65e0fe6f0d514c3cf96e03f3330c465472209827099c6f04202495bb9c4af1a",
+      "category": "",
+      "title": "12 July 1972",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0372",
+      "number": 372,
+      "file": "corpus/RFC-0372.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc372.txt",
+      "source_sha256": "f2cb898910bc72552c34e44cc6f7116d862bb6e11afe78cd4e95bb84a4c13d33",
+      "category": "",
+      "title": "12-JUL-72",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0373",
+      "number": 373,
+      "file": "corpus/RFC-0373.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc373.txt",
+      "source_sha256": "98078b27bf1280f915258a51d28dc57e7c05f310f5ddf778bdbbd44e07ff1d6c",
+      "category": "",
+      "title": "ARBITRARY CHARACTER SETS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0374",
+      "number": 374,
+      "file": "corpus/RFC-0374.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc374.txt",
+      "source_sha256": "1e578f6014ad81c1763b0a4e334065cd959d03383b8d34271a4a235401251fee",
+      "category": "",
+      "title": "On Tuesday July 18, the new IMP software described in previous RFC's",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0376",
+      "number": 376,
+      "file": "corpus/RFC-0376.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc376.txt",
+      "source_sha256": "528d83d4ee84455f03db65cd756ba6c38b0d4daff2fb1366e45f091b76ccad24",
+      "category": "",
+      "title": "NETWORK HOST STATUS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0377",
+      "number": 377,
+      "file": "corpus/RFC-0377.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc377.txt",
+      "source_sha256": "883ad1a31c63a22370d433c0a8637aadec6f3a04f9e2e7f636854821fbbb3dd5",
+      "category": "",
+      "title": "USING TSO VIA ARPA NETWORK VIRTUAL TERMINAL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0378",
+      "number": 378,
+      "file": "corpus/RFC-0378.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc378.txt",
+      "source_sha256": "50a96e66cbfa114eaf029610a1b969d28fe5b5bd9f403cfd5be3ffbabf50be56",
+      "category": "",
+      "title": "Traffic Statistics (July 1972)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0379",
+      "number": 379,
+      "file": "corpus/RFC-0379.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc379.txt",
+      "source_sha256": "99a1b7a9a6aad7902f0d6a38274e12cc74e6c2b3a6bebdc77fd480aa8bda21e3",
+      "category": "",
+      "title": "USING TSO AT CCN",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0381",
+      "number": 381,
+      "file": "corpus/RFC-0381.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc381.txt",
+      "source_sha256": "8bd88c86a16bc9dcc2a777ab44ce555152ae804ec28e901aae8b1474605d9899",
+      "category": "",
+      "title": "26 July 1972",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0382",
+      "number": 382,
+      "file": "corpus/RFC-0382.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc382.txt",
+      "source_sha256": "812ad5413088282ccff1a0c61bea09084f7646f2638e6f024067f87cd7aaebfa",
+      "category": "",
+      "title": "Computation",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0384",
+      "number": 384,
+      "file": "corpus/RFC-0384.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc384.txt",
+      "source_sha256": "564d35b43f4b270d79ed648c703a528926601e841ae5308b8f2c4ea429acfd26",
+      "category": "",
+      "title": "OFFICIAL SITE IDENTS FOR ORGANIZATIONS IN THE ARPA NETWORK",
+      "obsoletes": [
+        "RFC-0289"
+      ],
+      "replaces": [
+        "RFC-0289"
+      ]
+    },
+    {
+      "id": "RFC-0385",
+      "number": 385,
+      "file": "corpus/RFC-0385.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc385.txt",
+      "source_sha256": "80a748c2cbc6f33c5e49aa22efd73ba62260a9c448857b7cc9d57b2414106cc4",
+      "category": "",
+      "title": "COMMENTS ON THE FILE TRANSFER PROTOCOL (RFC 354)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0386",
+      "number": 386,
+      "file": "corpus/RFC-0386.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc386.txt",
+      "source_sha256": "b02ac5c6af1c5d16352b68db886ecd8eec12b74ba7603e41e7ec44070f1a930c",
+      "category": "",
+      "title": "LETTER TO TIP USERS -- 2",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0387",
+      "number": 387,
+      "file": "corpus/RFC-0387.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc387.txt",
+      "source_sha256": "1daf0c52950112bbc53559e9b8eb22326895ee4e27fd924f2a3df4a1819d0859",
+      "category": "",
+      "title": "SOME EXPERIENCES IN IMPLEMENTING NETWORK GRAPHICS PROTOCOL LEVEL 0",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0388",
+      "number": 388,
+      "file": "corpus/RFC-0388.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc388.txt",
+      "source_sha256": "340ae7bb54f925a8ff9a68c7d007c80bd18fec71a0c8970141d0da4f5e1591c8",
+      "category": "",
+      "title": "NCP Statistics",
+      "obsoletes": [
+        "RFC-0323"
+      ],
+      "replaces": [
+        "RFC-0323"
+      ]
+    },
+    {
+      "id": "RFC-0389",
+      "number": 389,
+      "file": "corpus/RFC-0389.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc389.txt",
+      "source_sha256": "455bc43e09a4c998fce4501591ada0ec490d2737ea84b730f8c8e12ee453a60a",
+      "category": "",
+      "title": "The ARPA Network contacts at CCN are:",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0390",
+      "number": 390,
+      "file": "corpus/RFC-0390.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc390.txt",
+      "source_sha256": "af1da6389b2a4752188f9ee555799a23afd10553624f3da1f413349784b14819",
+      "category": "",
+      "title": "TSO SCENARIO",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0391",
+      "number": 391,
+      "file": "corpus/RFC-0391.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc391.txt",
+      "source_sha256": "581c313e34470efb97ee304d40238360f6a826178436f321817cdd93c3f3edff",
+      "category": "",
+      "title": "TRAFFIC STATISTICS (August 1972)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0392",
+      "number": 392,
+      "file": "corpus/RFC-0392.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc392.txt",
+      "source_sha256": "0f22559dc5be2f7ab4b27ba43d54bce2a1e3c46df561715b1c357283a2d3cee2",
+      "category": "",
+      "title": "20 September 1972",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0393",
+      "number": 393,
+      "file": "corpus/RFC-0393.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc393.txt",
+      "source_sha256": "3082e59a06c1f4ac8c4674b9fb9df82633c971de3abae41859cf9c69a998b09c",
+      "category": "",
+      "title": "Comments on TELNET Protocol Changes",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0394",
+      "number": 394,
+      "file": "corpus/RFC-0394.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc394.txt",
+      "source_sha256": "b63d8d5388bd9f009540a8dde959e146e32199bdac8cbd94b2f03a3fa0c0605e",
+      "category": "",
+      "title": "TWO PROPOSED CHANGES TO THE IMP-HOST PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0395",
+      "number": 395,
+      "file": "corpus/RFC-0395.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc395.txt",
+      "source_sha256": "b39a83074b1fabedbd0d3de60a518ef0aa9f88b9a1856cf6c762dbee84f40a07",
+      "category": "",
+      "title": "SWITCH SETTINGS ON IMPS AND TIPS",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0396",
+      "number": 396,
+      "file": "corpus/RFC-0396.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc396.txt",
+      "source_sha256": "fc4cb3a8007bafa12f2c812b066cbf99200a4f9a539cf413aeb4b7621eb30ff0",
+      "category": "",
+      "title": "I have obtained some feedback concerning my suggestion in RFC",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0398",
+      "number": 398,
+      "file": "corpus/RFC-0398.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc398.txt",
+      "source_sha256": "b969b1f6f9c56120f1fe2ef742d6bfadf5197833a21a1143b0fb6f6d900b12d6",
+      "category": "",
+      "title": "22 Sept 72",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0399",
+      "number": 399,
+      "file": "corpus/RFC-0399.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc399.txt",
+      "source_sha256": "7be87bd65a232c7f1c6eea8f215a272b6fc1c0a970529ad869639a5df5090128",
+      "category": "",
+      "title": "SMFS Login and Logout",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-0400",
+      "number": 400,
+      "file": "corpus/RFC-0400.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc400.txt",
+      "source_sha256": "8de1be0f8db0ae0765f0d28632b98b51edd76db2f76e0f1fd9eead056fddc443",
+      "category": "",
+      "title": "TRAFFIC STATISTICS (September 1972)",
+      "obsoletes": [],
+      "replaces": []
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-0123",
+      "type": "supersedes",
+      "target": "RFC-0066"
+    },
+    {
+      "source": "RFC-0123",
+      "type": "supersedes",
+      "target": "RFC-0080"
+    },
+    {
+      "source": "RFC-0145",
+      "type": "supersedes",
+      "target": "RFC-0127"
+    },
+    {
+      "source": "RFC-0165",
+      "type": "supersedes",
+      "target": "RFC-0123"
+    },
+    {
+      "source": "RFC-0165",
+      "type": "supersedes",
+      "target": "RFC-0143"
+    },
+    {
+      "source": "RFC-0165",
+      "type": "supersedes",
+      "target": "RFC-0145"
+    },
+    {
+      "source": "RFC-0189",
+      "type": "supersedes",
+      "target": "RFC-0088"
+    },
+    {
+      "source": "RFC-0211",
+      "type": "supersedes",
+      "target": "RFC-0168"
+    },
+    {
+      "source": "RFC-0214",
+      "type": "supersedes",
+      "target": "RFC-0193"
+    },
+    {
+      "source": "RFC-0214",
+      "type": "supersedes",
+      "target": "RFC-0198"
+    },
+    {
+      "source": "RFC-0217",
+      "type": "supersedes",
+      "target": "RFC-0074"
+    },
+    {
+      "source": "RFC-0236",
+      "type": "supersedes",
+      "target": "RFC-0229"
+    },
+    {
+      "source": "RFC-0240",
+      "type": "supersedes",
+      "target": "RFC-0235"
+    },
+    {
+      "source": "RFC-0265",
+      "type": "supersedes",
+      "target": "RFC-0172"
+    },
+    {
+      "source": "RFC-0300",
+      "type": "supersedes",
+      "target": "RFC-0211"
+    },
+    {
+      "source": "RFC-0303",
+      "type": "supersedes",
+      "target": "RFC-0300"
+    },
+    {
+      "source": "RFC-0329",
+      "type": "supersedes",
+      "target": "RFC-0303"
+    },
+    {
+      "source": "RFC-0333",
+      "type": "supersedes",
+      "target": "RFC-0062"
+    },
+    {
+      "source": "RFC-0354",
+      "type": "supersedes",
+      "target": "RFC-0264"
+    },
+    {
+      "source": "RFC-0363",
+      "type": "supersedes",
+      "target": "RFC-0329"
+    },
+    {
+      "source": "RFC-0384",
+      "type": "supersedes",
+      "target": "RFC-0289"
+    },
+    {
+      "source": "RFC-0388",
+      "type": "supersedes",
+      "target": "RFC-0323"
+    }
+  ]
+}

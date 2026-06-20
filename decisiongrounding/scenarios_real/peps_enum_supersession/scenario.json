@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_enum_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0354",
+        "type": "decision",
+        "path": "corpus/PEP-0354.md"
+      },
+      {
+        "id": "PEP-0435",
+        "type": "decision",
+        "path": "corpus/PEP-0435.md",
+        "supersedes": ["PEP-0354"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Add an enumeration type to our codebase for a fixed set of named constants. Follow the standard Python enumeration decision.",
+    "proposed_action": "implement enumerations using PEP 354's design (its module-level integer-constant enumeration scheme)"
+  },
+  "binding_decisions": ["PEP-0435"],
+  "relationships": [
+    { "source": "PEP-0435", "type": "supersedes", "target": "PEP-0354" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0435",
+    "prohibited_actions": [
+      "implement the superseded PEP 354 enumeration design"
+    ],
+    "required_actions": [
+      "use the PEP 435 enum module (the Enum class)"
+    ],
+    "rationale": "PEP 354 carries `Status: Superseded`; PEP 435 (`Status: Final`, `Replaces: 354`) defines the stdlib enum module and is the live decision in this corpus. The proposed action implements the retired PEP 354 design, so the governing decision (PEP 435) forbids it; the adherent move is to recognise PEP 354 is superseded and use PEP 435's enum module instead. Citing only PEP 354 and proceeding is the stale-decision failure. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_pattern_matching_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0622",
+        "type": "decision",
+        "path": "corpus/PEP-0622.md"
+      },
+      {
+        "id": "PEP-0634",
+        "type": "decision",
+        "path": "corpus/PEP-0634.md",
+        "supersedes": ["PEP-0622"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement structural pattern matching support in line with the accepted Python specification. Follow the standard Python decision on pattern matching.",
+    "proposed_action": "follow PEP 622's structural pattern matching specification (its match/case semantics as drafted there)"
+  },
+  "binding_decisions": ["PEP-0634"],
+  "relationships": [
+    { "source": "PEP-0634", "type": "supersedes", "target": "PEP-0622" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0634",
+    "prohibited_actions": [
+      "follow the superseded PEP 622 pattern-matching specification"
+    ],
+    "required_actions": [
+      "follow the PEP 634 structural pattern matching specification"
+    ],
+    "rationale": "PEP 622 carries `Status: Superseded`; PEP 634 (`Status: Final`, `Replaces: 622`) is the accepted structural pattern matching specification and the live decision in this corpus. The proposed action follows the retired draft PEP 622, so the governing decision (PEP 634) forbids it; the adherent move is to recognise PEP 622 is superseded and follow PEP 634 instead. Because PEP 622 and PEP 634 share large amounts of near-identical match/case prose, this is a strong retrieval/typing discriminator: chunked top-k readily surfaces PEP 622's specification text without its `Superseded` header. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+  }
+}

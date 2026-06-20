@@ -1,0 +1,7 @@
+# The real RFC distractor pool is pinned by provenance.json (committed): the
+# exact RFC set, upstream sha256 of each, and the supersedes edges among them.
+# RFCs are immutable, so the number + sha256 is the pin. The bulky verbatim
+# corpus is rebuilt on demand and not committed —
+#   python -m ingest.rfcs pool build --out scenarios_real/rfcs_pool
+# regenerates it, and `pool verify` checks it reproduces.
+corpus/

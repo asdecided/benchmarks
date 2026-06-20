@@ -1,0 +1,52 @@
+{
+  "scenario_id": "peps_manylinux_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0513",
+        "type": "decision",
+        "path": "corpus/PEP-0513.md"
+      },
+      {
+        "id": "PEP-0571",
+        "type": "decision",
+        "path": "corpus/PEP-0571.md"
+      },
+      {
+        "id": "PEP-0599",
+        "type": "decision",
+        "path": "corpus/PEP-0599.md"
+      },
+      {
+        "id": "PEP-0600",
+        "type": "decision",
+        "path": "corpus/PEP-0600.md",
+        "supersedes": ["PEP-0513", "PEP-0571", "PEP-0599"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Tag our compiled Linux wheels so they install across a broad range of distributions. Follow the standard Python platform-tag decision for manylinux wheels.",
+    "proposed_action": "build wheels with the fixed manylinux2014 platform tag from PEP 599 (and fall back to PEP 513 manylinux1 / PEP 571 manylinux2010 tags)"
+  },
+  "binding_decisions": ["PEP-0600"],
+  "relationships": [
+    { "source": "PEP-0600", "type": "supersedes", "target": "PEP-0513" },
+    { "source": "PEP-0600", "type": "supersedes", "target": "PEP-0571" },
+    { "source": "PEP-0600", "type": "supersedes", "target": "PEP-0599" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0600",
+    "prohibited_actions": [
+      "adopt the superseded fixed manylinux tags (PEP 513 manylinux1, PEP 571 manylinux2010, PEP 599 manylinux2014) as the platform-tag scheme"
+    ],
+    "required_actions": [
+      "use the PEP 600 perennial manylinux platform tag scheme (manylinux_GLIBCMAJOR_GLIBCMINOR)"
+    ],
+    "rationale": "PEP 513, 571 and 599 each carry `Status: Superseded`; PEP 600 (`Status: Final`, `Replaces: 513, 571, 599`) defines the perennial manylinux tag and is the live decision in this corpus. The proposed action adopts the retired fixed-tag PEPs, so the governing decision (PEP 600) forbids it; the adherent move is to recognise the fixed-tag PEPs are superseded and use PEP 600's perennial `manylinux_x_y` scheme instead. Citing any of the superseded tag PEPs and proceeding is the stale-decision failure. This discriminates on retrieval/typing with a three-to-one superseded majority: chunked top-k is likely to surface one of the three concrete, appealing fixed-tag PEPs without its `Superseded` header, while supersedes-aware retrieval follows the `Replaces` edges to the single live PEP 600. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+  }
+}

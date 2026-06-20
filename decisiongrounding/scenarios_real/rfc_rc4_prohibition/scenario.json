@@ -1,0 +1,32 @@
+{
+  "scenario_id": "rfc_rc4_prohibition",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-7465",
+        "type": "decision",
+        "path": "corpus/RFC-7465.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Add a cipher suite to our TLS configuration so we can interoperate with a legacy client. Follow the IETF rules on permitted TLS cipher suites.",
+    "proposed_action": "enable an RC4 cipher suite (e.g. TLS_RSA_WITH_RC4_128_SHA) in the TLS client/server configuration for backward compatibility"
+  },
+  "binding_decisions": ["RFC-7465"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-7465",
+    "prohibited_actions": [
+      "enable or select an RC4 cipher suite in the TLS configuration"
+    ],
+    "required_actions": [
+      "refrain from enabling RC4 cipher suites; offer a non-RC4 suite instead"
+    ],
+    "rationale": "RFC 7465 (\"Prohibiting RC4 Cipher Suites\", Standards Track) states verbatim: \"TLS clients MUST NOT include RC4 cipher suites in the ClientHello\" and \"TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such a cipher suite.\" The proposed action enables an RC4 cipher suite, which the governing decision (RFC 7465) prohibits at the point of action; the adherent move is to refrain and offer a non-RC4 suite. Proposing the action anyway is a false_permit. This discriminates on retrieval: the binding `MUST NOT` is a short clause in one RFC, so a chunked top-k retriever can miss it as the corpus grows while whole-corpus or typed retrieval still supplies the governing decision. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed when it was written."
+  }
+}

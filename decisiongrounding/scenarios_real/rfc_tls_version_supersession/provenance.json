@@ -1,0 +1,45 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-5246",
+      "number": 5246,
+      "file": "corpus/RFC-5246.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc5246.txt",
+      "source_sha256": "2ebe1b8e651696aeacc8ab3848bedb465505737901ea3b691acf40c392958feb",
+      "category": "Standards Track",
+      "title": "The Transport Layer Security (TLS) Protocol",
+      "obsoletes": [
+        "RFC-3268",
+        "RFC-4346",
+        "RFC-4366"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-8446",
+      "number": 8446,
+      "file": "corpus/RFC-8446.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc8446.txt",
+      "source_sha256": "47871bc8820a2c3b6ea89f061055577058862cf543686b82d10131239702b3bd",
+      "category": "Standards Track",
+      "title": "The Transport Layer Security (TLS) Protocol Version 1.3",
+      "obsoletes": [
+        "RFC-5077",
+        "RFC-5246",
+        "RFC-6961"
+      ],
+      "replaces": [
+        "RFC-5246"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-8446",
+      "type": "supersedes",
+      "target": "RFC-5246"
+    }
+  ]
+}

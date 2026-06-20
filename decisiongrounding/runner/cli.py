@@ -1,0 +1,387 @@
+"""decisiongrounding runner.
+
+    python -m runner.cli run     --arm context_dump --scenarios scenarios/
+    python -m runner.cli compare --arms context_dump,naive_rag --scenarios scenarios/
+    python -m runner.cli demo    --scenarios scenarios/
+
+`demo` is the one-command spine: it runs the two real arms on the worked
+scenarios offline, writes an append-only report, and emits the crossover chart.
+
+Reproducibility: the answering model + seed are pinned and recorded in every
+RunResult. `results/` is append-only — runs are written as new timestamped
+files and never mutated.
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import os
+import shutil
+import sys
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+
+# Make the package root importable when run as `python -m runner.cli` or directly.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from providers import (  # noqa: E402
+    ARMS,
+    REAL_ARMS,
+    build_provider,
+    make_answering_model,
+)
+from providers.base import ProposedChange  # noqa: E402
+from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
+from scoring import aggregate, score  # noqa: E402
+from scoring.crossover import build_dataset, emit  # noqa: E402
+
+HARNESS_VERSION = "0.1.0-scaffold"
+_ROOT = Path(__file__).resolve().parent.parent
+_DEFAULT_RESULTS = _ROOT / "results"
+
+
+def _answering_model(name: str, seed: int):
+    # Thin CLI wrapper: surface the factory's error as a usage exit.
+    try:
+        return make_answering_model(name, seed)
+    except ValueError as e:
+        raise SystemExit(str(e))
+
+
+def _provider(arm: str, model, embedder_spec: str):
+    """Instantiate an arm, wiring a real embedder into naive_rag when asked."""
+    return build_provider(arm, model, embedder_spec)
+
+
+def _pc_to_dict(pc: ProposedChange) -> dict:
+    return {
+        "summary": pc.summary,
+        "actions": [{"kind": a.kind, "target": a.target, "detail": a.detail} for a in pc.actions],
+        "cites_decisions": list(pc.cites_decisions),
+        "asserts_prohibition": pc.asserts_prohibition,
+        "asserts_permission": pc.asserts_permission,
+    }
+
+
+def run_one(arm: str, scenario: Scenario, model, seed: int, embedder: str = "local-hash") -> dict:
+    provider = _provider(arm, model, embedder)
+    provider.prepare(list(scenario.corpus))
+    pc = provider.respond(scenario.task)
+    sc = score(scenario, pc)
+    g = provider.grounding
+    gov = scenario.gold_label.governing_decision
+    governing_retrieved = None if gov is None else (gov in g.artifacts_supplied)
+    # Reproducibility: record the embedder identity for retrieval arms (the dim
+    # is probed during prepare()); null for arms that don't embed.
+    emb = getattr(provider, "embedder", None)
+    embedder_meta = {"name": emb.name, "dim": emb.dim} if emb is not None else None
+    return {
+        "run_id": str(uuid.uuid4()),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "arm": arm,
+        "scenario_id": scenario.scenario_id,
+        "corpus_size_N": len(scenario.corpus),
+        "answering_model": {
+            "name": model.name,
+            "version": model.version,
+            "temperature": model.temperature,
+            "seed": seed,
+        },
+        "grounding": {
+            "provider": arm,
+            "token_estimate": g.token_estimate,
+            "artifacts_supplied": list(g.artifacts_supplied),
+        },
+        "embedder": embedder_meta,
+        "proposed_change": _pc_to_dict(pc),
+        "score": sc.as_dict(),
+        "retrieval": {"governing_decision_retrieved": governing_retrieved},
+        "harness_version": HARNESS_VERSION,
+    }
+
+
+def _preflight(arms: tuple[str, ...], answering: str, embedder: str) -> None:
+    """Fail fast — BEFORE any work or API spend — if the requested configuration
+    cannot run. A real run is expensive; surfacing a missing key or package up
+    front beats discovering it mid-sweep after burning credits."""
+    problems: list[str] = []
+
+    if answering == "claude":
+        if importlib.util.find_spec("anthropic") is None:
+            problems.append("--answering claude needs `anthropic` (pip install -e '.[real]')")
+        elif not os.environ.get("ANTHROPIC_API_KEY"):
+            problems.append("--answering claude needs ANTHROPIC_API_KEY in the environment")
+
+    if "naive_rag" in arms:
+        if embedder.startswith("voyage"):
+            if importlib.util.find_spec("voyageai") is None:
+                problems.append("--embedder voyage needs `voyageai` (pip install -e '.[real]')")
+            elif not os.environ.get("VOYAGE_API_KEY"):
+                problems.append("--embedder voyage needs VOYAGE_API_KEY in the environment")
+        elif embedder.startswith("st") and importlib.util.find_spec("sentence_transformers") is None:
+            problems.append("--embedder st needs `sentence-transformers` (pip install -e '.[local-embeddings]')")
+
+    if "rac" in arms and shutil.which(os.environ.get("RAC_BIN", "rac")) is None:
+        problems.append(
+            "the rac arm needs the `rac` CLI on PATH (pip install -e the rac repo, or set RAC_BIN)"
+        )
+
+    if problems:
+        raise SystemExit("preflight failed:\n" + "\n".join(f"  - {p}" for p in problems))
+
+
+def _execute_runs(
+    pairs: list[tuple[str, Scenario]],
+    model,
+    seed: int,
+    embedder: str,
+    partial_path: Path,
+) -> tuple[list[dict], list[dict]]:
+    """Run each (arm, scenario) cell, streaming every completed RunResult to a
+    durable `.partial.jsonl` sidecar as it lands. A crash or API error on one
+    cell is recorded and skipped — it never discards the cells already done, so a
+    long paid run preserves every result it managed to produce."""
+    results: list[dict] = []
+    errors: list[dict] = []
+    partial_path.parent.mkdir(parents=True, exist_ok=True)
+    with partial_path.open("a", encoding="utf-8") as fp:
+        for arm, sc in pairs:
+            try:
+                r = run_one(arm, sc, model, seed, embedder)
+            except Exception as exc:  # noqa: BLE001 - one cell must not kill the batch
+                err = {"arm": arm, "scenario_id": sc.scenario_id, "error": repr(exc)}
+                errors.append(err)
+                fp.write(json.dumps({"record": "error", **err}) + "\n")
+                fp.flush()
+                print(f"  ! {arm}/{sc.scenario_id} failed, continuing: {exc}", file=sys.stderr)
+                continue
+            results.append(r)
+            fp.write(json.dumps({"record": "run", **r}) + "\n")
+            fp.flush()
+    return results, errors
+
+
+def _backend_versions() -> dict:
+    """Best-effort: the installed versions of the real backends, so each report
+    records exactly what produced it. Empty when the [real] extra isn't present."""
+    import importlib.metadata as md
+
+    out: dict[str, str] = {}
+    for pkg in ("anthropic", "voyageai"):
+        try:
+            out[pkg] = md.version(pkg)
+        except Exception:  # noqa: BLE001 - absence is expected offline
+            pass
+    return out
+
+
+def _write_report(
+    results: list[dict],
+    out_dir: Path,
+    label: str,
+    errors: list[dict] | None = None,
+    stamp: str | None = None,
+) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stamp = stamp or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    path = out_dir / f"run-{stamp}-{label}.json"
+    if path.exists():  # append-only: never overwrite an existing run file
+        path = out_dir / f"run-{stamp}-{label}-{uuid.uuid4().hex[:6]}.json"
+    by_arm: dict[str, list] = {}
+    for r in results:
+        by_arm.setdefault(r["arm"], []).append(r)
+    from scoring.scorer import Score
+
+    metrics = {
+        arm: aggregate(
+            arm,
+            [Score(**r["score"]) for r in rs],
+            [r["retrieval"]["governing_decision_retrieved"] for r in rs],
+        ).as_dict()
+        for arm, rs in by_arm.items()
+    }
+    report = {
+        "harness_version": HARNESS_VERSION,
+        "generated": datetime.now(timezone.utc).isoformat(),
+        "label": label,
+        "backend_versions": _backend_versions(),
+        "metrics_by_arm": metrics,
+        "runs": results,
+        "errors": errors or [],
+    }
+    path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    return path
+
+
+def _print_metrics(results: list[dict]) -> None:
+    by_arm: dict[str, list] = {}
+    for r in results:
+        by_arm.setdefault(r["arm"], []).append(r)
+    from scoring.scorer import Score
+
+    print(f"{'arm':<16}{'adhere':>8}{'stale':>8}{'f-permit':>10}{'f-prohibit':>12}{'gov-recall':>12}")
+    for arm, rs in by_arm.items():
+        m = aggregate(
+            arm,
+            [Score(**r["score"]) for r in rs],
+            [r["retrieval"]["governing_decision_retrieved"] for r in rs],
+        )
+        recall = "  n/a" if m.governing_recall_rate is None else f"{m.governing_recall_rate:.2f}"
+        print(
+            f"{arm:<16}{m.adherence_rate:>8.2f}{m.stale_decision_rate:>8.2f}"
+            f"{m.false_permit_rate:>10.2f}{m.false_prohibit_rate:>12.2f}{recall:>12}"
+        )
+
+
+def cmd_run(args) -> int:
+    _preflight((args.arm,), args.answering, args.embedder)
+    scenarios = load_scenarios(args.scenarios)
+    model = _answering_model(args.answering, args.seed)
+    out_dir = Path(args.out)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    partial = out_dir / f"run-{stamp}-{args.arm}.partial.jsonl"
+    pairs = [(args.arm, sc) for sc in scenarios]
+    results, errors = _execute_runs(pairs, model, args.seed, args.embedder, partial)
+    _print_metrics(results)
+    path = _write_report(results, out_dir, args.arm, errors, stamp)
+    print(f"\nwrote {path}")
+    return 1 if errors else 0
+
+
+def cmd_compare(args) -> int:
+    arms = tuple(a.strip() for a in args.arms.split(",") if a.strip())
+    _preflight(arms, args.answering, args.embedder)
+    scenarios = load_scenarios(args.scenarios)
+    model = _answering_model(args.answering, args.seed)
+    out_dir = Path(args.out)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    label = "compare-" + "-".join(arms)
+    partial = out_dir / f"run-{stamp}-{label}.partial.jsonl"
+    pairs = [(arm, sc) for arm in arms for sc in scenarios]
+    results, errors = _execute_runs(pairs, model, args.seed, args.embedder, partial)
+    _print_metrics(results)
+    path = _write_report(results, out_dir, label, errors, stamp)
+    print(f"\nwrote {path}")
+    return 1 if errors else 0
+
+
+def cmd_demo(args) -> int:
+    arms = tuple(a.strip() for a in args.arms.split(",") if a.strip())
+    _preflight(arms, args.answering, args.embedder)
+    scenarios = load_scenarios(args.scenarios)
+    ns = tuple(int(x) for x in args.ns.split(",") if x.strip())
+    if args.answering == "claude":
+        print(
+            f"NOTE: --answering claude makes real API calls "
+            f"(~ {len(arms)} arms x scenarios x {len(ns)} corpus sizes). "
+            f"Use --ns to keep a real run cheap (e.g. --ns 10,50).\n"
+        )
+    model = _answering_model(args.answering, args.seed)
+    out_dir = Path(args.out)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    print("== per-scenario, per-arm (tiny corpus) ==")
+    partial = out_dir / f"run-{stamp}-demo.partial.jsonl"
+    pairs = [(arm, sc) for arm in arms for sc in scenarios]
+    results, errors = _execute_runs(pairs, model, args.seed, args.embedder, partial)
+    _print_metrics(results)
+    report = _write_report(results, out_dir, "demo", errors, stamp)
+
+    pool = None
+    if args.distractors == "real":
+        pool = load_pool(args.pool)
+        print(
+            f"\n(real distractors: {len(pool)} public PEP decisions from {args.pool})"
+        )
+    print("\n== adherence vs corpus size (discriminating scenarios, averaged) ==")
+    dataset = build_dataset(
+        scenarios,
+        arms=arms,
+        ns=ns,
+        seed=args.seed,
+        answering_model_name=args.answering,
+        embedder_spec=args.embedder,
+        pool=pool,
+    )
+    for arm in arms:
+        row = " ".join(f"N={p['N']}:{p['adherence_rate']:.2f}" for p in dataset["arms"][arm])
+        print(f"{arm:<16}{row}")
+    print("\n== governing-decision recall vs corpus size (why adherence moves) ==")
+    for arm in arms:
+        row = " ".join(
+            f"N={p['N']}:{'n/a' if p['governing_recall'] is None else format(p['governing_recall'], '.2f')}"
+            for p in dataset["arms"][arm]
+        )
+        print(f"{arm:<16}{row}")
+
+    print("\n== per-scenario adherence (where the average comes from) ==")
+    for arm in arms:
+        for sid, series in dataset["per_scenario"][arm].items():
+            row = " ".join(f"N={p['N']}:{'1' if p['adherent'] else '0'}" for p in series)
+            print(f"{arm:<13}{sid:<32}{row}")
+    data_path, chart_path = emit(dataset, out_dir)
+    print(f"\nwrote {report}\nwrote {data_path}\nwrote {chart_path}")
+    if args.answering == "offline-stub":
+        print(
+            "\nNOTE: offline-stub output is a harness illustration, NOT a benchmark "
+            "result. See README and ADR-0001."
+        )
+    else:
+        print(
+            "\nNOTE: real-model run on the tiny SYNTHETIC scenarios — a real-model "
+            "crossover, not yet the real-CORPUS evidence run. See README and ADR-0001."
+        )
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(prog="decisiongrounding", description=__doc__)
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    common = dict()
+    for name in ("run", "compare", "demo"):
+        sp = sub.add_parser(name)
+        sp.add_argument("--scenarios", default=str(_ROOT / "scenarios"))
+        sp.add_argument("--out", default=str(_DEFAULT_RESULTS))
+        sp.add_argument("--seed", type=int, default=0)
+        sp.add_argument(
+            "--answering", default="offline-stub", choices=["offline-stub", "claude"]
+        )
+        sp.add_argument(
+            "--embedder",
+            default="local-hash",
+            help="naive_rag embedder: local-hash (offline) | voyage[:model] | st[:model]",
+        )
+        if name == "run":
+            sp.add_argument("--arm", required=True, choices=sorted(ARMS))
+        if name == "compare":
+            sp.add_argument("--arms", default=",".join(REAL_ARMS))
+        if name == "demo":
+            sp.add_argument("--arms", default=",".join(REAL_ARMS))
+            sp.add_argument(
+                "--ns",
+                default="10,50,150,300",
+                help="comma-separated corpus sizes for the crossover sweep "
+                "(smaller keeps a real run cheap, e.g. 10,50)",
+            )
+            sp.add_argument(
+                "--distractors",
+                default="synthetic",
+                choices=["synthetic", "real"],
+                help="N-curve padding: synthetic `note` filler (illustrative) or "
+                "real public PEP decisions from a built pool (the honest curve)",
+            )
+            sp.add_argument(
+                "--pool",
+                default=str(_ROOT / "scenarios_real" / "peps_pool"),
+                help="real distractor pool dir (build: python -m ingest.peps pool build)",
+            )
+
+    args = p.parse_args(argv)
+    return {"run": cmd_run, "compare": cmd_compare, "demo": cmd_demo}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

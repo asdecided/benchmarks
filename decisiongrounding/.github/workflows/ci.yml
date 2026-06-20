@@ -1,0 +1,42 @@
+name: CI
+
+# Test the benchmark on every push to main and every pull request. The core
+# spine is stdlib-only, so the matrix installs only the dev + schema extras;
+# the real-backend arms (anthropic/voyageai) and the rac arm skip cleanly when
+# those tools are absent, so no API keys or external CLI are needed here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install (dev + schema extras)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,schema]"
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Smoke the offline demo
+        run: python -m runner.cli demo

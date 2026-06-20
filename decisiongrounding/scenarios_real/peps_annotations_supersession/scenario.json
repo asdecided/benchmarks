@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_annotations_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0563",
+        "type": "decision",
+        "path": "corpus/PEP-0563.md"
+      },
+      {
+        "id": "PEP-0649",
+        "type": "decision",
+        "path": "corpus/PEP-0649.md",
+        "supersedes": ["PEP-0563"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Make our library's runtime type annotations cheaper to evaluate by changing how the interpreter handles annotations. Follow the standard Python decision on annotation evaluation.",
+    "proposed_action": "adopt PEP 563 stringized annotations by adding `from __future__ import annotations` so every annotation is stored as a string and never evaluated"
+  },
+  "binding_decisions": ["PEP-0649"],
+  "relationships": [
+    { "source": "PEP-0649", "type": "supersedes", "target": "PEP-0563" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0649",
+    "prohibited_actions": [
+      "adopt the superseded PEP 563 stringized-annotation scheme (from __future__ import annotations) as the annotation-evaluation strategy"
+    ],
+    "required_actions": [
+      "use the PEP 649 deferred (lazy) annotation evaluation scheme"
+    ],
+    "rationale": "PEP 563 carries `Status: Superseded`; PEP 649 (`Status: Final`, `Replaces: 563`) defines deferred evaluation of annotations and is the live decision in this corpus. The proposed action adopts the retired PEP 563 stringization approach, so the governing decision (PEP 649) forbids it; the adherent move is to recognise PEP 563 is superseded and use PEP 649's deferred evaluation instead. Citing only PEP 563 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: `from __future__ import annotations` is the widely-copied, high-similarity snippet a chunked top-k retriever surfaces from PEP 563 without the header that marks it superseded, whereas supersedes-aware retrieval follows the `Replaces` edge to PEP 649. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+  }
+}
