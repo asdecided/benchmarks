@@ -1,0 +1,42 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-7159",
+      "number": 7159,
+      "file": "corpus/RFC-7159.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc7159.txt",
+      "source_sha256": "50aa72534210945457f5460a50f263c1d6cf87a3da8c814c1d9f54cb04f22342",
+      "category": "Standards Track",
+      "title": "The JavaScript Object Notation (JSON) Data Interchange Format",
+      "obsoletes": [
+        "RFC-4627",
+        "RFC-7158"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-8259",
+      "number": 8259,
+      "file": "corpus/RFC-8259.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc8259.txt",
+      "source_sha256": "61a5378f4255c720beb2a4b4a63b29540147c140f36988bf086291989b4cd2d7",
+      "category": "Standards Track",
+      "title": "The JavaScript Object Notation (JSON) Data Interchange Format",
+      "obsoletes": [
+        "RFC-7159"
+      ],
+      "replaces": [
+        "RFC-7159"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-8259",
+      "type": "supersedes",
+      "target": "RFC-7159"
+    }
+  ]
+}

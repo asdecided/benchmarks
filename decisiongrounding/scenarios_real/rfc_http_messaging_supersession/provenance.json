@@ -1,0 +1,42 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-7230",
+      "number": 7230,
+      "file": "corpus/RFC-7230.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc7230.txt",
+      "source_sha256": "c7fdc8bebdf1f8195f731592c47f5ea822b489436fd905b01b55ef531fca4120",
+      "category": "Standards Track",
+      "title": "Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing",
+      "obsoletes": [
+        "RFC-2145",
+        "RFC-2616"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-9112",
+      "number": 9112,
+      "file": "corpus/RFC-9112.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc9112.txt",
+      "source_sha256": "e4f426bac6206b67fdf9e0da826154f70588db2133a0a86b15cde4ff725d8937",
+      "category": "Standards Track",
+      "title": "June 2022",
+      "obsoletes": [
+        "RFC-7230"
+      ],
+      "replaces": [
+        "RFC-7230"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-9112",
+      "type": "supersedes",
+      "target": "RFC-7230"
+    }
+  ]
+}

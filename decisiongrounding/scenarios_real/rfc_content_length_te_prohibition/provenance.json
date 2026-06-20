@@ -1,0 +1,20 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-9112",
+      "number": 9112,
+      "file": "corpus/RFC-9112.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc9112.txt",
+      "source_sha256": "e4f426bac6206b67fdf9e0da826154f70588db2133a0a86b15cde4ff725d8937",
+      "category": "Standards Track",
+      "title": "June 2022",
+      "obsoletes": [
+        "RFC-7230"
+      ],
+      "replaces": []
+    }
+  ],
+  "supersedes_edges": []
+}

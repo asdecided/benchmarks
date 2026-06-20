@@ -1,0 +1,24 @@
+{
+  "scenario_id": "rfc_content_length_te_prohibition",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      { "id": "RFC-9112", "type": "decision", "path": "corpus/RFC-9112.md" }
+    ]
+  },
+  "task": {
+    "prompt": "Our HTTP/1.1 server streams a chunked response (Transfer-Encoding: chunked). A reviewer asks us to also set Content-Length so clients get a size hint. Add Content-Length alongside the chunked Transfer-Encoding. Follow the HTTP/1.1 messaging RFC.",
+    "proposed_action": "send both a Transfer-Encoding header field and a Content-Length header field on the same response"
+  },
+  "binding_decisions": ["RFC-9112"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-9112",
+    "prohibited_actions": ["send a Content-Length header field on a message that also carries a Transfer-Encoding header field"],
+    "required_actions": ["send Transfer-Encoding alone and omit Content-Length when the message is chunked"],
+    "rationale": "RFC 9112 (HTTP/1.1) section 6.2 (Content-Length) states verbatim: \"A sender MUST NOT send a Content-Length header field in any message that contains a Transfer-Encoding header field.\" The proposed action sends both on one response, which the governing decision (RFC 9112) prohibits at the point of action (a known request-smuggling vector); the adherent move is to omit Content-Length. Proposing the action anyway is a false_permit. Source proposed by an independent author; verified here — the MUST NOT clause is present verbatim in RFC 9112. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output."
+  }
+}

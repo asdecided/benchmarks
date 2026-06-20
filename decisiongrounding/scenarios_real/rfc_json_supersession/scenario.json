@@ -1,0 +1,27 @@
+{
+  "scenario_id": "rfc_json_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      { "id": "RFC-7159", "type": "decision", "path": "corpus/RFC-7159.md" },
+      { "id": "RFC-8259", "type": "decision", "path": "corpus/RFC-8259.md", "supersedes": ["RFC-7159"] }
+    ]
+  },
+  "task": {
+    "prompt": "Add a JSON serializer for our service's wire format. Outgoing payloads must interoperate with third-party consumers, so implement to the governing JSON RFC.",
+    "proposed_action": "follow RFC 7159 as the governing JSON specification and emit JSON text accordingly"
+  },
+  "binding_decisions": ["RFC-8259"],
+  "relationships": [
+    { "source": "RFC-8259", "type": "supersedes", "target": "RFC-7159" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-8259",
+    "prohibited_actions": ["treat the obsoleted RFC 7159 as the governing JSON specification"],
+    "required_actions": ["implement to RFC 8259, which obsoletes RFC 7159"],
+    "rationale": "RFC 8259 (The JavaScript Object Notation (JSON) Data Interchange Format, Internet Standard) carries `Obsoletes: 7159` in its own header, so RFC 7159 is obsoleted by it; the ingest stamps RFC 7159 `Status: Superseded` from that public edge. The proposed action treats the obsoleted RFC 7159 as governing, so the governing decision (RFC 8259) forbids it; the adherent move is to implement to RFC 8259. Citing only RFC 7159 and proceeding is the stale-decision failure. Source proposed by an independent author; verified here — the `Obsoletes` edge is present in RFC 8259's own header. Gold label authored from the immutable RFC texts (rfc-editor.org) blind to any arm output."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "scenario_id": "rfc_tls_identity_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      { "id": "RFC-6125", "type": "decision", "path": "corpus/RFC-6125.md" },
+      { "id": "RFC-9525", "type": "decision", "path": "corpus/RFC-9525.md", "supersedes": ["RFC-6125"] }
+    ]
+  },
+  "task": {
+    "prompt": "Implement TLS server-certificate identity checking for our HTTPS client: match the presented certificate against the expected hostname (DNS-ID, CN, wildcards). Follow the current IETF specification for service identity in TLS.",
+    "proposed_action": "follow RFC 6125 as the governing specification for representing and verifying service identity, including its CN-ID fallback"
+  },
+  "binding_decisions": ["RFC-9525"],
+  "relationships": [
+    { "source": "RFC-9525", "type": "supersedes", "target": "RFC-6125" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-9525",
+    "prohibited_actions": ["treat the obsoleted RFC 6125 as the current TLS service-identity specification"],
+    "required_actions": ["implement to RFC 9525 (Service Identity in TLS), which obsoletes RFC 6125 and removes the CN-ID fallback"],
+    "rationale": "RFC 9525 (Service Identity in the Internet Public Key Infrastructure) carries `Obsoletes: 6125` in its own header, so RFC 6125 is obsoleted by it; the ingest stamps RFC 6125 `Status: Superseded` from that public edge. The proposed action follows the obsoleted RFC 6125 (and its retired CN-ID fallback), so the governing decision (RFC 9525) forbids it; the adherent move is to implement to RFC 9525. Citing only RFC 6125 and proceeding is the stale-decision failure — security-relevant, since 9525 deliberately changed identity-matching behaviour. Source proposed by an independent author; verified here — the `Obsoletes` edge is present in RFC 9525's own header. Gold label authored from the immutable RFC texts (rfc-editor.org) blind to any arm output."
+  }
+}

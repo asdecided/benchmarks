@@ -39,6 +39,12 @@ def test_real_scenarios_present():
         "rfc_rc4_prohibition",
         "rfc_http_semantics_supersession",
         "rfc_date_header_prohibition",
+        "rfc_json_supersession",
+        "rfc_http_messaging_supersession",
+        "rfc_tls_identity_supersession",
+        "rfc_json_bom_prohibition",
+        "rfc_content_length_te_prohibition",
+        "pep8_none_identity_prohibition",
         "w3c_xml_edition_supersession",
     } <= set(_IDS)
 
