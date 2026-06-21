@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-id: DG-ADR-0002
+id: DG-KVMRT7NYZ9SQ
 type: decision
 tags: [corpus, methodology, supersession, pilot]
 ---
@@ -13,7 +13,7 @@ Accepted
 
 ## Category
 
-Methodology
+Technical
 
 ## Context
 
@@ -114,8 +114,7 @@ tool that produces the corpus from a pinned upstream commit.
 
 ## Related Decisions
 
-- ADR-0001 — Harness Foundation (this pilot realises its "real/public-derived
-  corpora" success condition).
+- DG-KVMRSS0C7T4M
 
 ## Success Measures
 

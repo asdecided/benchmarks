@@ -84,10 +84,12 @@ deterministic scorer as every other arm — no arm gets a bespoke scorer.
 
 ## Decisions
 
-Architecture decisions are recorded as RAC-style ADRs in `decisions/`
-(`decisions/ADR-template.md`). The repo dogfoods the artifact format the
-benchmark studies. If your change makes a non-obvious architectural choice,
-record it as an ADR.
+Architecture decisions are recorded as RAC ADRs in `decisions/`, created with
+`rac new decision decisions/<file>.md` (the repo is a RAC corpus — `rac init`
+established the `DG` key). The repo dogfoods the artifact format the benchmark
+studies: `rac validate`, `rac relationships --validate`, and `rac review` gate
+the corpus. If your change makes a non-obvious architectural choice, record it
+as an ADR and keep the gate green.
 
 ## License and sign-off
 

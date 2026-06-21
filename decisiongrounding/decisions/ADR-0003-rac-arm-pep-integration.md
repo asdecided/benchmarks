@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-id: DG-ADR-0003
+id: DG-KVMRTPNN0X20
 type: decision
 tags: [rac-arm, corpus, retrieval, supersession]
 ---
@@ -104,8 +104,8 @@ merely dumps. The supersedes edge is PEP 440's own `Replaces: 386`, not ours.
 
 ## Related Decisions
 
-- ADR-0001 — Harness Foundation (the `rac` arm gets no special treatment).
-- ADR-0002 — Real-Corpus Pilot (this makes its corpus runnable by the `rac` arm).
+- DG-KVMRSS0C7T4M
+- DG-KVMRT7NYZ9SQ
 
 ## Success Measures
 

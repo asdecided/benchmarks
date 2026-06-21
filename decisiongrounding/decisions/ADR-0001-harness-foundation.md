@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-id: DG-ADR-0001
+id: DG-KVMRSS0C7T4M
 type: decision
 tags: [harness, foundation, methodology]
 ---
@@ -139,10 +139,6 @@ adapter slot (`providers/memory_provider.py`).
 
 See Option A and Option B above. Option A was rejected for evaluation-contract
 mismatch, not for lack of merit; its memory-provider reach is retained under B.
-
-## Related Decisions
-
-- (none yet — this is the foundation decision)
 
 ## Success Measures
 

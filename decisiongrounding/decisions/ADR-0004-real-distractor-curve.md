@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-id: DG-ADR-0004
+id: DG-KVMRV4YRMJB6
 type: decision
 tags: [corpus, crossover, methodology]
 ---
@@ -99,8 +99,8 @@ Rejected: `provenance.json` + `verify` give the same guarantee leaner.
 
 ## Related Decisions
 
-- DG-ADR-0002 (extends the real-corpus pilot to scaling distractors)
-- DG-ADR-0003 (reuses the RAC-native PEP envelope for pool artifacts)
+- DG-KVMRT7NYZ9SQ
+- DG-KVMRTPNN0X20
 
 ## Success Measures
 
