@@ -143,6 +143,58 @@ scenarios**. That is the plumbing for evidence, not the evidence. The real
 result requires real/public-derived corpora (see CONTRIBUTING.md); until then
 the crossover is plumbing, not evidence.
 
+### Through a proxy (LiteLLM or any Anthropic gateway)
+
+The answering model uses the official `anthropic` SDK, which honours the
+**`ANTHROPIC_BASE_URL`** environment variable. So if your funded access routes
+through a LiteLLM proxy (or any gateway) that exposes Anthropic's **native**
+Messages route, no code change is needed — point the SDK at the proxy:
+
+```bash
+export ANTHROPIC_BASE_URL=https://your-litellm/...   # the Anthropic-native route
+export ANTHROPIC_API_KEY=sk-litellm-virtual-key      # the proxy's virtual key
+# then run compare / batch / demo exactly as above
+```
+
+The benchmark relies on three Anthropic-native features, so **probe the endpoint
+first** (a couple of small calls) to confirm the proxy forwards them faithfully:
+
+```bash
+python -m scripts.litellm_probe        # reuses the exact request the run sends
+```
+
+It checks, and prints a verdict on:
+
+1. **`messages.create` with structured outputs** (`output_config` + a JSON
+   schema) — the response must parse back into a `ProposedChange`; this is what
+   makes scoring deterministic. It also confirms token **`usage`** is reported
+   (the cost report needs it).
+2. **The Message Batches API** (`messages.batches`) — the `batch` /
+   `make real-batch` / `demo --batch` path.
+
+How to read the result:
+
+- **Both pass** → it's a transparent Anthropic passthrough. Set the two env vars
+  and run normally; `run_real.sh` prints the resolved endpoint so a proxied run
+  is on the record.
+- **Batch fails, structured outputs pass** → the proxy doesn't expose the batch
+  endpoint. Run the crossover **synchronously** through LiteLLM (drop `--batch`),
+  and reserve `--batch` for a direct-Anthropic key.
+- **Structured outputs fail** → the proxy is an OpenAI-compatible gateway
+  (`/chat/completions`), not an Anthropic passthrough. The native code won't work
+  unmodified; it needs an OpenAI-client answering adapter (no Batch API, and
+  normalised JSON output instead of `output_config`).
+
+Two caveats when proxied, regardless of mode:
+
+- **Model identity.** Each report records `answering_model.version` as
+  `claude-opus-4-8` (a pinned constant). Make sure the proxy's model alias maps
+  to that exact model, or the recorded version is misleading.
+- **Cost numbers.** `scoring/cost.py` prices at Anthropic's published list rates.
+  Token counts stay accurate if the proxy forwards `usage`, but the £/$ figures
+  are list-price estimates — they won't reflect a proxy's markup or your
+  organisation's contract.
+
 ### Real-corpus pilot (PEP supersession)
 
 `scenarios_real/` holds the first **real, public-derived** corpus: the
