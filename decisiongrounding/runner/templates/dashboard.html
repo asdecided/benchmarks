@@ -83,7 +83,7 @@ function renderStatus(s){
   if(p.total){const pct=p.pct||0; bar=`<div style="background:#eee;border-radius:6px;height:14px;max-width:420px;overflow:hidden"><div style="width:${pct}%;background:#2ca02c;height:14px"></div></div><div class=note>${p.done}/${p.total} cells (${pct}%)</div>`;}
   const tail=s.log_tail?`<pre>${esc(s.log_tail)}</pre>`:'';
   el.innerHTML=`<b>${esc(s.state)}</b> &middot; ${esc(s.command||'')} ${esc(s.mode||'')}${bar}${tail}`;
-  if(s.state==='done'){el.innerHTML+='<div class=note>done — reloading…</div>';poll_stop=true;setTimeout(()=>location.reload(),1500);}
+  if(s.state==='done'){el.innerHTML+='<div class=note>done — refreshing…</div>';poll_stop=true;setTimeout(refreshMain,1200);}
   if(s.state==='error'){el.innerHTML+='<div class=bad>run failed — see log above</div>';poll_stop=true;}
 }
 async function poll(){if(poll_stop)return;try{renderStatus(await jget('/api/run/status'))}catch(e){}}
@@ -91,6 +91,36 @@ async function runOffline(){poll_stop=false; const r=await jpost('/api/run/start
 function cfg(){return {command:document.getElementById('r-cmd').value, ns:document.getElementById('r-ns').value.split(',').map(x=>x.trim()).filter(Boolean), batch:document.getElementById('r-batch').checked};}
 async function estimate(){const c=cfg(); const q=new URLSearchParams({command:c.command,ns:c.ns.join(','),batch:c.batch}); const e=await jget('/api/run/estimate?'+q); document.getElementById('r-est').textContent=`~£${e.gbp} ($${e.usd}) · ${e.calls} calls · ${e.note}`; return e;}
 async function runReal(){if(!document.getElementById('r-confirm').checked){alert('Tick the confirmation box first.');return;} const e=await estimate(); if(!confirm(`Spend ~£${e.gbp} ($${e.usd}) on ${e.calls} real API calls?`))return; poll_stop=false; const c=cfg(); const r=await jpost('/api/run/start',{mode:'real',command:c.command,ns:c.ns,batch:c.batch,confirm_usd:e.usd}); if(!r.ok)alert(r.data.error||'failed'); else renderStatus(r.data);}
+// --- progressive enhancement: table sort, scenario filter, arm toggle, refresh ---
+function _cellVal(tr,i){const c=tr.children[i]; if(!c)return ''; const t=c.textContent.trim(); const n=parseFloat(t); return (t!=='' && !isNaN(n))?n:t.toLowerCase();}
+function sortTable(th){
+  const table=th.closest('table'), idx=[...th.parentNode.children].indexOf(th), tb=table.tBodies[0];
+  const asc=!(th.dataset.asc==='1'); const rows=[...tb.rows];
+  rows.sort((a,b)=>{const x=_cellVal(a,idx),y=_cellVal(b,idx); return (x<y?-1:x>y?1:0)*(asc?1:-1);});
+  th.parentNode.querySelectorAll('th').forEach(h=>{delete h.dataset.asc;}); th.dataset.asc=asc?'1':'0';
+  rows.forEach(r=>tb.appendChild(r));
+}
+function filterScenarios(q){
+  q=(q||'').toLowerCase(); const fail=document.getElementById('scen-fail');
+  const only=fail&&fail.checked;
+  document.querySelectorAll('#scenario-matrix tbody tr, details[data-scenario]').forEach(el=>{
+    const match=el.dataset.scenario.toLowerCase().includes(q) && (!only || el.dataset.fail==='1');
+    el.style.display=match?'':'none';});
+}
+function toggleFailures(){const s=document.getElementById('scen-search'); filterScenarios(s?s.value:'');}
+async function refreshMain(){
+  try{const r=await fetch('/api/fragment'); if(!r.ok)return; const html=await r.text();
+      const m=document.querySelector('main'); if(m&&html) m.innerHTML=html;}catch(e){}
+}
+// Delegated so handlers survive an /api/fragment innerHTML swap.
+document.addEventListener('click',e=>{
+  const th=e.target.closest('th.sort'); if(th){sortTable(th); return;}
+  const lg=e.target.closest('g.legend[data-arm]');
+  if(lg){const svg=lg.closest('svg'), arm=lg.getAttribute('data-arm');
+    const s=svg&&svg.querySelector('g.series[data-arm="'+arm+'"]');
+    if(s){const hidden=s.style.display==='none'; s.style.display=hidden?'':'none'; lg.style.opacity=hidden?'1':'0.35';}}
+});
+
 // Only poll when a live Run tab is present (static snapshots stay inert).
 if(document.getElementById('run-status')){setInterval(poll,2000); poll();}
 </script>

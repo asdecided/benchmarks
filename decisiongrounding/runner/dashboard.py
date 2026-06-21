@@ -73,12 +73,14 @@ def _f(x, nd=2):
 
 def _metric_table(run):
     m = run["metrics_by_arm"]
-    rows = ["<table><thead><tr><th>arm</th><th>adherence</th><th>stale</th>"
-            "<th>false-permit</th><th>false-prohibit</th><th>gov-recall</th></tr></thead><tbody>"]
+    rows = ['<table id=leaderboard class=sortable><thead><tr>'
+            '<th class=sort>arm</th><th class=sort>adherence</th><th class=sort>stale</th>'
+            '<th class=sort>false-permit</th><th class=sort>false-prohibit</th>'
+            '<th class=sort>gov-recall</th></tr></thead><tbody>']
     for a in sorted(m, key=lambda a: m[a]["adherence_rate"], reverse=True):
         d = m[a]
         rows.append(
-            f"<tr><td><code>{_esc(a)}</code></td><td>{_f(d['adherence_rate'])}</td>"
+            f'<tr data-arm="{_esc(a)}"><td><code>{_esc(a)}</code></td><td>{_f(d["adherence_rate"])}</td>'
             f"<td>{_f(d['stale_decision_rate'])}</td><td>{_f(d['false_permit_rate'])}</td>"
             f"<td>{_f(d['false_prohibit_rate'])}</td><td>{_f(d.get('governing_recall_rate'))}</td></tr>"
         )
@@ -137,19 +139,29 @@ def _scenarios_section(run):
     scen = sorted({r["scenario_id"] for r in runs})
     by = {(r["arm"], r["scenario_id"]): r for r in runs}
 
+    # controls (progressive enhancement; inert without JS / in static snapshots)
+    controls = (
+        '<div class=controls>'
+        '<input id=scen-search type=search placeholder="filter scenarios…" '
+        'oninput="filterScenarios(this.value)" aria-label="filter scenarios">'
+        '<label><input id=scen-fail type=checkbox onchange="toggleFailures(this.checked)"> '
+        'failures only</label></div>'
+    )
     # matrix
-    head = "".join(f"<th>{_esc(a)}</th>" for a in arms)
-    mrows = [f"<table><thead><tr><th>scenario</th>{head}</tr></thead><tbody>"]
+    head = "".join(f"<th class=sort>{_esc(a)}</th>" for a in arms)
+    mrows = [f"<table id=scenario-matrix class=sortable><thead><tr><th class=sort>scenario</th>{head}</tr></thead><tbody>"]
     for s in scen:
         cells = ""
+        any_miss = False
         for a in arms:
             r = by.get((a, s))
             if r is None:
                 cells += "<td>–</td>"; continue
             ok = r["score"]["adherent"]
+            any_miss = any_miss or not ok
             cells += f'<td class="{ "ok" if ok else "bad"}">{"✓" if ok else "✗"}</td>'
-        mrows.append(f"<tr><td>{_esc(s)}</td>{cells}</tr>")
-    matrix = "".join(mrows) + "</tbody></table>"
+        mrows.append(f'<tr data-scenario="{_esc(s)}" data-fail="{int(any_miss)}"><td>{_esc(s)}</td>{cells}</tr>')
+    matrix = controls + "".join(mrows) + "</tbody></table>"
 
     # per-scenario drill-down (inspect failures) via native <details>
     drill = ["<h2>Drill-down</h2>",
@@ -175,7 +187,8 @@ def _scenarios_section(run):
                 f"<td>{_esc(stance)}</td><td>{_esc(', '.join(pc['cites_decisions']) or '—')}</td>"
                 f"<td>{govs}</td><td>{_esc(pc['summary'][:120])}</td></tr>")
         mark = " ⚠️" if any_miss else ""
-        drill.append(f"<details><summary>{_esc(s)}{mark}</summary>"
+        drill.append(f'<details data-scenario="{_esc(s)}" data-fail="{int(any_miss)}">'
+                     f"<summary>{_esc(s)}{mark}</summary>"
                      + "".join(rows) + "</tbody></table></details>")
     return matrix + "".join(drill)
 
@@ -203,15 +216,18 @@ def _run_tab(paid: bool) -> str:
         "<section class=tab id=s7><h2>Run the benchmark</h2>"
         "<p class=note>Triggers the CLI on the server; the page refreshes when the run finishes.</p>"
         "<button onclick=runOffline()>Run offline (free)</button> "
+        "<button onclick=refreshMain()>↻ Refresh data</button> "
         "<span class=note>offline-stub + local-hash — zero spend</span>"
         "<div id=run-status style='margin-top:14px'></div>"
         + real + "</section>"
     )
 
 
-def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=False, template=None):
+def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False):
+    """The tab sections — the inner of <main>. Shared by build_dashboard and the
+    live /api/fragment endpoint, so an in-place refresh re-renders server-side
+    (single source of truth; SVG stays Python-generated)."""
     model = run["runs"][0]["answering_model"]["version"] if run["runs"] else "?"
-    emb = next((r["embedder"]["name"] for r in run["runs"] if r.get("embedder")), "n/a")
     m = run["metrics_by_arm"]
     n_scen = len({r["scenario_id"] for r in run["runs"]})
     # Fast cost-vs-N for the live UI: read the dataset's recorded token means when
@@ -304,16 +320,27 @@ def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=F
     # 7 Run (live UI only — needs the server's endpoints)
     if live:
         secs.append(_run_tab(paid_enabled))
+    return "".join(secs)
 
-    tabs = ["Overview", "Leaderboard", "Curves", "Cost", "rac vs RAG", "Scenarios", "Reproduce"]
-    if live:
-        tabs.append("Run")
+
+# Tab labels, in section order (s0..s6, +s7 Run when live). Kept beside the
+# renderer so the nav and the sections stay in lockstep.
+_TABS = ["Overview", "Leaderboard", "Curves", "Cost", "rac vs RAG", "Scenarios", "Reproduce"]
+
+
+def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=False, template=None):
+    model = run["runs"][0]["answering_model"]["version"] if run["runs"] else "?"
+    emb = next((r["embedder"]["name"] for r in run["runs"] if r.get("embedder")), "n/a")
+    n_scen = len({r["scenario_id"] for r in run["runs"]})
+    sections = render_main(run, dataset, cost_curve, live=live, paid_enabled=paid_enabled)
+
+    tabs = _TABS + (["Run"] if live else [])
     radios = "".join(f'<input class=tabsel type=radio name=tab id=t{i} {"checked" if i==0 else ""}>'
                      for i in range(len(tabs)))
     nav = "<nav>" + "".join(f'<label for=t{i}>{_esc(t)}</label>' for i, t in enumerate(tabs)) + "</nav>"
     chips = "".join(f'<span class=chip>{_esc(c)}</span>' for c in
                     [f"answering: {model}", f"embedder: {emb}", f"{n_scen} scenarios",
                      f"distractors: {dataset.get('pool_size','—')} real" if dataset else "no crossover yet"])
-    body = radios + nav + "<main>" + "".join(secs) + "</main>"
+    body = radios + nav + "<main>" + sections + "</main>"
     # Inject the data-bound parts into the editable HTML shell (the .html template).
     return load_template(template).replace("<!--CHIPS-->", chips).replace("<!--BODY-->", body)

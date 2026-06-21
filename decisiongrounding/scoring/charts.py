@@ -100,17 +100,22 @@ def line_chart(
         f'<text x="16" y="{(pad_t+height-pad_b)/2}" text-anchor="middle" font-size="12" '
         f'transform="rotate(-90 16 {(pad_t+height-pad_b)/2})">{_esc(y_label)}</text>'
     )
-    # series
+    # series — each wrapped in a data-arm group so the UI can toggle it, and a
+    # matching legend group (clickable) carrying the same data-arm.
     legend_y = pad_t + 6
     for i, (label, pts) in enumerate(series.items()):
         c = color_for(label, i)
+        arm = _esc(label)
         pts = sorted(pts)
         poly = " ".join(f"{px(x):.1f},{py(y):.1f}" for x, y in pts)
-        parts.append(f'<polyline points="{poly}" fill="none" stroke="{c}" stroke-width="2.5"/>')
-        for x, y in pts:
-            parts.append(f'<circle cx="{px(x):.1f}" cy="{py(y):.1f}" r="3.5" fill="{c}"/>')
-        parts.append(f'<rect x="{width-pad_r+8}" y="{legend_y-9}" width="11" height="11" fill="{c}"/>')
-        parts.append(f'<text x="{width-pad_r+24}" y="{legend_y}" font-size="12" fill="#222">{_esc(label)}</text>')
+        series_svg = [f'<polyline points="{poly}" fill="none" stroke="{c}" stroke-width="2.5"/>']
+        series_svg += [f'<circle cx="{px(x):.1f}" cy="{py(y):.1f}" r="3.5" fill="{c}"/>' for x, y in pts]
+        parts.append(f'<g class="series" data-arm="{arm}">' + "".join(series_svg) + "</g>")
+        parts.append(
+            f'<g class="legend" data-arm="{arm}" style="cursor:pointer">'
+            f'<rect x="{width-pad_r+8}" y="{legend_y-9}" width="11" height="11" fill="{c}"/>'
+            f'<text x="{width-pad_r+24}" y="{legend_y}" font-size="12" fill="#222">{arm}</text></g>'
+        )
         legend_y += 18
     parts.append("</svg>")
     return "\n".join(parts)

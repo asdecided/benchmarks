@@ -21,7 +21,7 @@ import threading
 import time
 from pathlib import Path
 
-from runner.dashboard import build_dashboard, curve_from_dataset
+from runner.dashboard import build_dashboard, curve_from_dataset, render_main
 from scoring.cost import dollars
 
 _ROOT = Path(__file__).resolve().parent.parent
@@ -264,6 +264,15 @@ def build_ui_app(results_dir: str | Path = "results/published", template: str | 
             return JSONResponse({"ok": True, **st})
         except ValueError as exc:
             return JSONResponse({"ok": False, "error": str(exc)}, status_code=400)
+
+    @app.get("/api/fragment", response_class=HTMLResponse)
+    def fragment():  # noqa: ANN202
+        # The <main> inner, server-rendered from the latest results — the page
+        # swaps this in place (no full reload) on refresh / run completion.
+        run, dataset = load_results(results_dir)
+        if run is None:
+            return HTMLResponse("", status_code=204)
+        return HTMLResponse(render_main(run, dataset, live=True, paid_enabled=paid_enabled()))
 
     @app.get("/healthz")
     def healthz():  # noqa: ANN202
