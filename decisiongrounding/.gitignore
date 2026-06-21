@@ -4,3 +4,10 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
+
+# Local secrets and virtualenv — never commit (keep the .env.example template).
+.env
+.env.*
+!.env.example
+.venv/
+venv/

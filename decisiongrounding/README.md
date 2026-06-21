@@ -90,6 +90,18 @@ append-only report under `results/`, and emits the crossover chart
 
 ### Run it for real (pinned model + real retrieval)
 
+**Quickest from a fresh clone** — one launcher creates a venv, installs the real
+backends, loads your keys from `.env`, and runs (it probes the endpoint first if
+you point `ANTHROPIC_BASE_URL` at a proxy):
+
+```bash
+cp .env.example .env        # then add ANTHROPIC_API_KEY (+ VOYAGE_API_KEY)
+./scripts/from_source.sh                       # headline compare (all arms)
+CROSSOVER=1 BATCH=1 ./scripts/from_source.sh   # + the adherence-vs-N curve, batched
+```
+
+Or set it up by hand:
+
 ```bash
 pip install -e ".[real,schema,chart]"
 export ANTHROPIC_API_KEY=...        # pinned answering model: claude-opus-4-8
