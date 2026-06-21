@@ -27,6 +27,9 @@ chart = ["matplotlib>=3.7"]
 real = ["anthropic>=0.109", "voyageai>=0.4"]
 # Local, offline-capable embeddings alternative to Voyage.
 local-embeddings = ["sentence-transformers>=2.2"]
+# Local web UI (`decisiongrounding ui`). Optional and lazily imported so the
+# core stays dependency-free; the page needs no frontend build step.
+ui = ["fastapi>=0.110", "uvicorn>=0.27"]
 # The rac arm additionally needs the `rac` CLI on PATH (or RAC_BIN) — it is an
 # external tool, not a Python dependency (ADR-0001), so it is not listed here.
 # Test runner.

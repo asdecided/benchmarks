@@ -1,4 +1,13 @@
-.PHONY: demo test compare pool rfc-pool crossover-real corpora-verify real-run real-crossover
+.PHONY: demo test compare pool rfc-pool crossover-real corpora-verify real-run real-crossover ui dashboard
+
+# Local web UI: serve the results dashboard at 127.0.0.1:8099 (needs the [ui]
+# extra: pip install -e '.[ui]'). RESULTS overrides the directory it reads.
+ui:
+	python -m runner.cli ui --results $(or $(RESULTS),results/published) --port $(or $(PORT),8099)
+# Static snapshot of the dashboard (bakes in the offline cost-vs-N curve):
+dashboard:
+	python -m scripts.dashboard --run $(RUN) --crossover $(CROSSOVER) --cost-curve \
+	  --out results/published/index.html
 
 # The real evidence run. Needs ANTHROPIC_API_KEY (+ VOYAGE_API_KEY recommended).
 # headline compare across all real scenarios:

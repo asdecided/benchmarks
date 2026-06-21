@@ -472,6 +472,18 @@ def cmd_demo(args) -> int:
     return 0
 
 
+def cmd_ui(args) -> int:
+    """Serve the local results dashboard. FastAPI + uvicorn are an optional
+    extra; surface a clear install hint if they are missing."""
+    from runner.ui import UIUnavailable, run_ui
+
+    try:
+        run_ui(results_dir=args.results, host=args.host, port=args.port)
+    except UIUnavailable as exc:
+        raise SystemExit(str(exc))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="decisiongrounding", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -521,9 +533,17 @@ def main(argv: list[str] | None = None) -> int:
                 help="real distractor pool dir (build: python -m ingest.peps pool build)",
             )
 
+    # The local web UI is a different shape (no scenarios/answering knobs).
+    sp_ui = sub.add_parser("ui", help="serve the local results dashboard (needs the [ui] extra)")
+    sp_ui.add_argument("--results", default=str(_DEFAULT_RESULTS / "published"),
+                       help="directory to read the latest run + crossover from")
+    sp_ui.add_argument("--host", default="127.0.0.1")
+    sp_ui.add_argument("--port", type=int, default=8099)
+
     args = p.parse_args(argv)
     return {
-        "run": cmd_run, "compare": cmd_compare, "demo": cmd_demo, "batch": cmd_batch,
+        "run": cmd_run, "compare": cmd_compare, "demo": cmd_demo,
+        "batch": cmd_batch, "ui": cmd_ui,
     }[args.cmd](args)
 
 
