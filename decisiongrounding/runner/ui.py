@@ -216,7 +216,7 @@ _EMPTY = (
 )
 
 
-def build_ui_app(results_dir: str | Path = "results/published"):
+def build_ui_app(results_dir: str | Path = "results/published", template: str | Path | None = None):
     """Build the FastAPI app. Routes:
       GET /            -> the dashboard (re-rendered from the latest results)
       GET /healthz     -> liveness
@@ -236,7 +236,8 @@ def build_ui_app(results_dir: str | Path = "results/published"):
         run, dataset = load_results(results_dir)
         if run is None:
             return HTMLResponse(_EMPTY.format(dir=results_dir))
-        return HTMLResponse(build_dashboard(run, dataset, live=True, paid_enabled=paid_enabled()))
+        return HTMLResponse(build_dashboard(run, dataset, live=True,
+                                            paid_enabled=paid_enabled(), template=template))
 
     @app.get("/api/run/estimate")
     def api_estimate(command: str = "compare", arms: str = "", ns: str = "10,50", batch: bool = False):  # noqa: ANN202
@@ -287,11 +288,12 @@ def build_ui_app(results_dir: str | Path = "results/published"):
     return app
 
 
-def run_ui(results_dir: str | Path = "results/published", host: str = "127.0.0.1", port: int = 8099) -> None:
+def run_ui(results_dir: str | Path = "results/published", host: str = "127.0.0.1",
+           port: int = 8099, template: str | Path | None = None) -> None:
     """Serve the UI with uvicorn (the `decisiongrounding ui` command)."""
     _require_ui()
     import uvicorn
 
-    app = build_ui_app(results_dir)
+    app = build_ui_app(results_dir, template=template)
     print(f"Decision Grounding Bench UI -> http://{host}:{port}  (results: {results_dir})")
     uvicorn.run(app, host=host, port=port, log_level="warning")

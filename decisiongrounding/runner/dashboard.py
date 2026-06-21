@@ -14,9 +14,25 @@ recorded token means; the static generator can additionally compute it offline.
 from __future__ import annotations
 
 import html
+import os
+from pathlib import Path
 
 from scoring.charts import grouped_bar_chart, line_chart
 from scoring.cost import cost_by_arm, dollars
+
+_DEFAULT_TEMPLATE = Path(__file__).resolve().parent / "templates" / "dashboard.html"
+
+
+def load_template(template: str | Path | None = None) -> str:
+    """The editable HTML shell. Resolution order: explicit `template` arg, then
+    the DG_UI_TEMPLATE env var, then the packaged default. The returned text
+    must contain the <!--CHIPS--> and <!--BODY--> placeholders."""
+    path = Path(template or os.environ.get("DG_UI_TEMPLATE") or _DEFAULT_TEMPLATE)
+    text = path.read_text(encoding="utf-8")
+    for token in ("<!--CHIPS-->", "<!--BODY-->"):
+        if token not in text:
+            raise ValueError(f"dashboard template {path} is missing the {token} placeholder")
+    return text
 
 
 def curve_from_dataset(dataset) -> dict | None:
@@ -45,46 +61,6 @@ _ARM_DESC = {
     "memory_provider": "pluggable external memory provider (stub)",
 }
 
-_CSS = """
-:root{--fg:#1a1a1a;--mut:#666;--line:#e3e3e3;--ok:#2ca02c;--bad:#d62728;--bg:#fff;--card:#fafafa}
-*{box-sizing:border-box}
-body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--fg);margin:0;background:var(--bg);line-height:1.5}
-header{padding:28px 32px 18px;border-bottom:1px solid var(--line)}
-h1{margin:0 0 6px;font-size:24px}
-.sub{color:var(--mut);max-width:760px}
-.chips{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 12px;font-size:13px}
-main{padding:0 32px 48px}
-.kpis{display:flex;flex-wrap:wrap;gap:16px;margin:22px 0}
-.kpi{flex:1;min-width:180px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-.kpi .n{font-size:26px;font-weight:700}
-.kpi .l{color:var(--mut);font-size:13px;margin-top:2px}
-nav{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:8px;flex-wrap:wrap}
-nav label{padding:10px 16px;cursor:pointer;font-size:14px;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1px}
-nav label:hover{color:var(--fg)}
-section.tab{display:none;padding-top:22px}
-input.tabsel{position:absolute;left:-9999px}
-""" + "".join(
-    f"#t{i}:checked~nav label[for=t{i}]{{color:var(--fg);border-bottom-color:var(--fg);font-weight:600}}"
-    f"#t{i}:checked~main #s{i}{{display:block}}"
-    for i in range(8)
-) + """
-table{border-collapse:collapse;width:100%;margin:8px 0 18px;font-size:14px}
-th,td{border:1px solid var(--line);padding:7px 10px;text-align:right}
-th:first-child,td:first-child{text-align:left}
-thead th{background:var(--card)}
-code{background:var(--card);padding:1px 5px;border-radius:4px;font-size:13px}
-pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font-size:13px}
-.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
-.chart{margin:10px 0 22px;max-width:760px}
-.chart svg{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
-details{border:1px solid var(--line);border-radius:8px;margin:6px 0;padding:6px 12px;background:var(--card)}
-summary{cursor:pointer;font-weight:600}
-details table{margin:10px 0 4px}
-.note{color:var(--mut);font-size:13px;margin:6px 0}
-.verdict{background:#f0f7f0;border:1px solid #cfe5cf;border-radius:8px;padding:12px 14px;max-width:760px}
-h2{font-size:18px;margin:26px 0 6px}
-"""
 
 
 def _esc(s):
@@ -233,31 +209,7 @@ def _run_tab(paid: bool) -> str:
     )
 
 
-_RUN_JS = """<script>
-async function jget(u){const r=await fetch(u);return r.json()}
-async function jpost(u,b){const r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});return {ok:r.ok,data:await r.json()}}
-let poll_stop=false;
-function esc(t){return (t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-function renderStatus(s){
-  const el=document.getElementById('run-status'); if(!el)return;
-  if(!s||s.state==='idle'){el.innerHTML='<span class=note>idle — no run yet</span>';return;}
-  const p=s.progress||{}; let bar='';
-  if(p.total){const pct=p.pct||0; bar=`<div style="background:#eee;border-radius:6px;height:14px;max-width:420px;overflow:hidden"><div style="width:${pct}%;background:#2ca02c;height:14px"></div></div><div class=note>${p.done}/${p.total} cells (${pct}%)</div>`;}
-  const tail=s.log_tail?`<pre>${esc(s.log_tail)}</pre>`:'';
-  el.innerHTML=`<b>${esc(s.state)}</b> &middot; ${esc(s.command||'')} ${esc(s.mode||'')}${bar}${tail}`;
-  if(s.state==='done'){el.innerHTML+='<div class=note>done — reloading…</div>';poll_stop=true;setTimeout(()=>location.reload(),1500);}
-  if(s.state==='error'){el.innerHTML+='<div class=bad>run failed — see log above</div>';poll_stop=true;}
-}
-async function poll(){if(poll_stop)return;try{renderStatus(await jget('/api/run/status'))}catch(e){}}
-setInterval(poll,2000); poll();
-async function runOffline(){poll_stop=false; const r=await jpost('/api/run/start',{mode:'offline',command:'compare'}); if(!r.ok)alert(r.data.error||'failed'); else renderStatus(r.data);}
-function cfg(){return {command:document.getElementById('r-cmd').value, ns:document.getElementById('r-ns').value.split(',').map(x=>x.trim()).filter(Boolean), batch:document.getElementById('r-batch').checked};}
-async function estimate(){const c=cfg(); const q=new URLSearchParams({command:c.command,ns:c.ns.join(','),batch:c.batch}); const e=await jget('/api/run/estimate?'+q); document.getElementById('r-est').textContent=`~£${e.gbp} ($${e.usd}) · ${e.calls} calls · ${e.note}`; return e;}
-async function runReal(){if(!document.getElementById('r-confirm').checked){alert('Tick the confirmation box first.');return;} const e=await estimate(); if(!confirm(`Spend ~£${e.gbp} ($${e.usd}) on ${e.calls} real API calls?`))return; poll_stop=false; const c=cfg(); const r=await jpost('/api/run/start',{mode:'real',command:c.command,ns:c.ns,batch:c.batch,confirm_usd:e.usd}); if(!r.ok)alert(r.data.error||'failed'); else renderStatus(r.data);}
-</script>"""
-
-
-def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=False):
+def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=False, template=None):
     model = run["runs"][0]["answering_model"]["version"] if run["runs"] else "?"
     emb = next((r["embedder"]["name"] for r in run["runs"] if r.get("embedder")), "n/a")
     m = run["metrics_by_arm"]
@@ -362,14 +314,6 @@ def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=F
     chips = "".join(f'<span class=chip>{_esc(c)}</span>' for c in
                     [f"answering: {model}", f"embedder: {emb}", f"{n_scen} scenarios",
                      f"distractors: {dataset.get('pool_size','—')} real" if dataset else "no crossover yet"])
-    return (
-        "<!doctype html><html lang=en><head><meta charset=utf-8>"
-        "<meta name=viewport content='width=device-width,initial-scale=1'>"
-        "<title>Decision Grounding Bench</title><style>" + _CSS + "</style></head><body>"
-        "<header><h1>Decision Grounding Bench</h1>"
-        "<div class=sub>Does typed, supersession-aware grounding make an agent follow the right "
-        "decision better than context-dump or naive RAG — and at what token cost?</div>"
-        f"<div class=chips>{chips}</div></header>"
-        + radios + nav + "<main>" + "".join(secs) + "</main>"
-        + (_RUN_JS if live else "") + "</body></html>"
-    )
+    body = radios + nav + "<main>" + "".join(secs) + "</main>"
+    # Inject the data-bound parts into the editable HTML shell (the .html template).
+    return load_template(template).replace("<!--CHIPS-->", chips).replace("<!--BODY-->", body)

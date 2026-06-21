@@ -478,7 +478,7 @@ def cmd_ui(args) -> int:
     from runner.ui import UIUnavailable, run_ui
 
     try:
-        run_ui(results_dir=args.results, host=args.host, port=args.port)
+        run_ui(results_dir=args.results, host=args.host, port=args.port, template=args.template)
     except UIUnavailable as exc:
         raise SystemExit(str(exc))
     return 0
@@ -539,6 +539,8 @@ def main(argv: list[str] | None = None) -> int:
                        help="directory to read the latest run + crossover from")
     sp_ui.add_argument("--host", default="127.0.0.1")
     sp_ui.add_argument("--port", type=int, default=8099)
+    sp_ui.add_argument("--template", default=None,
+                       help="path to a custom dashboard HTML template (else DG_UI_TEMPLATE or the default)")
 
     args = p.parse_args(argv)
     return {

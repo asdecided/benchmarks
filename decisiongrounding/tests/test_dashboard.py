@@ -4,7 +4,9 @@ render path that the live UI and the static generator share."""
 
 import html.parser
 
-from runner.dashboard import build_dashboard, curve_from_dataset
+import pytest
+
+from runner.dashboard import build_dashboard, curve_from_dataset, load_template
 
 
 def _run():
@@ -78,6 +80,31 @@ def test_build_dashboard_head_to_head_verdict_reads_the_numbers():
     out = build_dashboard(_run(), _dataset())
     # naive_rag decays to 0.3 at N=300 while rac holds 1.0 -> rac-holds verdict.
     assert "rac holds adherence" in out
+
+
+def test_default_template_is_a_file_with_both_placeholders():
+    # The shell is a separately-managed .html file, not embedded in the .py.
+    t = load_template()
+    assert "<!--CHIPS-->" in t and "<!--BODY-->" in t
+    # exactly one real placeholder each (the doc-comment must not duplicate them)
+    assert t.count("<!--CHIPS-->") == 1 and t.count("<!--BODY-->") == 1
+
+
+def test_custom_template_override_is_honored(tmp_path):
+    custom = tmp_path / "mine.html"
+    custom.write_text("<!doctype html><title>Mine</title><body>"
+                      "<div class=chips><!--CHIPS--></div><!--BODY--></body>")
+    out = build_dashboard(_run(), _dataset(), template=str(custom))
+    assert "<title>Mine</title>" in out          # the user's shell is used
+    assert "Leaderboard" in out and "<svg" in out  # data still injected
+    assert "<!--BODY-->" not in out               # placeholder consumed
+
+
+def test_template_missing_placeholder_is_a_clear_error(tmp_path):
+    bad = tmp_path / "bad.html"
+    bad.write_text("<html><body>no placeholders here</body></html>")
+    with pytest.raises(ValueError, match="placeholder"):
+        build_dashboard(_run(), _dataset(), template=str(bad))
 
 
 def test_curve_from_dataset_prefers_real_usage():

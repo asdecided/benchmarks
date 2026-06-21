@@ -40,3 +40,7 @@ decisiongrounding = "runner.cli:main"
 
 [tool.setuptools]
 packages = ["providers", "scenarios", "scoring", "runner", "ingest"]
+
+[tool.setuptools.package-data]
+# The editable dashboard HTML shell ships with the package (the UI loads it).
+runner = ["templates/*.html"]

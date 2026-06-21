@@ -30,6 +30,7 @@ def main(argv=None):
     ap.add_argument("--cost-curve", action="store_true",
                     help="compute the offline token-cost-vs-N curve (no API spend)")
     ap.add_argument("--pool"); ap.add_argument("--scenarios")
+    ap.add_argument("--template", default=None, help="custom dashboard HTML template")
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
 
@@ -40,7 +41,7 @@ def main(argv=None):
         curve = _offline_cost_curve(dataset, args.pool, args.scenarios)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(build_dashboard(run, dataset, curve), encoding="utf-8")
+    out.write_text(build_dashboard(run, dataset, curve, template=args.template), encoding="utf-8")
     print(f"wrote {out}  ({out.stat().st_size:,} bytes)")
     return 0
 
