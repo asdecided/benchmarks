@@ -91,6 +91,9 @@ class _FakeBatches:
 
 def test_cmd_batch_end_to_end(tmp_path, monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")  # satisfies preflight
+    # Preflight checks the real `anthropic`/`rac` deps are present; this hermetic
+    # test fakes the client, so neutralise it (CI's base install has no [real]).
+    monkeypatch.setattr("runner.cli._preflight", lambda *a, **k: None)
     fake = types.SimpleNamespace(messages=types.SimpleNamespace(batches=_FakeBatches()))
     monkeypatch.setattr(ClaudeAnsweringModel, "_ensure_client", lambda self: fake)
 
