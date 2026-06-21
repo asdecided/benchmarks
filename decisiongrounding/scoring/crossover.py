@@ -18,11 +18,13 @@ from __future__ import annotations
 import json
 import random
 import re
+import time
 from pathlib import Path
 from typing import Callable
 
 from providers import build_provider, make_answering_model
-from providers.base import CorpusArtifact
+from providers.answering import usage_dict
+from providers.base import SCAFFOLD, CorpusArtifact
 from scenarios.loader import Scenario
 from scoring.scorer import score
 
@@ -116,6 +118,70 @@ def _run_arm_on_corpus(arm_name: str, corpus, scenario, answering_model, embedde
     return score(scenario, pc), retrieved, token_estimate, usage
 
 
+def _corpus_for(n, sc, ns, seed, pool, use_real):
+    """The corpus for one sweep cell: the scenario's own artifacts plus padding to
+    size N — real public-decision distractors, or synthetic note filler."""
+    pad = max(0, n - len(sc.corpus))
+    if use_real:
+        distractors = make_real_distractors(pool, pad, sc, seed)
+    else:
+        n_max, n_min = max(ns), min(ns)
+        density = (n - n_min) / (n_max - n_min) if n_max != n_min else 0.0
+        distractors = make_filler_notes(pad, sc, seed, density)
+    return list(sc.corpus) + distractors
+
+
+def _point(n, adhered, total, retrieved_flags, token_estimates, usages):
+    """One (arm, N) curve point — shared by the sync and batched builders so the
+    two produce byte-identical shapes."""
+    rate = adhered / total if total else 0.0
+    governed = [f for f in retrieved_flags if f is not None]
+    recall = (sum(1 for f in governed if f) / len(governed)) if governed else None
+    tok_mean = sum(token_estimates) / len(token_estimates) if token_estimates else 0
+    point = {"N": n, "adherence_rate": rate, "governing_recall": recall,
+             "token_estimate_mean": tok_mean}
+    if usages:
+        point["input_tokens_mean"] = sum(u["input_tokens"] for u in usages) / len(usages)
+        point["output_tokens_mean"] = sum(u["output_tokens"] for u in usages) / len(usages)
+    return point
+
+
+def _envelope(discriminating, use_real, pool, seed, ns, model_version, embedder_spec,
+              pool_dir, scenarios_dir, arms, points, per_scenario, errors):
+    """The dataset dict both builders return."""
+    return {
+        "metric": "decision_adherence_rate",
+        "scenarios_included": [s.scenario_id for s in discriminating],
+        "distractors": "real-decision-pool" if use_real else "synthetic-note-filler",
+        "pool_size": len(pool) if use_real else 0,
+        "note": (
+            "Distractors are REAL public decision artifacts (PEP/RFC) drawn from "
+            "the pinned pool — a real adherence-vs-N curve."
+            if use_real
+            else "Filler is synthetic untyped `note` padding. Illustrative, not a real corpus."
+        ),
+        "seed": seed,
+        "ns": list(ns),
+        "answering_model": model_version,
+        "embedder": embedder_spec,
+        # Provenance so the cost-vs-N curve can be recomputed offline (no spend).
+        "pool_dir": pool_dir,
+        "scenarios_dir": scenarios_dir,
+        "arms": {arm: points[arm] for arm in arms},
+        "per_scenario": per_scenario,
+        "errors": errors,
+    }
+
+
+def _check_pool(pool, ns, scenarios, use_real):
+    if use_real and max(ns) > (len(pool) + max(len(s.corpus) for s in scenarios) if pool else 0):
+        raise ValueError(
+            f"real pool too small for N={max(ns)}: pool has {len(pool)} "
+            f"distractors. Build a wider pool (python -m ingest.peps pool "
+            f"build --range 1-700) or lower --ns."
+        )
+
+
 def build_dataset(
     scenarios: list[Scenario],
     arms: tuple[str, ...] = ("context_dump", "naive_rag"),
@@ -147,28 +213,18 @@ def build_dataset(
     real sweep is observable and never lost mid-run.
     """
     use_real = pool is not None
-    if use_real:
-        max_real = len(pool) + max(len(s.corpus) for s in scenarios) if pool else 0
-        if max(ns) > max_real:
-            raise ValueError(
-                f"real pool too small for N={max(ns)}: pool has {len(pool)} "
-                f"distractors. Build a wider pool (python -m ingest.peps pool "
-                f"build --range 1-700) or lower --ns."
-            )
+    _check_pool(pool, ns, scenarios, use_real)
     discriminating = [s for s in scenarios if s.scenario_type in DISCRIMINATING]
     # One answering model instance reused across the sweep (lazy client for real).
     answering_model = make_answering_model(answering_model_name, seed)
     points: dict[str, list[dict]] = {arm: [] for arm in arms}
-    # per_scenario[arm][scenario_id] -> [{N, adherent, stale}]
     per_scenario: dict[str, dict[str, list[dict]]] = {
         arm: {s.scenario_id: [] for s in discriminating} for arm in arms
     }
     errors: list[dict] = []
-    n_max = max(ns)
     total_cells = len(ns) * len(arms) * len(discriminating)
     idx = 0
     for n in ns:
-        density = (n - min(ns)) / (n_max - min(ns)) if n_max != min(ns) else 0.0
         for arm in arms:
             adhered = 0
             retrieved_flags: list = []
@@ -176,12 +232,7 @@ def build_dataset(
             usages: list[dict] = []
             for sc in discriminating:
                 idx += 1
-                pad = max(0, n - len(sc.corpus))
-                if use_real:
-                    distractors = make_real_distractors(pool, pad, sc, seed)
-                else:
-                    distractors = make_filler_notes(pad, sc, seed, density)
-                corpus = list(sc.corpus) + distractors
+                corpus = _corpus_for(n, sc, ns, seed, pool, use_real)
                 cell_error = None
                 try:
                     sc_score, gov_retrieved, tok_est, usage = _run_arm_on_corpus(
@@ -194,8 +245,7 @@ def build_dataset(
                     errors.append(
                         {"arm": arm, "scenario_id": sc.scenario_id, "N": n, "error": cell_error}
                     )
-                    adherent = False
-                    stale = False
+                    adherent = stale = False
                     gov_retrieved = None
                     tok_est = 0
                     usage = None
@@ -205,68 +255,135 @@ def build_dataset(
                 if usage:
                     usages.append(usage)
                 per_scenario[arm][sc.scenario_id].append(
-                    {
-                        "N": n,
-                        "adherent": adherent,
-                        "stale_decision_followed": stale,
-                        "governing_decision_retrieved": gov_retrieved,
-                    }
+                    {"N": n, "adherent": adherent, "stale_decision_followed": stale,
+                     "governing_decision_retrieved": gov_retrieved}
                 )
                 if progress is not None:
-                    progress(
-                        {
-                            "record": "cell",
-                            "idx": idx,
-                            "total": total_cells,
-                            "N": n,
-                            "arm": arm,
-                            "scenario_id": sc.scenario_id,
-                            "adherent": adherent,
-                            "stale_decision_followed": stale,
-                            "governing_decision_retrieved": gov_retrieved,
-                            "token_estimate": tok_est,
-                            "usage": usage,
-                            "error": cell_error,
-                        }
-                    )
-            rate = adhered / len(discriminating) if discriminating else 0.0
-            governed = [f for f in retrieved_flags if f is not None]
-            recall = (sum(1 for f in governed if f) / len(governed)) if governed else None
-            # Mean grounding tokens this arm placed in context at this N — the
-            # deterministic estimate, plus real API usage means when available.
-            tok_mean = sum(token_estimates) / len(token_estimates) if token_estimates else 0
-            point = {
-                "N": n,
-                "adherence_rate": rate,
-                "governing_recall": recall,
-                "token_estimate_mean": tok_mean,
-            }
-            if usages:
-                point["input_tokens_mean"] = sum(u["input_tokens"] for u in usages) / len(usages)
-                point["output_tokens_mean"] = sum(u["output_tokens"] for u in usages) / len(usages)
-            points[arm].append(point)
-    return {
-        "metric": "decision_adherence_rate",
-        "scenarios_included": [s.scenario_id for s in discriminating],
-        "distractors": "real-decision-pool" if use_real else "synthetic-note-filler",
-        "pool_size": len(pool) if use_real else 0,
-        "note": (
-            "Distractors are REAL public decision artifacts (PEP/RFC) drawn from "
-            "the pinned pool — a real adherence-vs-N curve."
-            if use_real
-            else "Filler is synthetic untyped `note` padding. Illustrative, not a real corpus."
-        ),
-        "seed": seed,
-        "ns": list(ns),
-        "answering_model": answering_model.version,
-        "embedder": embedder_spec,
-        # Provenance so the cost-vs-N curve can be recomputed offline (no spend).
-        "pool_dir": pool_dir,
-        "scenarios_dir": scenarios_dir,
-        "arms": {arm: points[arm] for arm in arms},
-        "per_scenario": per_scenario,
-        "errors": errors,
+                    progress({"record": "cell", "idx": idx, "total": total_cells, "N": n,
+                              "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
+                              "stale_decision_followed": stale,
+                              "governing_decision_retrieved": gov_retrieved,
+                              "token_estimate": tok_est, "usage": usage, "error": cell_error})
+            points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
+                                      token_estimates, usages))
+    return _envelope(discriminating, use_real, pool, seed, ns, answering_model.version,
+                     embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors)
+
+
+def build_dataset_batched(
+    scenarios: list[Scenario],
+    arms: tuple[str, ...],
+    ns: tuple[int, ...] = DEFAULT_NS,
+    seed: int = 0,
+    embedder_spec: str = "local-hash",
+    pool: list[CorpusArtifact] | None = None,
+    pool_dir: str | None = None,
+    scenarios_dir: str | None = None,
+    poll: int = 20,
+    progress: "Callable[[dict], None] | None" = None,
+) -> dict:
+    """Same adherence-vs-N curve as build_dataset, but the held-constant answering
+    calls go through the Message Batches API (≈50% of standard price, and it runs
+    server-side so it survives a client restart). Grounding assembly (rac CLI /
+    embeddings) still happens locally up front; only the answering is batched.
+
+    Pinned to the claude model — the offline stub has nothing to batch.
+    """
+    use_real = pool is not None
+    _check_pool(pool, ns, scenarios, use_real)
+    discriminating = [s for s in scenarios if s.scenario_type in DISCRIMINATING]
+    model = make_answering_model("claude", seed)
+
+    # Pass A (local, no API): assemble every cell's grounding + request, in sweep
+    # order. A cell whose grounding assembly fails is recorded and not submitted.
+    cells: list[dict] = []
+    for n in ns:
+        for arm in arms:
+            for sc in discriminating:
+                cell = {"cid": f"c{len(cells)}", "n": n, "arm": arm, "sc": sc,
+                        "tok": 0, "gov": None, "req": None, "error": None}
+                try:
+                    provider = build_provider(arm, model, embedder_spec)
+                    provider.prepare(_corpus_for(n, sc, ns, seed, pool, use_real))
+                    grounding = provider.assemble(sc.task)
+                    gov = sc.gold_label.governing_decision
+                    cell["gov"] = None if gov is None else (gov in grounding.artifacts_supplied)
+                    cell["tok"] = grounding.token_estimate
+                    cell["req"] = model.build_request(SCAFFOLD, grounding, sc.task)
+                except Exception as exc:  # noqa: BLE001 - one cell must not lose the run
+                    cell["error"] = repr(exc)
+                cells.append(cell)
+
+    # Submit one batch for the cells that assembled; poll until it ends.
+    client = model._ensure_client()
+    requests = [{"custom_id": c["cid"], "params": c["req"]} for c in cells if c["req"] is not None]
+    answers: dict[str, tuple] = {}  # cid -> (ProposedChange|None, usage|None, error|None)
+    if requests:
+        batch = client.messages.batches.create(requests=requests)
+        while client.messages.batches.retrieve(batch.id).processing_status != "ended":
+            time.sleep(max(5, poll))
+        for r in client.messages.batches.results(batch.id):
+            if r.result.type != "succeeded":
+                answers[r.custom_id] = (None, None, f"batch result: {r.result.type}")
+                continue
+            try:
+                pc = model.parse_message(r.result.message)
+                answers[r.custom_id] = (pc, usage_dict(getattr(r.result.message, "usage", None)), None)
+            except Exception as exc:  # noqa: BLE001
+                answers[r.custom_id] = (None, None, repr(exc))
+
+    # Aggregate in the same sweep order, scoring each cell from its batch answer.
+    points: dict[str, list[dict]] = {arm: [] for arm in arms}
+    per_scenario: dict[str, dict[str, list[dict]]] = {
+        arm: {s.scenario_id: [] for s in discriminating} for arm in arms
     }
+    errors: list[dict] = []
+    total_cells = len(cells)
+    it = iter(cells)
+    idx = 0
+    for n in ns:
+        for arm in arms:
+            adhered = 0
+            retrieved_flags: list = []
+            token_estimates: list[int] = []
+            usages: list[dict] = []
+            for sc in discriminating:
+                cell = next(it)
+                idx += 1
+                pc, usage, err = answers.get(cell["cid"], (None, None, cell["error"]))
+                cell_error = err or cell["error"]
+                if pc is None:
+                    errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                                   "error": cell_error or "no batch result"})
+                    adherent = stale = False
+                    gov_retrieved = None
+                    tok_est = 0
+                    usage = None
+                else:
+                    sc_score = score(sc, pc)
+                    adherent = sc_score.adherent
+                    stale = sc_score.stale_decision_followed
+                    gov_retrieved = cell["gov"]
+                    tok_est = cell["tok"]
+                adhered += 1 if adherent else 0
+                retrieved_flags.append(gov_retrieved)
+                token_estimates.append(tok_est)
+                if usage:
+                    usages.append(usage)
+                per_scenario[arm][sc.scenario_id].append(
+                    {"N": n, "adherent": adherent, "stale_decision_followed": stale,
+                     "governing_decision_retrieved": gov_retrieved}
+                )
+                if progress is not None:
+                    progress({"record": "cell", "idx": idx, "total": total_cells, "N": n,
+                              "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
+                              "stale_decision_followed": stale,
+                              "governing_decision_retrieved": gov_retrieved,
+                              "token_estimate": tok_est, "usage": usage, "error": cell_error})
+            points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
+                                      token_estimates, usages))
+    return _envelope(discriminating, use_real, pool, seed, ns, model.version,
+                     embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors)
 
 
 def render_chart(dataset: dict, out_path: str | Path) -> Path:

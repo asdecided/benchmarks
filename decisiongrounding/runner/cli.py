@@ -38,7 +38,7 @@ from providers.answering import usage_dict  # noqa: E402
 from providers.base import SCAFFOLD, ProposedChange  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
-from scoring.crossover import build_dataset, emit  # noqa: E402
+from scoring.crossover import build_dataset, build_dataset_batched, emit  # noqa: E402
 
 HARNESS_VERSION = "0.1.0-scaffold"
 _ROOT = Path(__file__).resolve().parent.parent
@@ -426,19 +426,26 @@ def cmd_demo(args) -> int:
             file=sys.stderr,
         )
 
+    pool_dir = args.pool if args.distractors == "real" else None
     try:
-        dataset = build_dataset(
-            scenarios,
-            arms=arms,
-            ns=ns,
-            seed=args.seed,
-            answering_model_name=args.answering,
-            embedder_spec=args.embedder,
-            pool=pool,
-            pool_dir=(args.pool if args.distractors == "real" else None),
-            scenarios_dir=args.scenarios,
-            progress=_on_cell,
-        )
+        if getattr(args, "batch", False):
+            if args.answering != "claude":
+                raise SystemExit("--batch requires --answering claude (the Batch API "
+                                 "discounts the pinned model; the offline stub has nothing to batch)")
+            print("  (Batch API: assembling cells locally, then one batch at ~50% price)",
+                  file=sys.stderr)
+            dataset = build_dataset_batched(
+                scenarios, arms=arms, ns=ns, seed=args.seed, embedder_spec=args.embedder,
+                pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
+                poll=args.poll, progress=_on_cell,
+            )
+        else:
+            dataset = build_dataset(
+                scenarios, arms=arms, ns=ns, seed=args.seed,
+                answering_model_name=args.answering, embedder_spec=args.embedder,
+                pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
+                progress=_on_cell,
+            )
     finally:
         _sweep_fp.close()
     for arm in arms:
@@ -531,6 +538,15 @@ def main(argv: list[str] | None = None) -> int:
                 "--pool",
                 default=str(_ROOT / "scenarios_real" / "peps_pool"),
                 help="real distractor pool dir (build: python -m ingest.peps pool build)",
+            )
+            sp.add_argument(
+                "--batch", action="store_true",
+                help="run the sweep's answering calls via the Batch API "
+                "(~50%% price, survives restarts; requires --answering claude)",
+            )
+            sp.add_argument(
+                "--poll", type=int, default=20,
+                help="seconds between Batch-API status polls (with --batch)",
             )
 
     # The local web UI is a different shape (no scenarios/answering knobs).

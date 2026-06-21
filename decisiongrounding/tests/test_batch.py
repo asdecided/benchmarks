@@ -123,3 +123,64 @@ def test_cmd_batch_rejects_offline_stub(tmp_path):
     )
     with pytest.raises(SystemExit, match="requires --answering claude"):
         cmd_batch(args)
+
+
+# --- the batched crossover (build -> one batch -> collect -> aggregate) --------
+
+def test_build_dataset_batched_produces_a_full_curve(monkeypatch):
+    from scoring.crossover import DISCRIMINATING, build_dataset, build_dataset_batched
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    fake = types.SimpleNamespace(messages=types.SimpleNamespace(batches=_FakeBatches()))
+    monkeypatch.setattr(ClaudeAnsweringModel, "_ensure_client", lambda self: fake)
+
+    scenarios = load_scenarios(_SCENARIOS)
+    arms = ("context_dump", "no_grounding")
+    ds = build_dataset_batched(scenarios, arms=arms, ns=(3, 6), seed=0,
+                               embedder_spec="local-hash", poll=0)
+
+    assert ds["errors"] == [] and ds["answering_model"] == "claude-opus-4-8"
+    # same envelope shape the sync builder yields (so emit()/report/UI all work)
+    offline = build_dataset(scenarios, arms=arms, ns=(3, 6), seed=0)
+    assert ds.keys() == offline.keys()
+    for arm in arms:
+        pts = ds["arms"][arm]
+        assert [p["N"] for p in pts] == [3, 6]
+        for p in pts:
+            assert {"N", "adherence_rate", "governing_recall", "token_estimate_mean"} <= p.keys()
+            assert "input_tokens_mean" in p  # the fake batch reports usage
+    disc = [s for s in scenarios if s.scenario_type in DISCRIMINATING]
+    assert disc and set(ds["per_scenario"]["context_dump"]) == {s.scenario_id for s in disc}
+
+
+def test_build_dataset_batched_tolerates_a_failed_cell(monkeypatch):
+    """A single bad batch result is recorded, not fatal — the curve still builds."""
+    from scoring.crossover import build_dataset_batched
+
+    class _FlakyBatches(_FakeBatches):
+        def results(self, _id):
+            first = True
+            for req in self._requests:
+                if first:  # one cell errors
+                    first = False
+                    yield types.SimpleNamespace(
+                        custom_id=req["custom_id"],
+                        result=types.SimpleNamespace(type="errored", message=None),
+                    )
+                    continue
+                payload = json.dumps({"summary": "ok", "actions": [], "cites_decisions": [],
+                                      "asserts_prohibition": False, "asserts_permission": True})
+                msg = types.SimpleNamespace(
+                    stop_reason="end_turn",
+                    content=[types.SimpleNamespace(type="text", text=payload)],
+                    usage=types.SimpleNamespace(input_tokens=10, output_tokens=5))
+                yield types.SimpleNamespace(custom_id=req["custom_id"],
+                                            result=types.SimpleNamespace(type="succeeded", message=msg))
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    fake = types.SimpleNamespace(messages=types.SimpleNamespace(batches=_FlakyBatches()))
+    monkeypatch.setattr(ClaudeAnsweringModel, "_ensure_client", lambda self: fake)
+    ds = build_dataset_batched(load_scenarios(_SCENARIOS), arms=("context_dump",), ns=(3,),
+                               seed=0, embedder_spec="local-hash", poll=0)
+    assert len(ds["errors"]) == 1 and "batch result: errored" in ds["errors"][0]["error"]
+    assert ds["arms"]["context_dump"][0]["N"] == 3  # curve still produced

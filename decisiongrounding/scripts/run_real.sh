@@ -78,13 +78,17 @@ python3 -m runner.cli "$HEADLINE_CMD" \
   --answering claude --embedder "$EMBEDDER" --seed "$SEED"
 
 # 7. Optional adherence-vs-N crossover over a real distractor pool.
+#    BATCH=1 routes the sweep's answering calls through the Batch API (~50% of
+#    standard price, and it runs server-side so a client/container restart can't
+#    lose it — strongly recommended for the full N sweep).
 if [ "$CROSSOVER" = "1" ]; then
   [ -d "$POOL/corpus" ] || python3 -m ingest.peps pool build --out "$POOL"
   echo "== crossover (real distractors) =="
   echo "  cost ~= $n_arms arms x (discriminating scenarios) x |$NS| ns"
+  CROSS_BATCH=""; [ "${BATCH:-0}" = "1" ] && CROSS_BATCH="--batch"
   python3 -m runner.cli demo \
     --scenarios "$SCENARIOS" --arms "$ARMS" \
-    --distractors real --pool "$POOL" --ns "$NS" \
+    --distractors real --pool "$POOL" --ns "$NS" $CROSS_BATCH \
     --answering claude --embedder "$EMBEDDER" --seed "$SEED"
 fi
 
