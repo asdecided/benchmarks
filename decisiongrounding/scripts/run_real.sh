@@ -64,6 +64,14 @@ n_arms="$(printf '%s' "$ARMS" | awk -F, '{print NF}')"
 echo "== config =="
 echo "  arms=$ARMS"
 echo "  answering=claude  embedder=$EMBEDDER  scenarios=$SCENARIOS ($n_scen)  seed=$SEED"
+# Surface the resolved Anthropic endpoint — the anthropic SDK honours
+# ANTHROPIC_BASE_URL, so a LiteLLM/proxy run is visible here. Probe it first with
+# `python -m scripts.litellm_probe` (verifies structured outputs + the batch API).
+if [ -n "${ANTHROPIC_BASE_URL:-}" ]; then
+  echo "  endpoint=$ANTHROPIC_BASE_URL (via proxy — probe with scripts.litellm_probe)"
+else
+  echo "  endpoint=api.anthropic.com (direct)"
+fi
 echo "  compare cost ~= $n_arms arms x $n_scen scenarios = $((n_arms * n_scen)) answering-model calls"
 
 # 6. Headline result: every arm on every real scenario at base corpus size.
