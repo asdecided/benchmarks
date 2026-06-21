@@ -86,7 +86,7 @@ append-only report under `results/`, and emits the crossover chart
 > zero credentials. **Its output is a harness illustration, NOT a benchmark
 > result.** Real runs swap in the pinned Claude answering model and a real
 > embedding backend (`pip install -e .[real]`) on real/public-derived corpora.
-> See `decisions/ADR-0001-harness-foundation.md`.
+> See `rac/decisions/ADR-0001-harness-foundation.md`.
 
 ### Run it for real (pinned model + real retrieval)
 
@@ -152,14 +152,14 @@ the crossover is plumbing, not evidence.
 versions which cannot be parsed by the rules in this PEP." An agent that reaches
 for PEP 386's retired `verlib`/`NormalizedVersion` scheme is following a
 superseded decision; the adherent move is to cite PEP 440 instead. See
-`decisions/ADR-0002-real-corpus-pilot-peps.md`.
+`rac/decisions/ADR-0002-real-corpus-pilot-peps.md`.
 
 The PEPs are ingested as **RAC-native `decision` artifacts**: each carries the
 verbatim PEP under a `## Source Text` section, wrapped in a decision envelope
 (`Status`/`Context`/`Decision`/`Consequences`) plus a directional `## Supersedes`
 edge — every envelope value derived from the PEP's own headers — so the `rac` arm
 can classify them and follow the supersedes edge (see
-`decisions/ADR-0003-rac-arm-pep-integration.md`). The corpus is pinned to one
+`rac/decisions/ADR-0003-rac-arm-pep-integration.md`). The corpus is pinned to one
 immutable commit of `python/peps` and fully reproducible — nothing in it is
 hand-written PEP prose:
 
@@ -197,7 +197,7 @@ The headline curve grows the corpus to N ∈ {10,50,150,300}. By default it pads
 with synthetic `note` filler (illustrative). For a real curve, pad instead with
 **real public PEP decisions** drawn from a pinned pool — a far harder, fairer
 distractor set, since a typing-blind retriever can no longer dismiss them as
-non-decisions (see `decisions/ADR-0004-real-distractor-curve.md`):
+non-decisions (see `rac/decisions/ADR-0004-real-distractor-curve.md`):
 
 ```bash
 # Build the pinned real PEP pool once (~644 PEP decisions; provenance.json is
@@ -258,8 +258,9 @@ make test
 
 ```
 decisiongrounding/
-  decisions/   ADR-0001 (harness foundation) + ADR template  — the repo dogfoods
-               RAC-style ADRs to ground its own choices
+  rac/         RAC knowledge corpus — decisions/ (ADRs), roadmaps/, designs/;
+               the repo dogfoods the artifact format the benchmark studies
+               (gated by rac validate / relationships --validate / review)
   spec/        FROZEN scenario taxonomy + scoring rubric (pre-registration)
   schema/      JSON Schema (Draft 2020-12) for Scenario and RunResult
   providers/   uniform adapter (prepare/respond) + the arms + answering/embedding
