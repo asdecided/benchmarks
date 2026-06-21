@@ -204,7 +204,60 @@ def _scenarios_section(run):
     return matrix + "".join(drill)
 
 
-def build_dashboard(run, dataset, cost_curve=None):
+def _run_tab(paid: bool) -> str:
+    if paid:
+        real = (
+            "<h2>Real run (paid)</h2>"
+            "<p class=note>Pinned Opus 4.8 + Voyage. Estimate first, then tick the box to confirm.</p>"
+            "<div class=runform>"
+            "<label>Command <select id=r-cmd>"
+            "<option value=compare>compare (base-N headline)</option>"
+            "<option value=crossover>crossover (adherence-vs-N)</option></select></label> "
+            "<label>N (crossover) <input id=r-ns value='10,50' size=10></label> "
+            "<label><input type=checkbox id=r-batch> Batch API (−50%)</label> "
+            "<button onclick=estimate()>Estimate £</button> <span id=r-est class=note></span>"
+            "<br><label><input type=checkbox id=r-confirm> I confirm the estimated spend</label> "
+            "<button onclick=runReal()>Run real</button></div>"
+        )
+    else:
+        real = ("<h2>Real run (paid)</h2><p class=note>Disabled. Restart the server with "
+                "<code>DG_UI_ALLOW_PAID=1</code> (and <code>ANTHROPIC_API_KEY</code>) to enable; "
+                "you'll still have to estimate and tick a confirmation before any spend.</p>")
+    return (
+        "<section class=tab id=s7><h2>Run the benchmark</h2>"
+        "<p class=note>Triggers the CLI on the server; the page refreshes when the run finishes.</p>"
+        "<button onclick=runOffline()>Run offline (free)</button> "
+        "<span class=note>offline-stub + local-hash — zero spend</span>"
+        "<div id=run-status style='margin-top:14px'></div>"
+        + real + "</section>"
+    )
+
+
+_RUN_JS = """<script>
+async function jget(u){const r=await fetch(u);return r.json()}
+async function jpost(u,b){const r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});return {ok:r.ok,data:await r.json()}}
+let poll_stop=false;
+function esc(t){return (t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function renderStatus(s){
+  const el=document.getElementById('run-status'); if(!el)return;
+  if(!s||s.state==='idle'){el.innerHTML='<span class=note>idle — no run yet</span>';return;}
+  const p=s.progress||{}; let bar='';
+  if(p.total){const pct=p.pct||0; bar=`<div style="background:#eee;border-radius:6px;height:14px;max-width:420px;overflow:hidden"><div style="width:${pct}%;background:#2ca02c;height:14px"></div></div><div class=note>${p.done}/${p.total} cells (${pct}%)</div>`;}
+  const tail=s.log_tail?`<pre>${esc(s.log_tail)}</pre>`:'';
+  el.innerHTML=`<b>${esc(s.state)}</b> &middot; ${esc(s.command||'')} ${esc(s.mode||'')}${bar}${tail}`;
+  if(s.state==='done'){el.innerHTML+='<div class=note>done — reloading…</div>';poll_stop=true;setTimeout(()=>location.reload(),1500);}
+  if(s.state==='error'){el.innerHTML+='<div class=bad>run failed — see log above</div>';poll_stop=true;}
+}
+async function poll(){if(poll_stop)return;try{renderStatus(await jget('/api/run/status'))}catch(e){}}
+setInterval(poll,2000); poll();
+async function runOffline(){poll_stop=false; const r=await jpost('/api/run/start',{mode:'offline',command:'compare'}); if(!r.ok)alert(r.data.error||'failed'); else renderStatus(r.data);}
+function cfg(){return {command:document.getElementById('r-cmd').value, ns:document.getElementById('r-ns').value.split(',').map(x=>x.trim()).filter(Boolean), batch:document.getElementById('r-batch').checked};}
+async function estimate(){const c=cfg(); const q=new URLSearchParams({command:c.command,ns:c.ns.join(','),batch:c.batch}); const e=await jget('/api/run/estimate?'+q); document.getElementById('r-est').textContent=`~£${e.gbp} ($${e.usd}) · ${e.calls} calls · ${e.note}`; return e;}
+async function runReal(){if(!document.getElementById('r-confirm').checked){alert('Tick the confirmation box first.');return;} const e=await estimate(); if(!confirm(`Spend ~£${e.gbp} ($${e.usd}) on ${e.calls} real API calls?`))return; poll_stop=false; const c=cfg(); const r=await jpost('/api/run/start',{mode:'real',command:c.command,ns:c.ns,batch:c.batch,confirm_usd:e.usd}); if(!r.ok)alert(r.data.error||'failed'); else renderStatus(r.data);}
+</script>"""
+
+
+def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=False):
     model = run["runs"][0]["answering_model"]["version"] if run["runs"] else "?"
     emb = next((r["embedder"]["name"] for r in run["runs"] if r.get("embedder")), "n/a")
     m = run["metrics_by_arm"]
@@ -296,7 +349,13 @@ def build_dashboard(run, dataset, cost_curve=None):
                 '    --crossover &lt;dataset.json&gt; --cost-curve --out results/published/index.html'
                 '</pre></section>')
 
+    # 7 Run (live UI only — needs the server's endpoints)
+    if live:
+        secs.append(_run_tab(paid_enabled))
+
     tabs = ["Overview", "Leaderboard", "Curves", "Cost", "rac vs RAG", "Scenarios", "Reproduce"]
+    if live:
+        tabs.append("Run")
     radios = "".join(f'<input class=tabsel type=radio name=tab id=t{i} {"checked" if i==0 else ""}>'
                      for i in range(len(tabs)))
     nav = "<nav>" + "".join(f'<label for=t{i}>{_esc(t)}</label>' for i, t in enumerate(tabs)) + "</nav>"
@@ -311,5 +370,6 @@ def build_dashboard(run, dataset, cost_curve=None):
         "<div class=sub>Does typed, supersession-aware grounding make an agent follow the right "
         "decision better than context-dump or naive RAG — and at what token cost?</div>"
         f"<div class=chips>{chips}</div></header>"
-        + radios + nav + "<main>" + "".join(secs) + "</main></body></html>"
+        + radios + nav + "<main>" + "".join(secs) + "</main>"
+        + (_RUN_JS if live else "") + "</body></html>"
     )

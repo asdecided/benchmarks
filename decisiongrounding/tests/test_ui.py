@@ -42,6 +42,28 @@ def test_empty_results_dir_shows_guidance(tmp_path):
     assert client.get("/api/run").status_code == 404
 
 
+def test_run_endpoints_estimate_status_and_paid_gate(tmp_path, monkeypatch):
+    import runner.ui as ui
+    monkeypatch.delenv("DG_UI_ALLOW_PAID", raising=False)
+    ui._RUN.clear(); ui._RUN.update(state="idle")
+    _seed(tmp_path)
+    client = TestClient(build_ui_app(tmp_path))
+
+    assert client.get("/api/run/status").json()["state"] == "idle"
+    est = client.get("/api/run/estimate?command=compare&arms=rac&ns=10").json()
+    assert est["usd"] > 0 and est["calls"] == 2  # 1 arm x 2 seeded scenarios
+
+    # real run is rejected (paid flag not set) — no spend possible from the web
+    r = client.post("/api/run/start", json={"mode": "real", "command": "compare"})
+    assert r.status_code == 400 and "DG_UI_ALLOW_PAID" in r.json()["error"]
+
+
+def test_dashboard_shows_run_tab_only_when_live(tmp_path):
+    _seed(tmp_path)
+    served = TestClient(build_ui_app(tmp_path)).get("/").text
+    assert "Run the benchmark" in served and "runOffline()" in served
+
+
 def test_load_results_picks_newest(tmp_path):
     import time
     (tmp_path / "run-1-compare-x.json").write_text(json.dumps({"runs": [], "metrics_by_arm": {}, "tag": "old"}))
