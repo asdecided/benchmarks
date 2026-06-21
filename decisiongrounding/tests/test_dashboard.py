@@ -6,7 +6,7 @@ import html.parser
 
 import pytest
 
-from runner.dashboard import build_dashboard, curve_from_dataset, load_template
+from runner.dashboard import build_dashboard, curve_from_dataset, load_template, render_main
 
 
 def _run():
@@ -80,6 +80,30 @@ def test_build_dashboard_head_to_head_verdict_reads_the_numbers():
     out = build_dashboard(_run(), _dataset())
     # naive_rag decays to 0.3 at N=300 while rac holds 1.0 -> rac-holds verdict.
     assert "rac holds adherence" in out
+
+
+def test_progressive_enhancement_hooks_present():
+    out = build_dashboard(_run(), _dataset(), live=True, paid_enabled=False)
+    # leaderboard: id + sortable headers + per-arm rows
+    assert "id=leaderboard" in out and "class=sort" in out
+    assert 'data-arm="rac"' in out
+    # scenarios: matrix id, per-scenario rows + drill-down, and the controls
+    assert "id=scenario-matrix" in out
+    assert 'data-scenario="s1"' in out and 'data-fail=' in out
+    assert "scen-search" in out and "scen-fail" in out
+    assert "filterScenarios" in out and "toggleFailures" in out
+    # refresh affordance + handler exist on the live page
+    assert "refreshMain()" in out
+
+
+def test_render_main_returns_sections_shared_by_page_and_fragment():
+    sections = render_main(_run(), _dataset(), live=True, paid_enabled=False)
+    assert sections.lstrip().startswith("<section")
+    # every section the fragment swap relies on, including the live Run tab
+    for sid in ("id=s0", "id=s1", "id=s5", "id=s7"):
+        assert sid in sections
+    # render_main is the <main> inner — no shell/template wrapper
+    assert "<!doctype" not in sections and "<nav>" not in sections
 
 
 def test_default_template_is_a_file_with_both_placeholders():

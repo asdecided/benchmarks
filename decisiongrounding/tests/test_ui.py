@@ -64,6 +64,21 @@ def test_dashboard_shows_run_tab_only_when_live(tmp_path):
     assert "Run the benchmark" in served and "runOffline()" in served
 
 
+def test_fragment_endpoint_returns_server_rendered_main(tmp_path):
+    _seed(tmp_path)
+    client = TestClient(build_ui_app(tmp_path))
+    r = client.get("/api/fragment")
+    assert r.status_code == 200
+    # the <main> inner: tab sections + a server-rendered SVG, no shell
+    assert "<section" in r.text and "<svg" in r.text
+    assert "<!doctype" not in r.text
+
+
+def test_fragment_is_204_when_no_results(tmp_path):
+    r = TestClient(build_ui_app(tmp_path)).get("/api/fragment")
+    assert r.status_code == 204
+
+
 def test_load_results_picks_newest(tmp_path):
     import time
     (tmp_path / "run-1-compare-x.json").write_text(json.dumps({"runs": [], "metrics_by_arm": {}, "tag": "old"}))

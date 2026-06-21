@@ -24,6 +24,15 @@ def test_line_chart_is_well_formed_and_deterministic():
     assert a.startswith("<svg") or a.lstrip().startswith("<svg")
 
 
+def test_line_chart_wraps_series_and_legend_in_data_arm_groups():
+    series = {"rac": [(10, 1.0), (300, 0.9)], "naive_rag": [(10, 1.0), (300, 0.3)]}
+    svg = line_chart("Adherence vs N", series, x_label="N", y_label="adherence", x_log=True)
+    _well_formed(svg)
+    for arm in ("rac", "naive_rag"):
+        assert f'<g class="series" data-arm="{arm}">' in svg   # toggleable series
+        assert f'<g class="legend" data-arm="{arm}"' in svg     # clickable legend
+
+
 def test_line_chart_log_y_handles_large_range():
     series = {"context_dump": [(10, 88_000), (300, 1_576_000)], "naive_rag": [(10, 50_000), (300, 45_000)]}
     svg = line_chart("Token cost vs N", series, x_label="N", y_label="tokens", x_log=True, y_log=True)
