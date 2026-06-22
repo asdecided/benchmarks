@@ -26,6 +26,7 @@ from providers import build_provider, make_answering_model
 from providers.answering import usage_dict
 from providers.base import SCAFFOLD, CorpusArtifact
 from scenarios.loader import Scenario
+from scoring.metrics import summarize
 from scoring.scorer import score
 
 _TOKEN = re.compile(r"[a-z0-9]+")
@@ -384,6 +385,276 @@ def build_dataset_batched(
                                       token_estimates, usages))
     return _envelope(discriminating, use_real, pool, seed, ns, model.version,
                      embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors)
+
+
+# --- multi-seed aggregation -------------------------------------------------
+# Fields aggregated across seeds. The plain key stays the MEAN (back-compat);
+# `<field>_ci` / `_std` / `_values` are added alongside.
+_AGG_FIELDS = ("adherence_rate", "governing_recall", "token_estimate_mean",
+               "input_tokens_mean")
+
+
+def _seed_points(ds: dict, arm: str) -> dict:
+    return {p["N"]: p for p in ds["arms"].get(arm, [])}
+
+
+def _tag_seed(cb, seed):
+    """Wrap a progress callback so each cell record carries its seed."""
+    if cb is None:
+        return None
+
+    def wrapped(rec):
+        rec = dict(rec)
+        rec["seed"] = seed
+        cb(rec)
+
+    return wrapped
+
+
+def build_dataset_multiseed(
+    scenarios: list[Scenario],
+    arms: tuple[str, ...],
+    ns: tuple[int, ...] = DEFAULT_NS,
+    seeds: "tuple[int, ...] | list[int]" = (0,),
+    *,
+    answering_model_name: str = "offline-stub",
+    embedder_spec: str = "local-hash",
+    pool: list[CorpusArtifact] | None = None,
+    pool_dir: str | None = None,
+    scenarios_dir: str | None = None,
+    batched: bool = False,
+    poll: int = 20,
+    pair: tuple[str, str] = ("rac", "naive_rag"),
+    progress: "Callable[[dict], None] | None" = None,
+) -> dict:
+    """Run the crossover over several seeds and aggregate per (arm, N) into
+    mean +/- a t-based 95% CI. The plain fields stay the mean (backward
+    compatible); `<field>_ci` / `_std` / `_values`, `n_seeds`, `seeds`, and a
+    paired `pair[0]`-vs-`pair[1]` adherence difference (`paired`) are added.
+
+    Calls the single-seed builders per seed, so batched + multiseed compose.
+    Offline runs (deterministic stub + embedder) show little spread; the
+    aggregation is exercised regardless.
+    """
+    uniq = list(dict.fromkeys(int(s) for s in seeds)) or [0]
+    per_seed = run_seeds(
+        scenarios, arms, ns, uniq,
+        answering_model_name=answering_model_name, embedder_spec=embedder_spec,
+        pool=pool, pool_dir=pool_dir, scenarios_dir=scenarios_dir,
+        batched=batched, poll=poll, progress=progress)
+    return _aggregate_seeds(per_seed, list(arms), list(ns), pair)
+
+
+def run_seeds(
+    scenarios, arms, ns, seeds, *,
+    answering_model_name: str = "offline-stub", embedder_spec: str = "local-hash",
+    pool=None, pool_dir=None, scenarios_dir=None,
+    batched: bool = False, poll: int = 20, progress=None,
+) -> list[tuple[int, dict]]:
+    """Build one single-seed crossover dataset per seed (seed-tagged progress).
+    The per-seed datasets feed `_aggregate_seeds` / `merge_seed_datasets`."""
+    out: list[tuple[int, dict]] = []
+    for s in seeds:
+        if batched:
+            ds = build_dataset_batched(
+                scenarios, arms=arms, ns=ns, seed=s, embedder_spec=embedder_spec,
+                pool=pool, pool_dir=pool_dir, scenarios_dir=scenarios_dir,
+                poll=poll, progress=_tag_seed(progress, s))
+        else:
+            ds = build_dataset(
+                scenarios, arms=arms, ns=ns, seed=s,
+                answering_model_name=answering_model_name, embedder_spec=embedder_spec,
+                pool=pool, pool_dir=pool_dir, scenarios_dir=scenarios_dir,
+                progress=_tag_seed(progress, s))
+        out.append((int(s), ds))
+    return out
+
+
+def _columns_from_datasets(per_seed, arms, ns) -> dict:
+    """cols[arm][N][field] = [per-seed values] (governing_recall Nones dropped)."""
+    cols = {arm: {n: {} for n in ns} for arm in arms}
+    for arm in arms:
+        for _, ds in per_seed:
+            by_n = _seed_points(ds, arm)
+            for n in ns:
+                p = by_n.get(n, {})
+                for field in _AGG_FIELDS:
+                    if field not in p:
+                        continue
+                    v = p[field]
+                    if field == "governing_recall" and v is None:
+                        continue
+                    cols[arm][n].setdefault(field, []).append(v)
+    return cols
+
+
+def _aggregate_arm_points(arms, ns, cols, n_seeds) -> dict:
+    points = {}
+    for arm in arms:
+        pts = []
+        for n in ns:
+            point = {"N": n, "n_seeds": n_seeds}
+            for field in _AGG_FIELDS:
+                vals = cols[arm][n].get(field)
+                if not vals:
+                    if field == "governing_recall":
+                        point["governing_recall"] = None
+                    continue
+                s = summarize(vals)
+                point[field] = s["mean"]
+                point[f"{field}_std"] = s["std"]
+                point[f"{field}_ci"] = s["ci"]
+                point[f"{field}_values"] = s["values"]
+            pts.append(point)
+        points[arm] = pts
+    return points
+
+
+def _paired(per_seed, ns, pair) -> dict | None:
+    """Per-N paired adherence difference pair[0]-pair[1], differenced within each
+    seed (common random numbers), with its own CI."""
+    a, b = pair
+    if not per_seed or not all(a in ds["arms"] and b in ds["arms"] for _, ds in per_seed):
+        return None
+    out = []
+    for n in ns:
+        diffs = []
+        for _, ds in per_seed:
+            pa, pb = _seed_points(ds, a).get(n), _seed_points(ds, b).get(n)
+            if pa and pb and pa.get("adherence_rate") is not None and pb.get("adherence_rate") is not None:
+                diffs.append(pa["adherence_rate"] - pb["adherence_rate"])
+        if diffs:
+            s = summarize(diffs)
+            out.append({"N": n, "diff_mean": s["mean"], "diff_ci": s["ci"],
+                        "diff_std": s["std"], "n": s["n"], "values": s["values"]})
+    return {f"{a}_vs_{b}": out} if out else None
+
+
+def _agg_per_scenario(per_seed, arms) -> dict:
+    """Per (arm, scenario, N): adherent/stale fraction across seeds (used by the
+    `demo` printout)."""
+    out = {}
+    for arm in arms:
+        out[arm] = {}
+        for sid in per_seed[0][1]["per_scenario"].get(arm, {}):
+            by_n = {}
+            for _, ds in per_seed:
+                for rec in ds["per_scenario"][arm][sid]:
+                    by_n.setdefault(rec["N"], []).append(rec)
+            recs = []
+            for n in sorted(by_n):
+                g = by_n[n]
+                adh = sum(1 for r in g if r["adherent"]) / len(g)
+                stale = sum(1 for r in g if r["stale_decision_followed"]) / len(g)
+                govs = [r["governing_decision_retrieved"] for r in g
+                        if r["governing_decision_retrieved"] is not None]
+                gov = (sum(1 for x in govs if x) / len(govs)) if govs else None
+                recs.append({"N": n, "adherent": adh, "stale_decision_followed": stale,
+                             "governing_decision_retrieved": gov, "n_seeds": len(g)})
+            out[arm][sid] = recs
+    return out
+
+
+def _aggregate_seeds(per_seed, arms, ns, pair) -> dict:
+    base = dict(per_seed[0][1])
+    cols = _columns_from_datasets(per_seed, arms, ns)
+    base["arms"] = _aggregate_arm_points(arms, ns, cols, len(per_seed))
+    base["per_scenario"] = _agg_per_scenario(per_seed, arms)
+    base["errors"] = [e for _, ds in per_seed for e in ds["errors"]]
+    base["seeds"] = [s for s, _ in per_seed]
+    base["n_seeds"] = len(per_seed)
+    base["seed"] = per_seed[0][0]
+    paired = _paired(per_seed, ns, pair)
+    if paired:
+        base["paired"] = paired
+    return base
+
+
+def merge_seed_datasets(existing: dict, new_per_seed, arms, ns, pair) -> dict:
+    """Add new per-seed datasets to an already-aggregated `existing` dataset and
+    re-aggregate, without re-running the seeds `existing` already covers."""
+    old_seeds = existing.get("seeds") or [existing.get("seed", 0)]
+    add = [(s, ds) for s, ds in new_per_seed if s not in old_seeds]
+    if not add:
+        return existing
+    all_seeds = list(old_seeds) + [s for s, _ in add]
+    n_old = len(old_seeds)
+
+    # Rebuild value columns from the existing point _values (or the single-seed
+    # scalar) plus the new seeds, then re-aggregate.
+    cols = {arm: {n: {} for n in ns} for arm in arms}
+    old_pts = {arm: {p["N"]: p for p in existing["arms"].get(arm, [])} for arm in arms}
+    for arm in arms:
+        for n in ns:
+            op = old_pts[arm].get(n, {})
+            for field in _AGG_FIELDS:
+                prior = op.get(f"{field}_values")
+                if prior is None:
+                    v = op.get(field)
+                    prior = [] if v is None else [v] * n_old
+                vals = list(prior)
+                for _, ds in add:
+                    p = _seed_points(ds, arm).get(n, {})
+                    if field in p and p[field] is not None:
+                        vals.append(p[field])
+                if vals:
+                    cols[arm][n][field] = vals
+
+    base = dict(existing)
+    base["arms"] = _aggregate_arm_points(arms, ns, cols, len(all_seeds))
+
+    # Paired: prior per-seed diffs + the new seeds' diffs.
+    a, b = pair
+    old_paired = (existing.get("paired") or {}).get(f"{a}_vs_{b}")
+    new_paired = (_paired(add, ns, pair) or {}).get(f"{a}_vs_{b}")
+    if old_paired is not None or new_paired is not None:
+        old_by_n = {e["N"]: e for e in (old_paired or [])}
+        new_by_n = {e["N"]: e for e in (new_paired or [])}
+        merged = []
+        for n in ns:
+            vals = list(old_by_n.get(n, {}).get("values", [])) + list(new_by_n.get(n, {}).get("values", []))
+            if vals:
+                s = summarize(vals)
+                merged.append({"N": n, "diff_mean": s["mean"], "diff_ci": s["ci"],
+                               "diff_std": s["std"], "n": s["n"], "values": s["values"]})
+        if merged:
+            base["paired"] = {f"{a}_vs_{b}": merged}
+
+    base["per_scenario"] = _merge_per_scenario(existing.get("per_scenario", {}), add, arms, n_old)
+    base["errors"] = list(existing.get("errors", [])) + [e for _, ds in add for e in ds["errors"]]
+    base["seeds"] = all_seeds
+    base["n_seeds"] = len(all_seeds)
+    return base
+
+
+def _merge_per_scenario(old_ps, add, arms, n_old) -> dict:
+    """Combine existing per-scenario fractions (carrying their own n_seeds) with
+    the new seeds' boolean records, by count-weighted averaging."""
+    out = {}
+    new_first = add[0][1]["per_scenario"] if add else {}
+    for arm in arms:
+        out[arm] = {}
+        sids = set(old_ps.get(arm, {})) | set(new_first.get(arm, {}))
+        for sid in sids:
+            old_recs = {r["N"]: r for r in old_ps.get(arm, {}).get(sid, [])}
+            new_by_n = {}
+            for _, ds in add:
+                for rec in ds["per_scenario"].get(arm, {}).get(sid, []):
+                    new_by_n.setdefault(rec["N"], []).append(rec)
+            recs = []
+            for n in sorted(set(old_recs) | set(new_by_n)):
+                o = old_recs.get(n)
+                g = new_by_n.get(n, [])
+                on = o.get("n_seeds", n_old) if o else 0
+                tot = on + len(g)
+                o_adh = float(o["adherent"]) if o else 0.0
+                o_stale = float(o["stale_decision_followed"]) if o else 0.0
+                adh = (o_adh * on + sum(1 for r in g if r["adherent"])) / tot if tot else 0.0
+                stale = (o_stale * on + sum(1 for r in g if r["stale_decision_followed"])) / tot if tot else 0.0
+                recs.append({"N": n, "adherent": adh, "stale_decision_followed": stale,
+                             "governing_decision_retrieved": None, "n_seeds": tot})
+            out[arm][sid] = recs
+    return out
 
 
 def render_chart(dataset: dict, out_path: str | Path) -> Path:

@@ -8,7 +8,7 @@ MemScore-style composite — the headline stays a single, legible rate.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from statistics import pvariance
+from statistics import mean, pvariance, stdev
 
 
 def _rate(flags: list[bool]) -> float:
@@ -69,3 +69,48 @@ def adherence_variance(per_seed_rates: list[float]) -> float:
     if len(per_seed_rates) < 2:
         return 0.0
     return pvariance(per_seed_rates)
+
+
+# Two-sided 95% Student-t critical values by degrees of freedom (df = n - 1).
+# Hardcoded to keep the core dependency-free (no SciPy); df >= 30 -> normal z.
+_T95 = {
+    1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365,
+    8: 2.306, 9: 2.262, 10: 2.228, 11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145,
+    15: 2.131, 16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086, 21: 2.080,
+    22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060, 26: 2.056, 27: 2.052, 28: 2.048,
+    29: 2.045,
+}
+
+
+def t_critical_95(df: int) -> float:
+    """Two-sided 95% Student-t critical value for `df` degrees of freedom.
+
+    Falls back to the normal approximation (1.96) for df >= 30, and returns 0.0
+    for df < 1 (no spread information).
+    """
+    if df < 1:
+        return 0.0
+    return _T95.get(df, 1.96)
+
+
+def mean_ci(values: list[float]) -> tuple[float, float, float, float, int]:
+    """Return (mean, ci_lo, ci_hi, sample_std, n) using a t-based 95% interval.
+
+    With fewer than two values the interval collapses to the mean and the std is
+    0 — a single seed reports a point, not a spurious spread.
+    """
+    n = len(values)
+    if n == 0:
+        return (0.0, 0.0, 0.0, 0.0, 0)
+    m = mean(values)
+    if n < 2:
+        return (m, m, m, 0.0, n)
+    s = stdev(values)
+    half = t_critical_95(n - 1) * s / (n ** 0.5)
+    return (m, m - half, m + half, s, n)
+
+
+def summarize(values: list[float]) -> dict:
+    """{mean, std, ci: [lo, hi], n, values} for a list of per-seed measurements."""
+    m, lo, hi, s, n = mean_ci(values)
+    return {"mean": m, "std": s, "ci": [lo, hi], "n": n, "values": list(values)}
