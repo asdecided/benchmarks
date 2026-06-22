@@ -23,8 +23,19 @@ tags: [publication, paper, arxiv]
   dataset. *(done)*
 - **Funded data run** — produce the real adherence-vs-N crossover + report (the
   data-provision PR); fill the results/figures/verdict into the paper.
-- **Strengthen the claim** — multiple seeds for variance, and ideally 2–3
-  answering models, before a strong empirical statement.
+- **Multi-model generalization** — re-run the full benchmark with several
+  held-constant answering models (e.g. Claude, OpenAI, Gemini, an open model)
+  behind the *same* arms, to show the grounding effect is not model-specific (not
+  to rank models). Operationally easy to drive many models through one proxy; the
+  work is a per-provider answering-model adapter with **equivalent structured
+  outputs** (Anthropic `output_config` / OpenAI `response_format` / Gemini
+  `response_schema`). The uniform adapter + `make_answering_model` factory already
+  abstract this; only the Claude adapter exists today.
+- **Multi-seed variance** — sweep seeds and aggregate per (arm, N) into
+  **mean ± confidence interval** so the crossover / falsifier verdict is
+  statistical, not a single point. Needs harness support: a `--seeds` sweep,
+  cross-seed aggregation, and CI bands on the figures (the part most worth
+  building, since the answering model is stochastic even at pinned temperature).
 - **Submit** — resolve arXiv endorsement / affiliated submitter, pick a template,
   and post the preprint.
 
@@ -34,6 +45,8 @@ tags: [publication, paper, arxiv]
 - Every `\todo` in `paper/` is resolved (results, counts, model/seed strings,
   citation verification, archived dataset DOI/release).
 - The reported numbers match the committed `results/published/` dataset and report.
+- Curves report **mean ± CI across seeds**, and the grounding ordering holds across
+  **≥2 answering models** (the generalization claim).
 
 ## Assumptions
 
@@ -45,7 +58,8 @@ tags: [publication, paper, arxiv]
 
 - **Thin data.** One model / ~19 scenarios / one seed is weak for a headline
   empirical claim — mitigated by framing as methodology + pilot and adding
-  seeds/models.
+  seeds/models. Multi-model is cheap to drive (one proxy, many models); multi-seed
+  and per-provider adapters are the engineering, and cost multiplies with both.
 - **Submission gate.** First-time cs submitters need an arXiv endorsement; sort an
   affiliated co-author or endorsement early.
 - **Narrative risk.** If the falsifier triggers, the paper becomes an honest

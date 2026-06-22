@@ -1,19 +1,22 @@
-Coding agents increasingly operate inside repositories that carry a long history
-of recorded decisions---architecture decision records, standards, and
-deprecations---that constrain what an agent should do. We ask a focused question:
-does a deterministic, supersession-aware \emph{grounding} layer make an agent
-adhere to a team's prior decisions better than (a) dumping every decision
-document into context, (b) commodity retrieval-augmented generation over the same
-documents, or (c) no grounding---and at what corpus size does any difference
-appear? We introduce \benchname, a benchmark built from \emph{real, public}
-decision corpora with machine-stated supersession (Python PEPs, IETF RFCs, W3C
-recommendations), in which the discriminating signal is whether an agent follows
-the \emph{governing} decision and drops the one it supersedes. All arms feed one
-held-constant answering model behind one held-constant scaffold and receive a
-single, symmetric opportunity to populate the context window; they differ
-\emph{only} in how grounding is selected and assembled. Scoring is deterministic
-and structural---no embeddings, no LLM judge---over decision adherence, governing
-recall, and false-permit/false-prohibit rates. The headline artifact is an
-adherence-versus-corpus-size curve that exposes where each strategy holds or loses
-the governing decision as it is buried among real distractors, reported alongside
-token cost. \todo{summarise the empirical result once the funded run lands.}
+Coding agents increasingly operate inside repositories carrying years of recorded
+decisions---architecture decision records, standards, and deprecations---that
+constrain what a correct change is. A common objection holds that long-context
+frontier models simply absorb these decisions, so a dedicated grounding layer adds
+no durable value. We test that objection directly with \benchname, a benchmark for
+\emph{decision adherence} built from real, public, reproducible corpora whose
+supersession is stated by the artifacts themselves (Python PEPs, IETF RFCs, W3C
+recommendations). Each scenario asks whether an agent follows the live
+\emph{governing} decision and drops the one it supersedes. All arms feed one
+held-constant answering model behind one fixed scaffold and receive a single,
+symmetric opportunity to populate the context window, differing \emph{only} in how
+grounding is selected and assembled: full context dump, naive RAG, and a
+deterministic, supersession-aware layer. Scoring is deterministic and
+structural---no embeddings, no LLM judge---over decision adherence,
+governing-decision recall, and false-permit/false-prohibit rates. The headline
+artifact is an adherence-versus-corpus-size curve exposing where strategies diverge
+as the governing decision is buried among real distractors, reported alongside
+token cost. \todo{result sentence once the run completes --- e.g.\ the grounded
+layer sustains adherence where naive RAG and context-dump decay beyond
+$N \approx {}$\ldots, or an honest null.} We release the benchmark, corpora
+provenance, and runner, and pre-register a falsifier so the benchmark can refute
+its own hypothesis.
