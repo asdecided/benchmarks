@@ -19,6 +19,13 @@ then runs the headline compare and the multi-seed crossover, generates the repor
 preserves the artifacts, and opens a data-provision PR — honouring the project's
 credibility and attribution rules.
 
+Everything the prompt references is already on `main`: the `compare`/`batch`/`demo`
+runners, multi-seed `--seeds`/`--augment` with mean ± CI and the paired
+`rac − naive_rag` difference, confidence bands in the charts/dashboard/report, the
+`scripts/litellm_probe.py` endpoint probe, `scripts/run_real.sh` (with `BATCH` and
+`SEEDS`), `scripts/from_source.sh` (venv + install + keys + run from a fresh
+clone), and the `paper/` LaTeX scaffold + `scripts/paper_figs.py`.
+
 ---
 
 ```text
@@ -34,7 +41,7 @@ with token cost. Before doing anything, read CLAUDE.md, README.md (especially th
 Produce the FIRST real benchmark data through a LiteLLM-routed Anthropic endpoint,
 generate the report, preserve the artifacts, and open a data-provision PR. The
 harness, multi-seed variance, batch mode, report generator, dashboard, and paper
-scaffold are already built and tested — this run produces the numbers.
+scaffold are all on main and tested — this run produces the numbers.
 
 ## Environment (LiteLLM routing)
 The official `anthropic` SDK honours ANTHROPIC_BASE_URL, so no code change is
@@ -43,16 +50,14 @@ needed IF the proxy exposes Anthropic's native /v1/messages route. Set:
   export ANTHROPIC_API_KEY=<litellm virtual key>
   export VOYAGE_API_KEY=<voyage key>            # strong embeddings for naive_rag
 
-## Step 0 — branch, install, capability check
+## Step 0 — branch & install
 - Work on a NEW branch off fresh origin/main: claude/decision-grounding-results-<slug>.
   Never push to main.
-- pip install -e ".[real,schema,chart]". The `rac` arm needs the `rac` CLI on PATH
-  (pip install "git+https://github.com/itsthelore/rac-core.git" if absent).
-- Confirm the features you'll use are on main:
-    git grep -q build_dataset_multiseed scoring/crossover.py   # --seeds / CIs
-    test -d paper                                              # the paper scaffold
-  If either is absent, that work hasn't merged yet — confirm with the maintainer
-  before relying on --seeds or the paper steps (a single-seed run still works).
+- Install: `pip install -e ".[real,schema,chart]"`. The `rac` arm needs the `rac`
+  CLI on PATH (pip install "git+https://github.com/itsthelore/rac-core.git" if
+  absent). Alternatively `./scripts/from_source.sh` does venv + install + loads
+  keys from .env + probe + run in one go; the granular steps below are recommended
+  for the first real run so you can inspect each stage.
 
 ## Step 1 — PROBE the proxy FIRST (tiny spend)
 Run: python -m scripts.litellm_probe
@@ -72,7 +77,8 @@ python -m runner.cli demo --scenarios scenarios_real \
   --arms naive_rag,no_grounding,rac --distractors real --ns 10 --seeds 0-1 \
   --answering claude --embedder voyage:voyage-4-large [--batch]
 Confirm real usage is recorded, the dataset is green, the .partial.jsonl sidecar
-streams. Report the observed per-cell token cost so the full run can be estimated.
+streams, and each curve point carries adherence_rate_ci / _values. Report the
+observed per-cell token cost so the full run can be estimated.
 
 ## Step 3 — headline base-N compare (all arms, once)
 python -m runner.cli compare --scenarios scenarios_real \
@@ -94,13 +100,16 @@ those N via:  python -m runner.cli demo ... --augment <crossover_dataset.json>
 - python -m scripts.report --run results/run-*-compare-*.json \
     --crossover <crossover_dataset.json> --cost-curve \
     --out results/published/decision-grounding-report.md
+  (use the run-*-batch-*.json file if you ran via the Batch API)
 - python -m scripts.dashboard --run <compare.json> --crossover <crossover.json> \
     --cost-curve --out results/published/index.html
-- If the paper scaffold is present: `make paper-figs CROSSOVER=<crossover.json>`,
-  fill the \todo placeholders in paper/sections/* (result sentence in abstract.tex,
-  the verdict in results.tex/discussion.tex, model/embedder/seed/scenario counts in
-  setup.tex), and add CI bands to scripts/paper_figs.py (matplotlib fill_between;
-  scoring.charts.line_chart already accepts bands=).
+- Paper figures + fill: `make paper-figs CROSSOVER=<crossover.json>` (PDF with the
+  [chart] extra, else SVG), then fill the \todo placeholders in paper/sections/*
+  (result sentence in abstract.tex, the verdict in results.tex/discussion.tex,
+  model/embedder/seed/scenario counts in setup.tex). NOTE: line_chart already
+  accepts bands=, but scripts/paper_figs.py does not yet pass them — wiring CI
+  bands into the paper figures (matplotlib fill_between + the SVG fallback) is a
+  small remaining follow-up; do it here so the paper figures match the dashboard.
 - Preserve the dataset + report + charts under results/published/.
 
 ## Step 6 — open the data-provision PR
@@ -112,12 +121,14 @@ those N via:  python -m runner.cli demo ... --augment <crossover_dataset.json>
   "_Generated by Claude Code_" footer — immediately call
   mcp__github__update_pull_request with the same body to strip it (update does NOT
   re-append), then read the PR body back to verify it's clean.
-- Subscribe to the PR and drive CI to green.
+- Subscribe to the PR and drive CI to green (the test matrix + the `rac corpus
+  gate` job both run).
 
 ## Honesty / credibility (non-negotiable — CONTRIBUTING.md)
 - The verdict is computed from the numbers. If naive_rag does NOT decay (grounded ≈
   naive_rag at N>=50), the falsifier is triggered — say so plainly and publish the
-  losing result. Do not spin.
+  losing result. Do not spin. The dashboard/report already derive the verdict from
+  the paired CI; do not override it.
 - Gold labels were authored blind; spec/taxonomy/rubric are frozen — do not change
   them to fit the result.
 - Note in the report that the run was proxied via LiteLLM (ANTHROPIC_BASE_URL) and
