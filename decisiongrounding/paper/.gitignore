@@ -1,0 +1,16 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+main.pdf
+
+# Figures are regenerated from the dataset (make paper-figs) — don't commit them.
+figures/*.pdf
+figures/*.png
+figures/*.svg

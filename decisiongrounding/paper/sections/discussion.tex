@@ -1,0 +1,29 @@
+\section{Discussion}
+
+\paragraph{The falsifier.} \benchname{} pre-registers a falsifier: if the grounded
+arm is statistically indistinguishable from \texttt{naive\_rag} on
+superseded-decision and prohibition scenarios at $N \geq 50$, the retrieval thesis
+is not supported and we report that. A benchmark whose hypothesis cannot fail is
+not a measurement. \todo{report the outcome.}
+
+\paragraph{Limitations.}
+\begin{itemize}
+  \item \textbf{One answering model.} Results are reported for a single pinned
+        model; generality across models is future work. \todo{extend to multiple
+        models for a stronger claim.}
+  \item \textbf{Scope of scenarios.} The reported corpora are standards-style
+        decisions (PEP/RFC/W3C); whether the effect transfers to in-repo ADRs and
+        product decisions is an open question.
+  \item \textbf{Symmetric-injection caveat.} The benchmark measures
+        retrieval/assembly quality given one symmetric shot at the context window.
+        It does not measure whether a pull-based grounding tool is \emph{invoked}
+        at the right time in a deployed agent; reading a favourable result as
+        ``this fixes adherence in production'' overstates what was measured.
+  \item \textbf{Cost is list-price.} Token costs are priced at published rates and
+        do not reflect proxy markups or negotiated contracts.
+\end{itemize}
+
+\paragraph{Threats to validity.} Gold labels are authored blind and the taxonomy
+and rubric are frozen before results exist, mitigating the risk of fitting the
+question to the winner; the negative control guards against an arm that wins by
+refusing everything; verbatim, pinned, hashed corpora mitigate cherry-picking.

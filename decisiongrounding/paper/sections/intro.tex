@@ -1,0 +1,43 @@
+\section{Introduction}
+
+A coding agent rarely works on a blank slate. Real repositories accumulate
+decisions---architecture decision records (ADRs), coding standards, deprecations,
+and the rationale behind rejected approaches---that constrain what a correct
+change looks like. A frequent objection is that this knowledge does not need
+special handling: \emph{frontier models with long context simply absorb the
+decisions, so a persistence or grounding layer adds no durable value.} That
+objection is correct often enough that any benchmark which cannot reproduce it is
+marketing rather than measurement.
+
+\benchname{} takes the objection seriously by making the threatening baselines
+mandatory. We compare a deterministic grounding arm against \texttt{context\_dump}
+(paste every artifact into the model's context, the skeptic's position implemented
+faithfully) and \texttt{naive\_rag} (embeddings plus top-$k$ over the same
+documents), under a regime designed to isolate one variable: the quality of
+context selection and assembly. Every arm feeds the \emph{same} answering model
+the \emph{same} prompt scaffold and is given one equal opportunity to populate the
+context window; the only thing that varies is grounding.
+
+The discriminating phenomenon is \emph{supersession}. Our corpora are built from
+real, public decisions whose supersession is stated by the artifacts themselves
+(e.g.\ PEP~440 \texttt{Replaces} PEP~386; an RFC \texttt{Obsoletes} another). The
+question is whether an agent, asked to take an action governed by a superseded or
+prohibiting decision, follows the \emph{live} governing decision rather than the
+stale one---and whether it still does so as the corpus grows and the governing
+decision is buried among real distractors.
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item \benchname, a benchmark for \emph{decision adherence} built from real,
+        reproducible, supersession-bearing public corpora (PEP/RFC/W3C), with a
+        controlled single-variable comparison across grounding strategies.
+  \item A deterministic, structural scoring protocol (no embeddings, no LLM judge)
+        over decision adherence, governing-decision recall, and
+        false-permit/false-prohibit rates.
+  \item An adherence-versus-corpus-size methodology that reports the
+        \emph{crossover}---where strategies diverge as conflict density rises---
+        alongside token cost.
+  \item A pre-registered falsifier and a publish-losing-results discipline, so the
+        benchmark can embarrass its own hypothesis. \todo{state the headline
+        finding once the funded run completes.}
+\end{itemize}

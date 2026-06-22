@@ -1,0 +1,49 @@
+% SWE-DecisionBench — paper scaffold.
+% Build:  make paper-figs   # generate figures from the crossover dataset
+%         make paper        # pdflatex + bibtex  (needs a LaTeX toolchain)
+% The benchmark name is a single macro (\benchname) so it is swappable.
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[numbers]{natbib}
+\usepackage{hyperref}
+\usepackage{xspace}
+
+\graphicspath{{figures/}}
+\newcommand{\benchname}{SWE-DecisionBench\xspace}
+% Visibly mark anything awaiting the real run / external verification.
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\title{\benchname: Measuring Whether Coding Agents Follow Prior Decisions}
+\author{Tom Ballard\\\texttt{tom@armytage.co}\\% TODO: co-authors and affiliations
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\input{sections/intro}
+\input{sections/related}
+\input{sections/benchmark}
+\input{sections/method}
+\input{sections/setup}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+\input{sections/repro}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

@@ -1,0 +1,19 @@
+Coding agents increasingly operate inside repositories that carry a long history
+of recorded decisions---architecture decision records, standards, and
+deprecations---that constrain what an agent should do. We ask a focused question:
+does a deterministic, supersession-aware \emph{grounding} layer make an agent
+adhere to a team's prior decisions better than (a) dumping every decision
+document into context, (b) commodity retrieval-augmented generation over the same
+documents, or (c) no grounding---and at what corpus size does any difference
+appear? We introduce \benchname, a benchmark built from \emph{real, public}
+decision corpora with machine-stated supersession (Python PEPs, IETF RFCs, W3C
+recommendations), in which the discriminating signal is whether an agent follows
+the \emph{governing} decision and drops the one it supersedes. All arms feed one
+held-constant answering model behind one held-constant scaffold and receive a
+single, symmetric opportunity to populate the context window; they differ
+\emph{only} in how grounding is selected and assembled. Scoring is deterministic
+and structural---no embeddings, no LLM judge---over decision adherence, governing
+recall, and false-permit/false-prohibit rates. The headline artifact is an
+adherence-versus-corpus-size curve that exposes where each strategy holds or loses
+the governing decision as it is buried among real distractors, reported alongside
+token cost. \todo{summarise the empirical result once the funded run lands.}

@@ -1,4 +1,4 @@
-.PHONY: demo test compare pool rfc-pool crossover-real corpora-verify real-run real-crossover ui dashboard
+.PHONY: demo test compare pool rfc-pool crossover-real corpora-verify real-run real-crossover ui dashboard paper-figs paper
 
 # Local web UI: serve the results dashboard at 127.0.0.1:8099 (needs the [ui]
 # extra: pip install -e '.[ui]'). RESULTS overrides the directory it reads.
@@ -51,6 +51,18 @@ crossover-real:
 	  --distractors real --ns $(or $(NS),10,50,150,300) \
 	  --answering $(or $(ANSWERING),offline-stub) \
 	  --embedder $(or $(EMBEDDER),local-hash)
+
+# Paper figures from a crossover dataset (PDF with the [chart] extra, else SVG).
+# CROSSOVER overrides the dataset; FORMAT overrides pdf.
+paper-figs:
+	python -m scripts.paper_figs --crossover $(or $(CROSSOVER),results/crossover_dataset.json) \
+	  --out paper/figures --format $(or $(FORMAT),pdf)
+
+# Build the paper PDF (needs a LaTeX toolchain: pdflatex + bibtex). Runs figures
+# first so includegraphics resolves.
+paper: paper-figs
+	cd paper && pdflatex -interaction=nonstopmode main.tex && bibtex main && \
+	  pdflatex -interaction=nonstopmode main.tex && pdflatex -interaction=nonstopmode main.tex
 
 test:
 	python -m pytest -q

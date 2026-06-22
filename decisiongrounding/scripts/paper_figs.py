@@ -1,0 +1,141 @@
+"""Generate paper-ready figures from a crossover dataset (and optional run).
+
+PDF (vector, for LaTeX) via matplotlib when the ``[chart]`` extra is installed;
+otherwise a clean SVG fallback via the in-repo renderer. Reads the same dataset
+the dashboard/report consume, so figures never diverge from the numbers.
+
+    python -m scripts.paper_figs --crossover results/crossover_dataset.json
+    python -m scripts.paper_figs --crossover <ds>.json --out paper/figures --format pdf
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# Stable arm order / colours come from the dataset; this only fixes legend order.
+_ARM_ORDER = ["rac", "naive_rag", "context_dump", "no_grounding", "memory_provider"]
+
+# (field, title, y-label, filename, y_log, y_max)
+_FIGS = [
+    ("adherence_rate", "Decision adherence vs corpus size", "adherence rate",
+     "adherence_vs_n", False, 1.05),
+    ("governing_recall", "Governing-decision recall vs corpus size", "recall",
+     "recall_vs_n", False, 1.05),
+]
+# Cost uses real API usage when present, else the deterministic token estimate.
+_COST_FIELDS = ("input_tokens_mean", "token_estimate_mean")
+
+
+def _ordered_arms(ds: dict) -> list[str]:
+    arms = list(ds["arms"])
+    return [a for a in _ARM_ORDER if a in arms] + [a for a in arms if a not in _ARM_ORDER]
+
+
+def _points(ds: dict, arm: str, field: str) -> list[tuple]:
+    return [(p["N"], p[field]) for p in ds["arms"][arm] if p.get(field) is not None]
+
+
+def _cost_field(ds: dict) -> str | None:
+    for f in _COST_FIELDS:
+        if any(f in p for arm in ds["arms"].values() for p in arm):
+            return f
+    return None
+
+
+def _write_svg(ds, field, title, ylabel, path, y_log, y_max):
+    from scoring.charts import line_chart
+    series = {a: _points(ds, a, field) for a in _ordered_arms(ds)}
+    series = {a: pts for a, pts in series.items() if pts}
+    path.write_text(line_chart(title, series, x_label="Corpus size N (log)",
+                               y_label=ylabel, x_log=True, y_log=y_log, y_max=y_max))
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Build paper figures from a crossover dataset.")
+    ap.add_argument("--crossover", required=True, help="crossover_dataset.json")
+    ap.add_argument("--out", default="paper/figures")
+    ap.add_argument("--format", default="pdf", choices=["pdf", "png", "svg"])
+    args = ap.parse_args(argv)
+
+    ds = json.loads(Path(args.crossover).read_text())
+    outdir = Path(args.out)
+    outdir.mkdir(parents=True, exist_ok=True)
+    figs = list(_FIGS)
+    cost = _cost_field(ds)
+    if cost:
+        figs.append((cost, "Token cost vs corpus size", "mean input tokens",
+                     "cost_vs_n", True, None))
+
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError:
+        if args.format != "svg":
+            print("matplotlib not installed — writing SVG instead of "
+                  f"{args.format}. For vector PDF figures: pip install -e '.[chart]'",
+                  file=sys.stderr)
+        for field, title, ylabel, fname, y_log, y_max in figs:
+            _write_svg(ds, field, title, ylabel, outdir / f"{fname}.svg", y_log, y_max)
+            print("wrote", outdir / f"{fname}.svg")
+        return 0
+
+    def plot(field, title, ylabel, fname, y_log, y_max):
+        fig, ax = plt.subplots(figsize=(5.0, 3.2))
+        drew = False
+        for arm in _ordered_arms(ds):
+            pts = sorted(_points(ds, arm, field))
+            if not pts:
+                continue
+            xs, ys = zip(*pts)
+            ax.plot(xs, ys, marker="o", linewidth=2, label=arm)
+            drew = True
+        if not drew:
+            plt.close(fig)
+            return
+        ax.set_xscale("log")
+        if y_log:
+            ax.set_yscale("log")
+        if y_max is not None:
+            ax.set_ylim(top=y_max)
+        ax.set_xlabel("Corpus size $N$ (log)")
+        ax.set_ylabel(ylabel)
+        ax.set_title(title)
+        ax.legend(fontsize=8)
+        fig.tight_layout()
+        out = outdir / f"{fname}.{args.format}"
+        fig.savefig(out)
+        plt.close(fig)
+        print("wrote", out)
+
+    for f in figs:
+        plot(*f)
+    # rac vs naive_rag head-to-head (the thesis figure)
+    if "rac" in ds["arms"] and "naive_rag" in ds["arms"]:
+        fig, ax = plt.subplots(figsize=(5.0, 3.2))
+        for arm in ("rac", "naive_rag"):
+            pts = sorted(_points(ds, arm, "adherence_rate"))
+            if pts:
+                xs, ys = zip(*pts)
+                ax.plot(xs, ys, marker="o", linewidth=2, label=arm)
+        ax.set_xscale("log")
+        ax.set_ylim(top=1.05)
+        ax.set_xlabel("Corpus size $N$ (log)")
+        ax.set_ylabel("adherence rate")
+        ax.set_title("rac vs naive RAG")
+        ax.legend(fontsize=8)
+        fig.tight_layout()
+        out = outdir / f"head_to_head.{args.format}"
+        fig.savefig(out)
+        plt.close(fig)
+        print("wrote", out)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
