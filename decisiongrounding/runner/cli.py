@@ -38,7 +38,14 @@ from providers.answering import usage_dict  # noqa: E402
 from providers.base import SCAFFOLD, ProposedChange  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
-from scoring.crossover import build_dataset, build_dataset_batched, emit  # noqa: E402
+from scoring.crossover import (  # noqa: E402
+    build_dataset,
+    build_dataset_batched,
+    build_dataset_multiseed,
+    emit,
+    merge_seed_datasets,
+    run_seeds,
+)
 
 HARNESS_VERSION = "0.1.0-scaffold"
 _ROOT = Path(__file__).resolve().parent.parent
@@ -377,6 +384,45 @@ def cmd_batch(args) -> int:
     return 1 if errors else 0
 
 
+def _parse_seeds(spec) -> list[int] | None:
+    """Parse a --seeds spec into a sorted, unique int list, or None if unset.
+
+    Accepts "3" (seed 3 only), "0,1,2", "0-4" (range, inclusive), and combos like
+    "0-2,5". A single value is one seed, not a count.
+    """
+    if not spec:
+        return None
+    out: list[int] = []
+    for part in str(spec).split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part.lstrip("-"):  # a range like 0-4 (not a bare negative)
+            a, b = part.split("-", 1)
+            out.extend(range(int(a), int(b) + 1))
+        else:
+            out.append(int(part))
+    return sorted(dict.fromkeys(out))
+
+
+def _fmt_pt(p: dict, field: str) -> str:
+    """Format a curve point's field as `mean` or `mean±half` (multi-seed)."""
+    v = p.get(field)
+    if v is None:
+        return "n/a"
+    ci = p.get(f"{field}_ci")
+    if ci and p.get("n_seeds", 1) > 1:
+        return f"{v:.2f}±{(ci[1] - ci[0]) / 2:.2f}"
+    return f"{v:.2f}"
+
+
+def _fmt_adherent(v) -> str:
+    """Per-scenario adherence cell: 1/0 for a single seed, a fraction otherwise."""
+    if isinstance(v, bool):
+        return "1" if v else "0"
+    return f"{v:.1f}"
+
+
 def cmd_demo(args) -> int:
     arms = tuple(a.strip() for a in args.arms.split(",") if a.strip())
     _preflight(arms, args.answering, args.embedder)
@@ -427,13 +473,43 @@ def cmd_demo(args) -> int:
         )
 
     pool_dir = args.pool if args.distractors == "real" else None
+    seeds = _parse_seeds(getattr(args, "seeds", None))
+    augment = getattr(args, "augment", None)
+    batch = bool(getattr(args, "batch", False))
+    if batch and args.answering != "claude":
+        _sweep_fp.close()
+        raise SystemExit("--batch requires --answering claude (the Batch API "
+                         "discounts the pinned model; the offline stub has nothing to batch)")
+    if batch:
+        print("  (Batch API: assembling cells locally, then one batch per seed at ~50% price)",
+              file=sys.stderr)
     try:
-        if getattr(args, "batch", False):
-            if args.answering != "claude":
-                raise SystemExit("--batch requires --answering claude (the Batch API "
-                                 "discounts the pinned model; the offline stub has nothing to batch)")
-            print("  (Batch API: assembling cells locally, then one batch at ~50% price)",
-                  file=sys.stderr)
+        if augment:
+            existing = json.loads(Path(augment).read_text(encoding="utf-8"))
+            have = set(existing.get("seeds") or [existing.get("seed", 0)])
+            want = seeds if seeds is not None else sorted(have)
+            todo = [s for s in want if s not in have]
+            if not todo:
+                print("  (augment: no new seeds to run; re-emitting)", file=sys.stderr)
+                dataset = existing
+            else:
+                print(f"  (augment: {sorted(have)} + new {todo})", file=sys.stderr)
+                new_ps = run_seeds(
+                    scenarios, arms, ns, todo,
+                    answering_model_name=args.answering, embedder_spec=args.embedder,
+                    pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
+                    batched=batch, poll=args.poll, progress=_on_cell)
+                dataset = merge_seed_datasets(existing, new_ps, list(arms), list(ns),
+                                              ("rac", "naive_rag"))
+        elif seeds is not None:
+            if len(seeds) > 1:
+                print(f"  (multi-seed: {seeds}; reporting mean +/- 95% CI)", file=sys.stderr)
+            dataset = build_dataset_multiseed(
+                scenarios, arms=arms, ns=ns, seeds=seeds,
+                answering_model_name=args.answering, embedder_spec=args.embedder,
+                pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
+                batched=batch, poll=args.poll, pair=("rac", "naive_rag"), progress=_on_cell)
+        elif batch:
             dataset = build_dataset_batched(
                 scenarios, arms=arms, ns=ns, seed=args.seed, embedder_spec=args.embedder,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
@@ -448,21 +524,26 @@ def cmd_demo(args) -> int:
             )
     finally:
         _sweep_fp.close()
+    multiseed = dataset.get("n_seeds", 1) > 1
     for arm in arms:
-        row = " ".join(f"N={p['N']}:{p['adherence_rate']:.2f}" for p in dataset["arms"][arm])
+        row = " ".join(f"N={p['N']}:{_fmt_pt(p, 'adherence_rate')}" for p in dataset["arms"][arm])
         print(f"{arm:<16}{row}")
     print("\n== governing-decision recall vs corpus size (why adherence moves) ==")
     for arm in arms:
-        row = " ".join(
-            f"N={p['N']}:{'n/a' if p['governing_recall'] is None else format(p['governing_recall'], '.2f')}"
-            for p in dataset["arms"][arm]
-        )
+        row = " ".join(f"N={p['N']}:{_fmt_pt(p, 'governing_recall')}" for p in dataset["arms"][arm])
         print(f"{arm:<16}{row}")
+
+    if multiseed and "paired" in dataset:
+        print("\n== rac - naive_rag adherence (paired across seeds; the falsifier statistic) ==")
+        for e in dataset["paired"].get("rac_vs_naive_rag", []):
+            lo, hi = e["diff_ci"]
+            verdict = "rac>" if lo > 0 else ("tie/loss" if hi >= 0 else "rac<")
+            print(f"  N={e['N']:<4} diff={e['diff_mean']:+.2f}  95% CI [{lo:+.2f}, {hi:+.2f}]  {verdict}")
 
     print("\n== per-scenario adherence (where the average comes from) ==")
     for arm in arms:
         for sid, series in dataset["per_scenario"][arm].items():
-            row = " ".join(f"N={p['N']}:{'1' if p['adherent'] else '0'}" for p in series)
+            row = " ".join(f"N={p['N']}:{_fmt_adherent(p['adherent'])}" for p in series)
             print(f"{arm:<13}{sid:<32}{row}")
     data_path, chart_path = emit(dataset, out_dir)
     print(f"\nwrote {report}\nwrote {data_path}\nwrote {chart_path}")
@@ -547,6 +628,17 @@ def main(argv: list[str] | None = None) -> int:
             sp.add_argument(
                 "--poll", type=int, default=20,
                 help="seconds between Batch-API status polls (with --batch)",
+            )
+            sp.add_argument(
+                "--seeds", default=None,
+                help="run the sweep over several seeds and report mean +/- 95%% CI "
+                "(spec: '0-4' | '0,1,2' | '0-2,5'; a single '3' = seed 3 only). "
+                "Cost multiplies with the number of seeds.",
+            )
+            sp.add_argument(
+                "--augment", default=None,
+                help="path to an existing crossover_dataset.json: run only the "
+                "--seeds not already in it and merge (append-friendly, no re-run)",
             )
 
     # The local web UI is a different shape (no scenarios/answering knobs).

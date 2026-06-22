@@ -89,14 +89,18 @@ python3 -m runner.cli "$HEADLINE_CMD" \
 #    BATCH=1 routes the sweep's answering calls through the Batch API (~50% of
 #    standard price, and it runs server-side so a client/container restart can't
 #    lose it — strongly recommended for the full N sweep).
+#    SEEDS (e.g. SEEDS=0-4) runs the sweep over several seeds and reports
+#    mean +/- 95% CI with a paired rac-vs-naive_rag difference. Cost multiplies
+#    with the number of seeds.
 if [ "$CROSSOVER" = "1" ]; then
   [ -d "$POOL/corpus" ] || python3 -m ingest.peps pool build --out "$POOL"
   echo "== crossover (real distractors) =="
-  echo "  cost ~= $n_arms arms x (discriminating scenarios) x |$NS| ns"
+  echo "  cost ~= $n_arms arms x (discriminating scenarios) x |$NS| ns${SEEDS:+ x seeds[$SEEDS]}"
   CROSS_BATCH=""; [ "${BATCH:-0}" = "1" ] && CROSS_BATCH="--batch"
+  CROSS_SEEDS=""; [ -n "${SEEDS:-}" ] && CROSS_SEEDS="--seeds $SEEDS"
   python3 -m runner.cli demo \
     --scenarios "$SCENARIOS" --arms "$ARMS" \
-    --distractors real --pool "$POOL" --ns "$NS" $CROSS_BATCH \
+    --distractors real --pool "$POOL" --ns "$NS" $CROSS_BATCH $CROSS_SEEDS \
     --answering claude --embedder "$EMBEDDER" --seed "$SEED"
 fi
 
