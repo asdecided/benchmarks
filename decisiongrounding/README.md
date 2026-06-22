@@ -70,6 +70,35 @@ as "this layer will fix adherence in production" overstates what was measured.
   explanation for why adherence moves (the analog of MemoryBench's Hit@K). There
   is deliberately **no** composite score.
 
+## Related work
+
+**SWE-ContextBench** (Zhu et al., 2026; [arXiv:2602.08316](https://arxiv.org/abs/2602.08316))
+is the closest neighbour. It finds that *accurately retrieved and summarised* prior
+context improves coding-agent resolution accuracy and cuts runtime and token cost, while
+*unfiltered or wrongly-selected* context gives limited or **negative** benefit. That is the
+same gradient this benchmark's `context_dump → naive_rag → rac` arms exist to measure, and
+it treats **token cost** as a first-class metric, as we do. We read its result as external
+support for the premise — and as a sharpener for where our distinct contribution must lie.
+
+Our niche is deliberately narrower:
+
+- **Durable decisions, not episodic experience.** SWE-ContextBench reuses prior *task*
+  solutions (related GitHub issues/PRs) — "have I solved a similar problem before?". We
+  test adherence to long-lived *governing decisions* (ADR- and standard-like) — "does a
+  recorded decision forbid what I am about to do?".
+- **Supersession is the discriminating signal.** Our headline case is *machine-stated*
+  supersession (PEP 386→440, RFC `Obsoletes`): follow the live decision and drop the
+  superseded one. Generic retrieval is necessary but not sufficient there — which is exactly
+  where our [falsifier](#the-falsifier-stated-up-front) is aimed. If accurate retrieval
+  alone closed the gap, the interesting result is the *stale/prohibited* case, not generic
+  recall.
+- **Deterministic, structural scoring** (ADR-066) — no embeddings, no LLM judge — over a
+  **single-variable A/B**: one held-constant answering model and scaffold, varying *only*
+  the grounding assembly. Cheaper and more reproducible than end-to-end resolution accuracy,
+  at the cost of a narrower question (decision adherence, not "does the patch pass tests").
+
+(See also MemoryBench's Hit@K, the analog of our governing-decision recall.)
+
 ## Run it (offline, no credentials)
 
 ```bash
