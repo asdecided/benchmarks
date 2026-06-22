@@ -16,7 +16,8 @@ real-run:
 # same headline via the Batch API (~50% of standard price; asynchronous):
 real-batch:
 	BATCH=1 ./scripts/run_real.sh
-# compare + the adherence-vs-N crossover over a real pool (set NS to taste):
+# compare + the adherence-vs-N crossover over a real pool (set NS to taste; add
+# BATCH=1 for the Batch API, and SEEDS=0-4 for mean +/- CI error bars):
 real-crossover:
 	CROSSOVER=1 ./scripts/run_real.sh
 

@@ -176,6 +176,13 @@ The **crossover** can also run on the real backends:
 # Real-model crossover. --ns keeps the API spend small (arms x scenarios x |ns|).
 python -m runner.cli demo \
   --answering claude --embedder voyage:voyage-4-large --ns 10,50
+
+# Repeat over several seeds for error bars: each curve point becomes mean +/- a
+# 95% CI, and the rac-vs-naive_rag verdict is the paired difference's CI (the
+# falsifier statistic). Cost multiplies with the seed count; --augment adds more
+# seeds to an existing dataset without re-running the ones it already has.
+python -m runner.cli demo --answering claude --embedder voyage:voyage-4-large \
+  --ns 10,50 --seeds 0-4
 ```
 
 This is where the thesis is actually tested — but note the boundary: with
