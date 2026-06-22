@@ -87,15 +87,40 @@ def _metric_table(run):
     return "".join(rows) + "</tbody></table>"
 
 
+def _curve_cell(p, field):
+    """A curve table cell: `mean` (single seed) or `mean ±half` (multi-seed CI)."""
+    v = p.get(field)
+    if v is None:
+        return "n/a"
+    ci = p.get(f"{field}_ci")
+    if ci and p.get("n_seeds", 1) > 1:
+        return f"{_f(v)} ±{_f((ci[1] - ci[0]) / 2)}"
+    return _f(v)
+
+
 def _curve_table(dataset, field):
     arms, ns = dataset["arms"], dataset["ns"]
     head = "".join(f"<th>N={n}</th>" for n in ns)
     rows = [f"<table><thead><tr><th>arm</th>{head}</tr></thead><tbody>"]
     for a in arms:
         pts = {p["N"]: p for p in arms[a]}
-        cells = "".join(f"<td>{_f(pts.get(n, {}).get(field))}</td>" for n in ns)
+        cells = "".join(f"<td>{_curve_cell(pts.get(n, {}), field)}</td>" for n in ns)
         rows.append(f"<tr><td><code>{_esc(a)}</code></td>{cells}</tr>")
     return "".join(rows) + "</tbody></table>"
+
+
+def _bands(dataset, field, arms=None):
+    """{arm: [(N, lo, hi)]} from per-point `<field>_ci` for chart confidence
+    bands. None when the dataset is single-seed (no CI)."""
+    out = {}
+    for a, pts in dataset["arms"].items():
+        if arms is not None and a not in arms:
+            continue
+        band = [(p["N"], p[f"{field}_ci"][0], p[f"{field}_ci"][1])
+                for p in pts if p.get(f"{field}_ci") and p.get("n_seeds", 1) > 1]
+        if band:
+            out[a] = band
+    return out or None
 
 
 def _cost_section(run, cost_curve, model):
@@ -273,10 +298,12 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
     if dataset:
         a_svg = line_chart("Decision adherence vs corpus size",
                            {a: [(p["N"], p["adherence_rate"]) for p in dataset["arms"][a]] for a in dataset["arms"]},
-                           x_label="Corpus size N (log)", y_label="adherence", x_log=True, y_max=1.05)
+                           x_label="Corpus size N (log)", y_label="adherence", x_log=True, y_max=1.05,
+                           bands=_bands(dataset, "adherence_rate"))
         r_svg = line_chart("Governing-decision recall vs corpus size",
                            {a: [(p["N"], p["governing_recall"] or 0) for p in dataset["arms"][a]] for a in dataset["arms"]},
-                           x_label="Corpus size N (log)", y_label="recall", x_log=True, y_max=1.05)
+                           x_label="Corpus size N (log)", y_label="recall", x_log=True, y_max=1.05,
+                           bands=_bands(dataset, "governing_recall"))
         secs.append(f'<section class=tab id=s2><h2>Adherence vs N</h2><div class=chart>{a_svg}</div>'
                     f'{_curve_table(dataset, "adherence_rate")}'
                     f'<h2>Governing-decision recall vs N</h2><div class=chart>{r_svg}</div>'
@@ -290,16 +317,33 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
     if dataset and "rac" in dataset["arms"] and "naive_rag" in dataset["arms"]:
         hh = line_chart("rac vs naive RAG — adherence vs N",
                         {a: [(p["N"], p["adherence_rate"]) for p in dataset["arms"][a]] for a in ("rac", "naive_rag")},
-                        x_label="Corpus size N (log)", y_label="adherence", x_log=True, y_max=1.05)
+                        x_label="Corpus size N (log)", y_label="adherence", x_log=True, y_max=1.05,
+                        bands=_bands(dataset, "adherence_rate", arms=("rac", "naive_rag")))
         ns = dataset["ns"]; base, top = ns[0], ns[-1]
-        ra = {p["N"]: p["adherence_rate"] for p in dataset["arms"]["rac"]}
-        na = {p["N"]: p["adherence_rate"] for p in dataset["arms"]["naive_rag"]}
-        if na.get(top, 1) < ra.get(top, 0) - 1e-9:
-            v = f"rac holds adherence as the corpus grows where naive_rag decays (N={top}: rac {_f(ra.get(top))} vs naive_rag {_f(na.get(top))})."
-        elif abs(na.get(top, 0) - ra.get(top, 0)) <= 1e-9:
-            v = f"At N={top} the two tie ({_f(ra.get(top))}); naive RAG does not measurably degrade here — thesis not supported by this run."
+        paired = (dataset.get("paired") or {}).get("rac_vs_naive_rag")
+        if paired:
+            # Multi-seed: the falsifier is the paired difference's CI at the top N.
+            e = paired[-1]
+            lo, hi = e["diff_ci"]
+            if lo > 1e-9:
+                v = (f"At N={e['N']} rac leads naive_rag by {e['diff_mean']:+.2f} "
+                     f"(95% CI [{lo:+.2f}, {hi:+.2f}], {e['n']} seeds) — thesis supported here.")
+            elif hi < -1e-9:
+                v = (f"At N={e['N']} naive_rag leads rac ({e['diff_mean']:+.2f}, "
+                     f"95% CI [{lo:+.2f}, {hi:+.2f}]) — thesis not supported.")
+            else:
+                v = (f"At N={e['N']} the rac−naive_rag difference is {e['diff_mean']:+.2f} "
+                     f"(95% CI [{lo:+.2f}, {hi:+.2f}] includes 0) — not statistically "
+                     f"separable; thesis not supported by this run.")
         else:
-            v = f"naive_rag leads rac at N={top} ({_f(na.get(top))} vs {_f(ra.get(top))}) — thesis not supported by this run."
+            ra = {p["N"]: p["adherence_rate"] for p in dataset["arms"]["rac"]}
+            na = {p["N"]: p["adherence_rate"] for p in dataset["arms"]["naive_rag"]}
+            if na.get(top, 1) < ra.get(top, 0) - 1e-9:
+                v = f"rac holds adherence as the corpus grows where naive_rag decays (N={top}: rac {_f(ra.get(top))} vs naive_rag {_f(na.get(top))})."
+            elif abs(na.get(top, 0) - ra.get(top, 0)) <= 1e-9:
+                v = f"At N={top} the two tie ({_f(ra.get(top))}); naive RAG does not measurably degrade here — thesis not supported by this run."
+            else:
+                v = f"naive_rag leads rac at N={top} ({_f(na.get(top))} vs {_f(ra.get(top))}) — thesis not supported by this run."
         secs.append(f'<section class=tab id=s4><h2>rac vs naive RAG</h2><div class=chart>{hh}</div>'
                     f'<div class=verdict>{_esc(v)}</div></section>')
     else:

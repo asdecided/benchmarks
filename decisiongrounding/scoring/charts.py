@@ -43,12 +43,19 @@ def line_chart(
     fmt: str = "{:.2f}",
     width: int = 720,
     height: int = 460,
+    bands: dict[str, list[tuple[float, float, float]]] | None = None,
 ) -> str:
     """Multi-series line chart. `series` maps label -> [(x, y), ...]. Set x_log
-    for the N axis; y_log for cost (orders of magnitude). Returns SVG text."""
+    for the N axis; y_log for cost (orders of magnitude). Optionally `bands` maps
+    label -> [(x, lo, hi), ...] to shade a confidence band under that arm's line
+    (rendered inside the arm's data-arm group, so the legend toggle hides both).
+    Returns SVG text."""
     pad_l, pad_r, pad_t, pad_b = 70, 150, 50, 55
     all_x = [x for pts in series.values() for x, _ in pts]
     all_y = [y for pts in series.values() for _, y in pts]
+    if bands:
+        all_x += [x for b in bands.values() for x, _, _ in b]
+        all_y += [v for b in bands.values() for _, lo, hi in b for v in (lo, hi)]
     if not all_x:
         all_x, all_y = [0, 1], [0, 1]
 
@@ -108,7 +115,13 @@ def line_chart(
         arm = _esc(label)
         pts = sorted(pts)
         poly = " ".join(f"{px(x):.1f},{py(y):.1f}" for x, y in pts)
-        series_svg = [f'<polyline points="{poly}" fill="none" stroke="{c}" stroke-width="2.5"/>']
+        series_svg = []
+        band = sorted(bands.get(label, [])) if bands else []
+        if len(band) >= 2:
+            top = " ".join(f"{px(x):.1f},{py(hi):.1f}" for x, _, hi in band)
+            bot = " ".join(f"{px(x):.1f},{py(lo):.1f}" for x, lo, _ in reversed(band))
+            series_svg.append(f'<polygon points="{top} {bot}" fill="{c}" fill-opacity="0.15" stroke="none"/>')
+        series_svg.append(f'<polyline points="{poly}" fill="none" stroke="{c}" stroke-width="2.5"/>')
         series_svg += [f'<circle cx="{px(x):.1f}" cy="{py(y):.1f}" r="3.5" fill="{c}"/>' for x, y in pts]
         parts.append(f'<g class="series" data-arm="{arm}">' + "".join(series_svg) + "</g>")
         parts.append(

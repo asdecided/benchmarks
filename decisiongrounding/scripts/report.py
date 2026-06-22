@@ -81,6 +81,31 @@ def _cost_table(run: dict) -> tuple[str, bool]:
     return "\n".join(rows), exact
 
 
+def _curve_cell(p: dict, field: str, nd=2) -> str:
+    """`mean` (single seed) or `mean ±half` (multi-seed CI)."""
+    v = p.get(field)
+    if v is None:
+        return _fmt(None, nd)
+    ci = p.get(f"{field}_ci")
+    if ci and p.get("n_seeds", 1) > 1:
+        return f"{_fmt(v, nd)} ±{_fmt((ci[1] - ci[0]) / 2, nd)}"
+    return _fmt(v, nd)
+
+
+def _bands(dataset: dict, field: str, arms=None):
+    """{arm: [(N, lo, hi)]} from per-point `<field>_ci` for chart confidence
+    bands. None when single-seed (no CI)."""
+    out = {}
+    for a, pts in dataset["arms"].items():
+        if arms is not None and a not in arms:
+            continue
+        band = [(p["N"], p[f"{field}_ci"][0], p[f"{field}_ci"][1])
+                for p in pts if p.get(f"{field}_ci") and p.get("n_seeds", 1) > 1]
+        if band:
+            out[a] = band
+    return out or None
+
+
 def _curve_table(dataset: dict, field: str, label: str, nd=2) -> str:
     arms = list(dataset["arms"])
     ns = dataset["ns"]
@@ -89,7 +114,7 @@ def _curve_table(dataset: dict, field: str, label: str, nd=2) -> str:
     rows = [f"{label}", "", head, sep]
     for arm in arms:
         pts = {p["N"]: p for p in dataset["arms"][arm]}
-        cells = " | ".join(_fmt(pts.get(n, {}).get(field), nd) for n in ns)
+        cells = " | ".join(_curve_cell(pts.get(n, {}), field, nd) for n in ns)
         rows.append(f"| `{arm}` | {cells} |")
     return "\n".join(rows)
 
@@ -187,7 +212,31 @@ def _head_to_head(dataset: dict, run: dict) -> str:
         f"- naive_rag adherence Δ {_fmt(rag_da, 2)}, recall Δ {_fmt(rag_dr, 2)}",
         "",
     ]
-    # auto verdict — strictly from the numbers
+    # Multi-seed: the falsifier is the paired difference's CI at the top N.
+    paired = (dataset.get("paired") or {}).get("rac_vs_naive_rag")
+    if paired:
+        e = paired[-1]
+        lo, hi = e["diff_ci"]
+        if lo > 1e-9:
+            verdict = (
+                f"**rac leads naive_rag at N={e['N']}** by {e['diff_mean']:+.2f} "
+                f"(paired 95% CI [{lo:+.2f}, {hi:+.2f}] over {e['n']} seeds) — the thesis "
+                "is supported here, with the difference statistically separable from zero."
+            )
+        elif hi < -1e-9:
+            verdict = (
+                f"**naive_rag leads rac at N={e['N']}** ({e['diff_mean']:+.2f}, paired 95% "
+                f"CI [{lo:+.2f}, {hi:+.2f}]) — the thesis is not supported; reported as-is."
+            )
+        else:
+            verdict = (
+                f"**At N={e['N']} the paired rac−naive_rag difference is {e['diff_mean']:+.2f} "
+                f"(95% CI [{lo:+.2f}, {hi:+.2f}] includes 0)** — not statistically separable; "
+                "the thesis is not supported by this run."
+            )
+        lines.append(verdict)
+        return "\n".join(lines)
+    # auto verdict — strictly from the numbers (single seed)
     if rac_da is not None and rag_da is not None:
         if rag_a.get(top, 1) < rac_a.get(top, 0) - 1e-9:
             verdict = (
@@ -287,6 +336,7 @@ def emit_charts(run: dict, dataset: dict | None, cost_curve: dict | None, out_di
             {a: [(p["N"], p["adherence_rate"]) for p in arms[a]] for a in arms},
             x_label="Corpus size N (log scale)", y_label="adherence rate",
             x_log=True, y_max=1.05,
+            bands=_bands(dataset, "adherence_rate"),
         )
         (out_dir / "chart-adherence-vs-n.svg").write_text(svg, encoding="utf-8")
         charts["adherence"] = "chart-adherence-vs-n.svg"
@@ -297,6 +347,7 @@ def emit_charts(run: dict, dataset: dict | None, cost_curve: dict | None, out_di
             {a: [(p["N"], p["governing_recall"] or 0) for p in arms[a]] for a in arms},
             x_label="Corpus size N (log scale)", y_label="recall rate",
             x_log=True, y_max=1.05,
+            bands=_bands(dataset, "governing_recall"),
         )
         (out_dir / "chart-recall-vs-n.svg").write_text(svg, encoding="utf-8")
         charts["recall"] = "chart-recall-vs-n.svg"
@@ -308,6 +359,7 @@ def emit_charts(run: dict, dataset: dict | None, cost_curve: dict | None, out_di
                 {a: [(p["N"], p["adherence_rate"]) for p in arms[a]] for a in ("rac", "naive_rag")},
                 x_label="Corpus size N (log scale)", y_label="adherence rate",
                 x_log=True, y_max=1.05,
+                bands=_bands(dataset, "adherence_rate", arms=("rac", "naive_rag")),
             )
             (out_dir / "chart-rac-vs-rag.svg").write_text(svg, encoding="utf-8")
             charts["head_to_head"] = "chart-rac-vs-rag.svg"
