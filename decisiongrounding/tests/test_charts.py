@@ -11,6 +11,26 @@ def _well_formed(svg: str):
     minidom.parseString(svg)
 
 
+def test_line_chart_bands_render_inside_data_arm_group():
+    series = {"rac": [(10, 0.9), (50, 0.8)], "naive_rag": [(10, 0.9), (50, 0.4)]}
+    bands = {"rac": [(10, 0.85, 0.95), (50, 0.7, 0.9)]}
+    svg = line_chart("A", series, x_label="N", y_label="adh", x_log=True, bands=bands)
+    _well_formed(svg)
+    assert "<polygon" in svg
+    # the band polygon sits inside rac's series group, before its polyline
+    grp = svg.split('class="series" data-arm="rac"', 1)[1]
+    assert grp.index("<polygon") < grp.index("<polyline")
+    # deterministic
+    assert svg == line_chart("A", series, x_label="N", y_label="adh", x_log=True, bands=bands)
+
+
+def test_line_chart_without_bands_has_no_polygon():
+    series = {"rac": [(10, 1.0), (50, 1.0)]}
+    svg = line_chart("A", series, x_label="N", y_label="adh", x_log=True)
+    _well_formed(svg)
+    assert "<polygon" not in svg
+
+
 def test_line_chart_is_well_formed_and_deterministic():
     series = {
         "context_dump": [(10, 1.0), (50, 1.0), (300, 1.0)],

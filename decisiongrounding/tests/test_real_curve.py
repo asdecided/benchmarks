@@ -8,7 +8,13 @@ import pytest
 
 from providers.base import CorpusArtifact
 from scenarios.loader import load_pool, load_scenarios
-from scoring.crossover import build_dataset, make_real_distractors
+from scoring.crossover import (
+    build_dataset,
+    build_dataset_multiseed,
+    make_real_distractors,
+    merge_seed_datasets,
+    run_seeds,
+)
 
 _ROOT = Path(__file__).resolve().parent.parent
 _REAL = _ROOT / "scenarios_real"
@@ -98,6 +104,63 @@ def test_build_dataset_real_pool_too_small_raises():
 def test_load_pool_missing_provenance_is_clear_error(tmp_path):
     with pytest.raises(FileNotFoundError, match="provenance"):
         load_pool(tmp_path)
+
+
+# --- multi-seed aggregation (offline, hermetic) ----------------------------
+
+def test_build_dataset_multiseed_shape_and_ci():
+    sc = load_scenarios(_REAL)
+    ds = build_dataset_multiseed(
+        sc, arms=("context_dump", "naive_rag"), ns=(3, 6), seeds=[0, 1, 2], pool=_pool(30)
+    )
+    assert ds["n_seeds"] == 3 and ds["seeds"] == [0, 1, 2]
+    for arm in ("context_dump", "naive_rag"):
+        for p in ds["arms"][arm]:
+            assert len(p["adherence_rate_values"]) == 3 and p["n_seeds"] == 3
+            lo, hi = p["adherence_rate_ci"]
+            assert lo <= p["adherence_rate"] <= hi
+            # back-compat: the plain field is still the mean
+            assert abs(p["adherence_rate"] - sum(p["adherence_rate_values"]) / 3) < 1e-9
+
+
+def test_build_dataset_multiseed_single_seed_is_degenerate():
+    sc = load_scenarios(_REAL)
+    ds = build_dataset_multiseed(sc, arms=("context_dump", "naive_rag"), ns=(3, 6),
+                                 seeds=[0], pool=_pool(30))
+    assert ds["n_seeds"] == 1
+    p = ds["arms"]["naive_rag"][0]
+    assert p["adherence_rate_ci"] == [p["adherence_rate"], p["adherence_rate"]]
+    assert p["adherence_rate_std"] == 0.0
+
+
+def test_build_dataset_multiseed_paired_difference():
+    sc = load_scenarios(_REAL)
+    ds = build_dataset_multiseed(
+        sc, arms=("context_dump", "naive_rag"), ns=(3, 6), seeds=[0, 1], pool=_pool(30),
+        pair=("context_dump", "naive_rag"),
+    )
+    assert "paired" in ds
+    entries = ds["paired"]["context_dump_vs_naive_rag"]
+    assert [e["N"] for e in entries] == [3, 6]
+    for e in entries:
+        assert len(e["diff_ci"]) == 2 and e["n"] == 2 and len(e["values"]) == 2
+
+
+def test_merge_seed_datasets_augment_equals_fresh_run():
+    sc = load_scenarios(_REAL)
+    arms, ns = ("context_dump", "naive_rag"), (3, 6)
+    pair = ("context_dump", "naive_rag")
+    base = build_dataset_multiseed(sc, arms=arms, ns=ns, seeds=[0, 1, 2], pool=_pool(30), pair=pair)
+    # add seeds 3,4 WITHOUT re-running 0,1,2
+    new_ps = run_seeds(sc, arms, ns, [3, 4], pool=_pool(30))
+    merged = merge_seed_datasets(base, new_ps, list(arms), list(ns), pair)
+    assert merged["n_seeds"] == 5 and merged["seeds"] == [0, 1, 2, 3, 4]
+    # augment must match a fresh 5-seed run
+    fresh = build_dataset_multiseed(sc, arms=arms, ns=ns, seeds=[0, 1, 2, 3, 4], pool=_pool(30), pair=pair)
+    for arm in arms:
+        for pm, pf in zip(merged["arms"][arm], fresh["arms"][arm]):
+            assert abs(pm["adherence_rate"] - pf["adherence_rate"]) < 1e-9
+            assert sorted(pm["adherence_rate_values"]) == sorted(pf["adherence_rate_values"])
 
 
 @pytest.mark.parametrize("pool_dir", ["peps_pool", "rfcs_pool"])

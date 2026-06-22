@@ -184,3 +184,22 @@ def test_build_dataset_batched_tolerates_a_failed_cell(monkeypatch):
                                seed=0, embedder_spec="local-hash", poll=0)
     assert len(ds["errors"]) == 1 and "batch result: errored" in ds["errors"][0]["error"]
     assert ds["arms"]["context_dump"][0]["N"] == 3  # curve still produced
+
+
+def test_build_dataset_multiseed_batched(monkeypatch):
+    """Batched + multiseed compose: one batch per seed, aggregated to mean +/- CI."""
+    from scoring.crossover import build_dataset_multiseed
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    fake = types.SimpleNamespace(messages=types.SimpleNamespace(batches=_FakeBatches()))
+    monkeypatch.setattr(ClaudeAnsweringModel, "_ensure_client", lambda self: fake)
+    ds = build_dataset_multiseed(
+        load_scenarios(_SCENARIOS), arms=("context_dump", "no_grounding"), ns=(3, 6),
+        seeds=[0, 1], batched=True, embedder_spec="local-hash",
+        pair=("context_dump", "no_grounding"),
+    )
+    assert ds["n_seeds"] == 2 and ds["errors"] == []
+    for p in ds["arms"]["context_dump"]:
+        assert len(p["adherence_rate_values"]) == 2
+        assert "input_tokens_mean" in p and "input_tokens_mean_ci" in p  # fake reports usage
+    assert "paired" in ds and ds["paired"]["context_dump_vs_no_grounding"]

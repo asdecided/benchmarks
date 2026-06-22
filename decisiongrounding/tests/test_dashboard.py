@@ -82,6 +82,24 @@ def test_build_dashboard_head_to_head_verdict_reads_the_numbers():
     assert "rac holds adherence" in out
 
 
+def test_dashboard_renders_ci_and_paired_verdict():
+    ds = _dataset()
+    for arm in ds["arms"]:
+        for p in ds["arms"][arm]:
+            p["n_seeds"] = 3
+            p["adherence_rate_ci"] = [max(0.0, p["adherence_rate"] - 0.05),
+                                      min(1.0, p["adherence_rate"] + 0.05)]
+    ds["n_seeds"] = 3
+    ds["seeds"] = [0, 1, 2]
+    ds["paired"] = {"rac_vs_naive_rag": [
+        {"N": 10, "diff_mean": 0.0, "diff_ci": [-0.02, 0.02], "diff_std": 0.01, "n": 3, "values": []},
+        {"N": 300, "diff_mean": 0.7, "diff_ci": [0.6, 0.8], "diff_std": 0.05, "n": 3, "values": []},
+    ]}
+    out = build_dashboard(_run(), ds, live=False)
+    assert "±" in out                              # CI in the curve table
+    assert "rac leads naive_rag by" in out         # paired-CI verdict at the top N
+
+
 def test_progressive_enhancement_hooks_present():
     out = build_dashboard(_run(), _dataset(), live=True, paid_enabled=False)
     # leaderboard: id + sortable headers + per-arm rows
