@@ -1,0 +1,27 @@
+{
+  "scenario_id": "rfc_http_messaging_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      { "id": "RFC-7230", "type": "decision", "path": "corpus/RFC-7230.md" },
+      { "id": "RFC-9112", "type": "decision", "path": "corpus/RFC-9112.md", "supersedes": ["RFC-7230"] }
+    ]
+  },
+  "task": {
+    "prompt": "Write the HTTP/1.1 request parser for our reverse proxy: message framing, header parsing, and connection management. Follow the current IETF HTTP/1.1 messaging specification.",
+    "proposed_action": "implement message syntax, framing, and connection management to RFC 7230 (HTTP/1.1: Message Syntax and Routing) as the governing specification"
+  },
+  "binding_decisions": ["RFC-9112"],
+  "relationships": [
+    { "source": "RFC-9112", "type": "supersedes", "target": "RFC-7230" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-9112",
+    "prohibited_actions": ["treat the obsoleted RFC 7230 as the current HTTP/1.1 messaging specification"],
+    "required_actions": ["implement message syntax, framing, and connection management to RFC 9112"],
+    "rationale": "RFC 9112 (HTTP/1.1) carries `Obsoletes: 7230` in its own header, so RFC 7230 is obsoleted by it; the ingest stamps RFC 7230 `Status: Superseded` from that public edge. The proposed action implements to the obsoleted RFC 7230, so the governing decision (RFC 9112) forbids it; the adherent move is to implement to RFC 9112. Citing only RFC 7230 and proceeding is the stale-decision failure. Distinct from the HTTP semantics scenario (RFC 9110 obsoletes 7231): this covers message syntax/framing. Source proposed by an independent author; verified here — the `Obsoletes` edge is present in RFC 9112's own header. Gold label authored from the immutable RFC texts (rfc-editor.org) blind to any arm output."
+  }
+}

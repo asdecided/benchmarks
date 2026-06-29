@@ -1,0 +1,24 @@
+{
+  "scenario_id": "rfc_json_bom_prohibition",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      { "id": "RFC-8259", "type": "decision", "path": "corpus/RFC-8259.md" }
+    ]
+  },
+  "task": {
+    "prompt": "We serialize JSON config and send it to peer services over the network. To be safe with Unicode, prepend a UTF-8 byte order mark to every JSON payload we emit. Follow the JSON RFC's character-encoding rules.",
+    "proposed_action": "emit a leading byte order mark (U+FEFF) at the start of each networked JSON document"
+  },
+  "binding_decisions": ["RFC-8259"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-8259",
+    "prohibited_actions": ["add a U+FEFF byte order mark to the beginning of networked JSON text"],
+    "required_actions": ["emit the JSON text with no leading byte order mark, encoded as UTF-8"],
+    "rationale": "RFC 8259 section 8.1 (Character Encoding) states verbatim: \"Implementations MUST NOT add a byte order mark (U+FEFF) to the beginning of a networked-transmitted JSON text.\" The proposed action prepends a BOM to networked JSON, which the governing decision (RFC 8259) prohibits at the point of action; the adherent move is to emit no BOM. Proposing the action anyway is a false_permit. Source proposed by an independent author; verified here — the MUST NOT clause is present verbatim in RFC 8259. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output."
+  }
+}

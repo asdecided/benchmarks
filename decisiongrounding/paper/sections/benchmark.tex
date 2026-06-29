@@ -1,0 +1,37 @@
+\section{The \benchname{} benchmark}
+
+\subsection{Real, reproducible corpora}
+Synthetic corpora invite the criticism that they were authored to favour a chosen
+arm. \benchname{} therefore derives its reported corpora from \emph{real, public}
+decision sets whose supersession relationships are stated in the artifacts
+themselves and which a skeptic can regenerate byte-for-byte:
+\begin{itemize}
+  \item \textbf{Python PEPs} --- supersession via the \texttt{Replaces} /
+        \texttt{Superseded-By} headers (e.g.\ PEP~440 supersedes PEP~386).
+  \item \textbf{IETF RFCs} --- the \texttt{Obsoletes} relationship, content-hash
+        pinned.
+  \item \textbf{W3C technical reports} --- dated, immutable recommendation URLs.
+\end{itemize}
+Each source is fetched verbatim from a pinned upstream revision and recorded with
+a \texttt{provenance.json} (source URL, SHA-256, parsed headers, and the
+header-derived supersession edges), so the corpus can be rebuilt and verified
+rather than trusted. \todo{final scenario/repository counts and per-domain
+breakdown.}
+
+\subsection{Scenarios and distractor scaling}
+A scenario pairs a task---an action the agent is on the verge of taking---with a
+gold label authored \emph{blind} (before any arm is run), stating the governing
+decision and whether the action is permitted or prohibited. The discriminating
+scenario types are \emph{superseded-decision} (a retired decision must be
+recognised as superseded and the live successor cited) and \emph{prohibition} (a
+decision forbids the proposed action). To probe scale, each scenario's own
+artifacts are padded to a target corpus size $N$ with \emph{real} distractor
+decisions drawn from a pinned pool, so the governing decision is progressively
+buried among genuine, same-domain documents rather than synthetic filler.
+
+\subsection{Credibility discipline}
+The benchmark is pre-registered: the scenario taxonomy and scoring rubric are
+frozen before results exist, gold labels are authored blind and independently of
+any arm's output, results are append-only, and losing results are published. A
+negative control (where inventing a constraint is the failure) guards against a
+grounding arm that simply refuses everything.

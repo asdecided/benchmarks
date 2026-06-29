@@ -1,0 +1,46 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-7231",
+      "number": 7231,
+      "file": "corpus/RFC-7231.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc7231.txt",
+      "source_sha256": "a83d026937f6f7929a0e53f8a9bfec4104285f0f89d6dbabd3927c4208a715b2",
+      "category": "Standards Track",
+      "title": "Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
+      "obsoletes": [
+        "RFC-2616"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-9110",
+      "number": 9110,
+      "file": "corpus/RFC-9110.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.txt",
+      "source_sha256": "21c1cdce6ab0e5509b04d84a28000836c7a087cf786efe6f04877ebfff47232a",
+      "category": "Standards Track",
+      "title": "7538, 7615, 7694                              J. Reschke, Ed.",
+      "obsoletes": [
+        "RFC-2818",
+        "RFC-7230",
+        "RFC-7231",
+        "RFC-7232",
+        "RFC-7233",
+        "RFC-7235"
+      ],
+      "replaces": [
+        "RFC-7231"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-9110",
+      "type": "supersedes",
+      "target": "RFC-7231"
+    }
+  ]
+}

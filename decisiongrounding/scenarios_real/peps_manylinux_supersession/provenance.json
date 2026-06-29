@@ -1,0 +1,77 @@
+{
+  "source_repo": "python/peps",
+  "pinned_commit": "f866e77409305866038471574f075cd8d83eee9e",
+  "peps": [
+    {
+      "id": "PEP-0513",
+      "number": 513,
+      "file": "corpus/PEP-0513.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0513.rst",
+      "source_sha256": "0da44eb82bedb5c430d4373f1ef8361fb2de13f88a22b66089fe5b447f361ee9",
+      "status": "Superseded",
+      "title": "A Platform Tag for Portable Linux Built Distributions",
+      "replaces": [],
+      "superseded_by": [
+        "PEP-0600"
+      ]
+    },
+    {
+      "id": "PEP-0571",
+      "number": 571,
+      "file": "corpus/PEP-0571.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0571.rst",
+      "source_sha256": "ede6375158ce0562cc38b471cf903a2d4e9b5783808b2cce33ace855dba8f430",
+      "status": "Superseded",
+      "title": "The manylinux2010 Platform Tag",
+      "replaces": [],
+      "superseded_by": [
+        "PEP-0600"
+      ]
+    },
+    {
+      "id": "PEP-0599",
+      "number": 599,
+      "file": "corpus/PEP-0599.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0599.rst",
+      "source_sha256": "018755007fb4a3ed26549ecbda05b367e6c592ef6315f2f457b95c5d06fb588c",
+      "status": "Superseded",
+      "title": "The manylinux2014 Platform Tag",
+      "replaces": [],
+      "superseded_by": [
+        "PEP-0600"
+      ]
+    },
+    {
+      "id": "PEP-0600",
+      "number": 600,
+      "file": "corpus/PEP-0600.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0600.rst",
+      "source_sha256": "178f06f53ee5729738df41638afd9d468154fd099de12f259a60bc0245a7ab78",
+      "status": "Final",
+      "title": "Future 'manylinux' Platform Tags for Portable Linux Built Distributions",
+      "replaces": [
+        "PEP-0513",
+        "PEP-0571",
+        "PEP-0599"
+      ],
+      "superseded_by": []
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "PEP-0600",
+      "type": "supersedes",
+      "target": "PEP-0513"
+    },
+    {
+      "source": "PEP-0600",
+      "type": "supersedes",
+      "target": "PEP-0571"
+    },
+    {
+      "source": "PEP-0600",
+      "type": "supersedes",
+      "target": "PEP-0599"
+    }
+  ]
+}

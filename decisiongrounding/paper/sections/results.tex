@@ -1,0 +1,56 @@
+\section{Results}
+
+\todo{This section is populated from the funded run. Generate the figures with
+\texttt{make paper-figs CROSSOVER=results/crossover\_dataset.json}; the commands
+below already point at the produced files.}
+
+\subsection{Adherence versus corpus size}
+Figure~\ref{fig:adherence} reports decision-adherence rate as the corpus grows and
+the governing decision is buried among real distractors. The story is the
+\emph{crossover}: where, if anywhere, the grounded arm separates from
+\texttt{context\_dump} and \texttt{naive\_rag}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.7\linewidth]{adherence_vs_n}
+  \caption{Decision adherence vs corpus size $N$. \todo{interpret.}}
+  \label{fig:adherence}
+\end{figure}
+
+\subsection{Governing-decision recall}
+Recall (Figure~\ref{fig:recall}) is the mechanistic explanation for adherence: an
+arm cannot follow a decision its grounding never contained.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.7\linewidth]{recall_vs_n}
+  \caption{Governing-decision recall vs $N$. \todo{interpret.}}
+  \label{fig:recall}
+\end{figure}
+
+\subsection{Token cost}
+Figure~\ref{fig:cost} reports mean input tokens per call against $N$; the
+crossover must be read \emph{together} with cost, since \texttt{context\_dump}
+buys any adherence with steeply rising tokens.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.7\linewidth]{cost_vs_n}
+  \caption{Token cost vs $N$ (log--log). \todo{interpret.}}
+  \label{fig:cost}
+\end{figure}
+
+\subsection{Head to head: \texttt{rac} vs \texttt{naive\_rag}}
+Figure~\ref{fig:h2h} isolates the thesis comparison. \todo{state whether the
+falsifier (grounded $\approx$ \texttt{naive\_rag} on superseded $+$ prohibition at
+$N \geq 50$) was triggered. Report the verdict computed from the numbers.}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.7\linewidth]{head_to_head}
+  \caption{\texttt{rac} vs naive RAG, adherence vs $N$. \todo{interpret.}}
+  \label{fig:h2h}
+\end{figure}
+
+\todo{Add the base-$N$ leaderboard table (adherence, stale, false-permit,
+false-prohibit, governing recall) and a per-arm cost table.}

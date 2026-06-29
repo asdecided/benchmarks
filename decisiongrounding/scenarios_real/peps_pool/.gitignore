@@ -1,0 +1,6 @@
+# The real PEP distractor pool is pinned by provenance.json (committed): the
+# exact PEP set, upstream sha256 of each, and the supersedes edges among them.
+# The bulky verbatim corpus is rebuilt on demand and not committed —
+#   python -m ingest.peps pool build --out scenarios_real/peps_pool
+# regenerates it, and `pool verify` checks it reproduces byte-for-byte.
+corpus/

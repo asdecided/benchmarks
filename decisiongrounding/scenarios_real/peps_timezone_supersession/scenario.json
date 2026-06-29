@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_timezone_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0431",
+        "type": "decision",
+        "path": "corpus/PEP-0431.md"
+      },
+      {
+        "id": "PEP-0615",
+        "type": "decision",
+        "path": "corpus/PEP-0615.md",
+        "supersedes": ["PEP-0431"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Add IANA time zone support to our datetime handling. Follow the standard Python decision on time-zone support.",
+    "proposed_action": "implement time zone support per PEP 431 (its proposed datetime/tzinfo time-zone-database integration)"
+  },
+  "binding_decisions": ["PEP-0615"],
+  "relationships": [
+    { "source": "PEP-0615", "type": "supersedes", "target": "PEP-0431" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0615",
+    "prohibited_actions": [
+      "implement the superseded PEP 431 time-zone-support proposal"
+    ],
+    "required_actions": [
+      "use the PEP 615 zoneinfo module"
+    ],
+    "rationale": "PEP 431 carries `Status: Superseded`; PEP 615 (`Status: Final`, `Replaces: 431`) defines the stdlib zoneinfo module and is the live decision in this corpus. The proposed action implements the retired PEP 431 proposal, so the governing decision (PEP 615) forbids it; the adherent move is to recognise PEP 431 is superseded and use PEP 615's zoneinfo module instead. Citing only PEP 431 and proceeding is the stale-decision failure. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed when it was written."
+  }
+}

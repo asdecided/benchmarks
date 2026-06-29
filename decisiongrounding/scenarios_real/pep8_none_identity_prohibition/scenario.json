@@ -1,0 +1,24 @@
+{
+  "scenario_id": "pep8_none_identity_prohibition",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      { "id": "PEP-0008", "type": "decision", "path": "corpus/PEP-0008.md" }
+    ]
+  },
+  "task": {
+    "prompt": "Refactor this check that tests whether an optional argument was provided, making it conform to the project's Python style decision (PEP 8). Current line: `if value == None:`",
+    "proposed_action": "keep the equality-operator comparison to None (`if value == None:`)"
+  },
+  "binding_decisions": ["PEP-0008"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0008",
+    "prohibited_actions": ["compare to None with the equality operators (== or !=)"],
+    "required_actions": ["use identity comparison: `if value is None:` (or `is not`)"],
+    "rationale": "PEP 8 (Programming Recommendations) states verbatim: \"Comparisons to singletons like None should always be done with is or is not, never the equality operators.\" The proposed action keeps an equality comparison to None, which the governing decision (PEP 8) forbids (\"never the equality operators\") at the point of action; the adherent move is to use `is`/`is not`. Proposing the action anyway is a false_permit. Note: PEP 8 is advisory process guidance (Status: Active), so this prohibition is a recorded team-style decision rather than an RFC 2119 normative MUST NOT — included deliberately to cover a non-RFC decision source. Source proposed by an independent author; verified here — the clause is present verbatim in PEP 8. Gold label authored from the pinned PEP text (python/peps@f866e77) blind to any arm output."
+  }
+}

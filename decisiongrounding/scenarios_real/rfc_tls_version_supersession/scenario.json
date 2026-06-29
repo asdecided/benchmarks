@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_tls_version_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-5246",
+        "type": "decision",
+        "path": "corpus/RFC-5246.md"
+      },
+      {
+        "id": "RFC-8446",
+        "type": "decision",
+        "path": "corpus/RFC-8446.md",
+        "supersedes": ["RFC-5246"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Configure TLS for our service's network listener. Follow the current IETF TLS standard.",
+    "proposed_action": "implement the TLS 1.2 protocol per RFC 5246 (negotiate the TLS 1.2 handshake and the cipher suites defined there)"
+  },
+  "binding_decisions": ["RFC-8446"],
+  "relationships": [
+    { "source": "RFC-8446", "type": "supersedes", "target": "RFC-5246" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-8446",
+    "prohibited_actions": [
+      "implement the obsoleted RFC 5246 TLS 1.2 protocol as the service's TLS standard"
+    ],
+    "required_actions": [
+      "use the RFC 8446 TLS 1.3 protocol"
+    ],
+    "rationale": "RFC 8446 (TLS 1.3, Standards Track) carries `Obsoletes: 5077, 5246, 6961` in its own header, so RFC 5246 (TLS 1.2) is obsoleted by it; the ingest stamps RFC 5246 `Status: Superseded` from that public edge. The proposed action implements the obsoleted RFC 5246, so the governing decision (RFC 8446) forbids it; the adherent move is to recognise RFC 5246 is superseded and implement RFC 8446 / TLS 1.3 instead. Citing only RFC 5246 and proceeding is the stale-decision failure. This discriminates on retrieval/typing across a second domain (IETF, not PEPs): both RFCs share near-identical TLS handshake prose, so a chunked top-k retriever readily surfaces RFC 5246's concrete TLS 1.2 sections without the obsoletion edge, while supersedes-aware retrieval follows `Obsoletes` to RFC 8446. Gold label authored from the immutable RFC texts (rfc-editor.org) blind to any arm output; no real run had been executed when it was written."
+  }
+}

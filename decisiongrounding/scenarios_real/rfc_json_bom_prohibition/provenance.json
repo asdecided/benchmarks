@@ -1,0 +1,20 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-8259",
+      "number": 8259,
+      "file": "corpus/RFC-8259.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc8259.txt",
+      "source_sha256": "61a5378f4255c720beb2a4b4a63b29540147c140f36988bf086291989b4cd2d7",
+      "category": "Standards Track",
+      "title": "The JavaScript Object Notation (JSON) Data Interchange Format",
+      "obsoletes": [
+        "RFC-7159"
+      ],
+      "replaces": []
+    }
+  ],
+  "supersedes_edges": []
+}

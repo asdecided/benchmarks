@@ -1,0 +1,19 @@
+\section{Reproducibility}
+
+The benchmark, corpora provenance, and runner are open source. Corpora are
+regenerated from pinned upstream revisions and verified by content hash; every run
+records the pinned model, version, temperature, seed, embedder, and backend
+package versions. The headline run is reproduced with:
+
+\begin{verbatim}
+make real-crossover   # adherence-vs-N over a real distractor pool (BATCH=1 to batch)
+python -m scripts.report --run results/run-*-compare-*.json \
+    --crossover results/crossover_dataset.json --cost-curve \
+    --out results/published/decision-grounding-report.md
+make paper-figs       # regenerate this paper's figures from the dataset
+\end{verbatim}
+
+Gold labels are authored before any arm is run and independently of arm outputs;
+the scenario taxonomy and scoring rubric are frozen prior to results; results are
+append-only and losing results are published. \todo{add the archived
+dataset/report DOI or release tag for the camera-ready.}

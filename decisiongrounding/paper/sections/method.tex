@@ -1,0 +1,39 @@
+\section{Method}
+
+\subsection{Arms}
+All arms are grounding strategies behind a uniform adapter; none is privileged.
+\begin{itemize}
+  \item \texttt{no\_grounding} --- the task with no decision context (floor).
+  \item \texttt{context\_dump} --- every decision artifact pasted into context.
+  \item \texttt{naive\_rag} --- embeddings with top-$k$ retrieval over the same
+        documents, using asymmetric query/document embeddings.
+  \item \texttt{rac} --- a deterministic, typed grounding layer that retrieves by
+        decision type and \emph{follows} machine-stated supersession edges,
+        replacing a retrieved superseded decision with its live successor.
+\end{itemize}
+
+\subsection{Fairness controls}
+Every arm feeds context to the \emph{same} fixed answering model with the
+\emph{same} prompt scaffold, pinned by model, version, temperature, and seed.
+Each arm receives \emph{one} symmetric opportunity to populate the context window;
+arms differ only in selection and assembly. We isolate retrieval/assembly quality:
+the benchmark measures, given one symmetric shot at the context window, which
+assembly strategy yields better decision adherence. It does \emph{not} test
+whether a pull-based grounding tool is invoked at the right moment in
+production---a separate deployment question, out of scope.
+
+\subsection{Deterministic scoring}
+The answering model returns a structured proposed change, scored by structural
+inspection rather than a learned judge:
+\begin{itemize}
+  \item \textbf{Decision adherence} --- did the change respect the governing
+        decision (cite the live decision; not follow a superseded one; not perform
+        a prohibited action)?
+  \item \textbf{Governing-decision recall} --- did the arm's assembled grounding
+        actually \emph{contain} the binding decision? This is the mechanistic
+        explanation for adherence.
+  \item \textbf{Stale-decision rate}, \textbf{false-permit rate}, and
+        \textbf{false-prohibit rate}.
+\end{itemize}
+There is deliberately no composite score, and no embedding- or LLM-based scoring,
+so results are reproducible from the recorded outputs.

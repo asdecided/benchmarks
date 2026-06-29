@@ -1,0 +1,21 @@
+\section{Experimental setup}
+
+\paragraph{Models.} The held-constant answering model is \texttt{claude-opus-4-8}
+at a pinned temperature and seed; the exact backend package versions are recorded
+in each run's \texttt{backend\_versions} field. \todo{confirm temperature/seed and
+final version strings from the run.}
+
+\paragraph{Retrieval.} \texttt{naive\_rag} uses Voyage embeddings
+(\texttt{voyage-4-large}) with asymmetric query/document roles. \todo{record the
+embedder id and dimension actually used.}
+
+\paragraph{Corpus sizes.} The adherence-versus-$N$ sweep uses
+$N \in \{10, 50, 150, 300\}$, padding each scenario with real distractors from the
+pinned pool. \todo{state final $N$ grid and number of seeds for variance.}
+
+\paragraph{Execution.} Answering calls for the sweep are issued through the
+Message Batches API (approximately half the standard token price, executed
+server-side), and every completed cell is streamed to a durable sidecar so a long
+run is observable and never lost. Token usage is captured per call and priced at
+published list rates; the deterministic token estimate is the fallback when usage
+is unavailable.

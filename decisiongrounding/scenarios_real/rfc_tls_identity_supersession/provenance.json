@@ -1,0 +1,39 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-6125",
+      "number": 6125,
+      "file": "corpus/RFC-6125.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc6125.txt",
+      "source_sha256": "ee1f413f420bfa6199302b1a85669243f27076c803a120d55c15198e300d7cf1",
+      "category": "Standards Track",
+      "title": "March 2011",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-9525",
+      "number": 9525,
+      "file": "corpus/RFC-9525.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc9525.txt",
+      "source_sha256": "ed8116c2435376dffe37ec2ca688c3a8515e36820852b29e0b6cdfbe92abd2c5",
+      "category": "Standards Track",
+      "title": "Service Identity in TLS",
+      "obsoletes": [
+        "RFC-6125"
+      ],
+      "replaces": [
+        "RFC-6125"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-9525",
+      "type": "supersedes",
+      "target": "RFC-6125"
+    }
+  ]
+}

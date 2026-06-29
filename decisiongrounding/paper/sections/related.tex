@@ -1,0 +1,31 @@
+\section{Related work}
+
+\paragraph{Context use in coding agents.}
+SWE-ContextBench~\citep{swecontextbench2026} is the closest neighbour: it
+evaluates whether coding agents reuse prior \emph{experience} across related
+GitHub issues and pull requests, and finds that accurately retrieved and
+summarised context improves resolution accuracy and reduces runtime and token
+cost, whereas unfiltered or wrongly-selected context provides limited or negative
+benefit. We share its premise---context selection quality matters, and bad
+context can hurt---and its treatment of token cost as a first-class metric. We
+differ in three ways. First, our unit of knowledge is a \emph{durable governing
+decision} (ADR- or standard-like), not an episodic task solution. Second, our
+discriminating signal is \emph{machine-stated supersession}: following the live
+decision and dropping the one it supersedes, a case generic retrieval need not
+get right. Third, our scoring is deterministic and structural rather than
+end-to-end resolution accuracy, trading breadth for reproducibility and a sharp,
+single-variable comparison.
+
+\paragraph{Issue resolution benchmarks.}
+SWE-bench~\citep{swebench} established realistic, execution-verified evaluation of
+coding agents on GitHub issues. \benchname{} is complementary: it does not ask
+whether a patch passes tests, but whether the agent's proposed change
+\emph{adheres} to the decision that governs it.
+
+\paragraph{Retrieval and memory.}
+Retrieval-augmented generation~\citep{rag} is the \texttt{naive\_rag} baseline
+here---a fair, strong baseline using asymmetric query/document embeddings, not a
+strawman. Memory and experience-reuse benchmarks (e.g.\ MemoryBench
+\todo{add citation}) report retrieval hit-rate metrics analogous to our
+governing-decision recall, which we use to explain \emph{why} adherence moves
+rather than as an end in itself.
