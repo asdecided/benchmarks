@@ -1,0 +1,11 @@
+{
+  "description": "get-summary gate config. The portfolio contract either matches the fixture composition or it does not: conformance is gated at 1.0 with zero tolerance.",
+  "tool": "get_summary",
+  "tolerance": 0.0,
+  "floors": {
+    "negative_violations": 0,
+    "overall": {
+      "conformance": 1.0
+    }
+  }
+}

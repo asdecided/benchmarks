@@ -1,0 +1,25 @@
+{
+  "overall": {
+    "conformance": 1.0,
+    "cases_passed": 10,
+    "cases_total": 10,
+    "negative_violations": 0
+  },
+  "by_category": {
+    "case_insensitive": {
+      "conformance": 1.0
+    },
+    "duplicate": {
+      "conformance": 1.0
+    },
+    "exact_id": {
+      "conformance": 1.0
+    },
+    "legacy_alias": {
+      "conformance": 1.0
+    },
+    "not_found": {
+      "conformance": 1.0
+    }
+  }
+}

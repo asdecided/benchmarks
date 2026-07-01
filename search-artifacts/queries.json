@@ -1,0 +1,219 @@
+{
+  "description": "search-artifacts benchmark query set. Each case drives `rac find <query> corpus/ --json` (plus --type for type_filter cases) — the same search_index service and order the search_artifacts MCP tool returns. Hard negatives are judged against the FULL returned list.",
+  "cases": [
+    {
+      "id": "Q01",
+      "category": "decision_lookup",
+      "query": "postgres metrics store",
+      "relevant": [
+        "SAB-064J1KYRB4MR"
+      ]
+    },
+    {
+      "id": "Q02",
+      "category": "decision_lookup",
+      "query": "redis query cache",
+      "relevant": [
+        "SAB-JC4YVMM357GG"
+      ]
+    },
+    {
+      "id": "Q03",
+      "category": "decision_lookup",
+      "query": "oauth device flow",
+      "relevant": [
+        "SAB-140F1RA59TET"
+      ]
+    },
+    {
+      "id": "Q04",
+      "category": "decision_lookup",
+      "query": "materialized rollup",
+      "relevant": [
+        "SAB-3G8GBMG2QWTF"
+      ]
+    },
+    {
+      "id": "Q05",
+      "category": "feature_lookup",
+      "query": "offline dashboard viewing",
+      "relevant": [
+        "SAB-FK8CDGGX4SAR"
+      ]
+    },
+    {
+      "id": "Q06",
+      "category": "feature_lookup",
+      "query": "alert notifications",
+      "relevant": [
+        "SAB-XRTP8KP80P17"
+      ]
+    },
+    {
+      "id": "Q07",
+      "category": "feature_lookup",
+      "query": "sharing permissions",
+      "relevant": [
+        "SAB-HWQ2HK2T61MX"
+      ]
+    },
+    {
+      "id": "Q08",
+      "category": "feature_lookup",
+      "query": "audit logging",
+      "relevant": [
+        "SAB-DPP0QKXKFS4H"
+      ]
+    },
+    {
+      "id": "Q09",
+      "category": "disambiguation",
+      "query": "dashboard grid layout",
+      "relevant": [
+        "SAB-83EGQYPTSMHV"
+      ]
+    },
+    {
+      "id": "Q10",
+      "category": "disambiguation",
+      "query": "mobile dashboard layout",
+      "relevant": [
+        "SAB-0VH83YT5R8Q7"
+      ]
+    },
+    {
+      "id": "Q11",
+      "category": "disambiguation",
+      "query": "alert rule editor",
+      "relevant": [
+        "SAB-DXPP6KEYYVC7"
+      ]
+    },
+    {
+      "id": "Q12",
+      "category": "disambiguation",
+      "query": "connector onboarding flow",
+      "relevant": [
+        "SAB-9FB3XRTNKWM7"
+      ]
+    },
+    {
+      "id": "Q13",
+      "category": "supersession",
+      "query": "websocket streaming channel",
+      "relevant": [
+        "SAB-YPYHNQ276H5A"
+      ],
+      "must_not_return": [
+        "SAB-G2BM261FSJ51"
+      ]
+    },
+    {
+      "id": "Q14",
+      "category": "supersession",
+      "query": "live delta push",
+      "relevant": [
+        "SAB-YPYHNQ276H5A"
+      ],
+      "must_not_return": [
+        "SAB-G2BM261FSJ51"
+      ]
+    },
+    {
+      "id": "Q15",
+      "category": "supersession",
+      "query": "parquet columnar",
+      "relevant": [
+        "SAB-11PXKZKPAJG2"
+      ],
+      "must_not_return": [
+        "SAB-Z4R5ADGAVT1J"
+      ]
+    },
+    {
+      "id": "Q16",
+      "category": "supersession",
+      "query": "asynchronous report export",
+      "relevant": [
+        "SAB-11PXKZKPAJG2"
+      ],
+      "must_not_return": [
+        "SAB-Z4R5ADGAVT1J"
+      ]
+    },
+    {
+      "id": "Q17",
+      "category": "cross_type",
+      "query": "alert",
+      "relevant": [
+        "SAB-XRTP8KP80P17",
+        "SAB-DXPP6KEYYVC7"
+      ]
+    },
+    {
+      "id": "Q18",
+      "category": "cross_type",
+      "query": "connector",
+      "relevant": [
+        "SAB-A75HC5ZWR0E1",
+        "SAB-9FB3XRTNKWM7",
+        "SAB-57CCMCV2X424"
+      ]
+    },
+    {
+      "id": "Q19",
+      "category": "cross_type",
+      "query": "tenant",
+      "relevant": [
+        "SAB-TQDNAG5W1PZM",
+        "SAB-7XZ3T9DXXSQY"
+      ]
+    },
+    {
+      "id": "Q20",
+      "category": "cross_type",
+      "query": "realtime",
+      "relevant": [
+        "SAB-09EB0V23GH85",
+        "SAB-YPYHNQ276H5A"
+      ]
+    },
+    {
+      "id": "Q21",
+      "category": "type_filter",
+      "query": "dashboard layout",
+      "type": "design",
+      "relevant": [
+        "SAB-83EGQYPTSMHV",
+        "SAB-0VH83YT5R8Q7"
+      ]
+    },
+    {
+      "id": "Q22",
+      "category": "type_filter",
+      "query": "export",
+      "type": "decision",
+      "relevant": [
+        "SAB-11PXKZKPAJG2"
+      ]
+    },
+    {
+      "id": "Q23",
+      "category": "type_filter",
+      "query": "release notes",
+      "type": "prompt",
+      "relevant": [
+        "SAB-A1B6ZNP94CCX"
+      ]
+    },
+    {
+      "id": "Q24",
+      "category": "type_filter",
+      "query": "offline",
+      "type": "requirement",
+      "relevant": [
+        "SAB-FK8CDGGX4SAR"
+      ]
+    }
+  ]
+}

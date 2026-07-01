@@ -1,0 +1,48 @@
+{
+  "description": "get-summary benchmark query set. Each case drives `rac portfolio <root> --json` — the same service the get_summary MCP tool serves — and asserts the artifact counts against the known fixture composition, the empty-corpus shape, and byte stability across repeated runs.",
+  "cases": [
+    {
+      "id": "S01",
+      "category": "counts",
+      "check": "counts",
+      "expect": {
+        "total": 9,
+        "by_type": {
+          "requirement": 2,
+          "decision": 3,
+          "roadmap": 1,
+          "prompt": 1,
+          "design": 2,
+          "unknown": 0
+        }
+      }
+    },
+    {
+      "id": "S02",
+      "category": "counts",
+      "check": "counts",
+      "expect": {
+        "by_type": {
+          "decision": 3
+        }
+      }
+    },
+    {
+      "id": "S03",
+      "category": "empty_corpus",
+      "check": "empty",
+      "root": "corpus-empty"
+    },
+    {
+      "id": "S04",
+      "category": "stability",
+      "check": "byte_stable"
+    },
+    {
+      "id": "S05",
+      "category": "stability",
+      "check": "byte_stable",
+      "root": "corpus-empty"
+    }
+  ]
+}

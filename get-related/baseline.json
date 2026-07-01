@@ -1,0 +1,22 @@
+{
+  "overall": {
+    "conformance": 1.0,
+    "cases_passed": 7,
+    "cases_total": 7,
+    "negative_violations": 0
+  },
+  "by_category": {
+    "bidirectional": {
+      "conformance": 1.0
+    },
+    "incoming_only": {
+      "conformance": 1.0
+    },
+    "isolated": {
+      "conformance": 1.0
+    },
+    "outgoing_only": {
+      "conformance": 1.0
+    }
+  }
+}

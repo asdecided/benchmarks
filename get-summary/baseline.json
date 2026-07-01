@@ -1,0 +1,19 @@
+{
+  "overall": {
+    "conformance": 1.0,
+    "cases_passed": 5,
+    "cases_total": 5,
+    "negative_violations": 0
+  },
+  "by_category": {
+    "counts": {
+      "conformance": 1.0
+    },
+    "empty_corpus": {
+      "conformance": 1.0
+    },
+    "stability": {
+      "conformance": 1.0
+    }
+  }
+}

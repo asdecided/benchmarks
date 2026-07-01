@@ -1,0 +1,150 @@
+{
+  "description": "find-decisions benchmark query set. Each case drives `rac find <query> corpus/ --decisions --json` — the live-decision filter (Accepted, non-retired) the find_decisions MCP tool serves. Superseded, deprecated, and proposed decisions must never appear ANYWHERE in the returned list, even when they are the lexically best match for the query.",
+  "cases": [
+    {
+      "id": "Q01",
+      "category": "supersession_defense",
+      "query": "cookie session",
+      "relevant": [
+        "FDB-FNC5AS3XS0FE"
+      ],
+      "must_not_return": [
+        "FDB-99EJE1VT5PHQ",
+        "FDB-94ZFJW09ZXMB"
+      ]
+    },
+    {
+      "id": "Q02",
+      "category": "supersession_defense",
+      "query": "redis session store",
+      "relevant": [
+        "FDB-FNC5AS3XS0FE"
+      ],
+      "must_not_return": [
+        "FDB-94ZFJW09ZXMB",
+        "FDB-99EJE1VT5PHQ"
+      ]
+    },
+    {
+      "id": "Q03",
+      "category": "supersession_defense",
+      "query": "fixed window rate limits",
+      "relevant": [
+        "FDB-EW906SN9HHGN"
+      ],
+      "must_not_return": [
+        "FDB-Q1G6QMGGX897"
+      ]
+    },
+    {
+      "id": "Q04",
+      "category": "supersession_defense",
+      "query": "session storage lookup",
+      "relevant": [
+        "FDB-FNC5AS3XS0FE"
+      ],
+      "must_not_return": [
+        "FDB-94ZFJW09ZXMB",
+        "FDB-99EJE1VT5PHQ"
+      ]
+    },
+    {
+      "id": "Q05",
+      "category": "live_lookup",
+      "query": "billing ledger",
+      "relevant": [
+        "FDB-0R2J9511KJFP"
+      ]
+    },
+    {
+      "id": "Q06",
+      "category": "live_lookup",
+      "query": "grpc internal services",
+      "relevant": [
+        "FDB-CCSDA8JGFTTP"
+      ]
+    },
+    {
+      "id": "Q07",
+      "category": "live_lookup",
+      "query": "webhook retries",
+      "relevant": [
+        "FDB-1KDR4AFPQ2GK"
+      ]
+    },
+    {
+      "id": "Q08",
+      "category": "live_lookup",
+      "query": "stateless jwt",
+      "relevant": [
+        "FDB-FNC5AS3XS0FE"
+      ]
+    },
+    {
+      "id": "Q09",
+      "category": "liveness_filter",
+      "query": "xml response payloads",
+      "relevant": [
+        "FDB-JPWFTJ5TD1ZE"
+      ],
+      "must_not_return": [
+        "FDB-NE6YBTGZV257"
+      ]
+    },
+    {
+      "id": "Q10",
+      "category": "liveness_filter",
+      "query": "response payloads",
+      "relevant": [
+        "FDB-JPWFTJ5TD1ZE"
+      ],
+      "must_not_return": [
+        "FDB-NE6YBTGZV257"
+      ]
+    },
+    {
+      "id": "Q11",
+      "category": "liveness_filter",
+      "query": "public api gateway",
+      "relevant": [
+        "FDB-7KPZDW2SNEK1"
+      ],
+      "must_not_return": [
+        "FDB-Q1JSNEV4Y0JB"
+      ]
+    },
+    {
+      "id": "Q12",
+      "category": "liveness_filter",
+      "query": "partner integrations gateway",
+      "relevant": [
+        "FDB-7KPZDW2SNEK1"
+      ],
+      "must_not_return": [
+        "FDB-Q1JSNEV4Y0JB"
+      ]
+    },
+    {
+      "id": "Q13",
+      "category": "type_scope",
+      "query": "rate limit ceiling",
+      "relevant": [
+        "FDB-EW906SN9HHGN"
+      ],
+      "must_not_return": [
+        "FDB-Q4S9SC12V2GH"
+      ]
+    },
+    {
+      "id": "Q14",
+      "category": "type_scope",
+      "query": "session refresh",
+      "relevant": [
+        "FDB-FNC5AS3XS0FE"
+      ],
+      "must_not_return": [
+        "FDB-KVYVX53ZT01B"
+      ]
+    }
+  ]
+}

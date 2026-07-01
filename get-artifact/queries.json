@@ -1,0 +1,123 @@
+{
+  "description": "get-artifact benchmark query set. Each case drives `rac resolve <lookup> corpus/ --json` — the same exact-id resolution payload the get_artifact MCP tool serves — and asserts the outcome, the exit code, and the stable payload fields (ADR-007). Paths are corpus-relative suffixes.",
+  "cases": [
+    {
+      "id": "C01",
+      "category": "exact_id",
+      "lookup": "GAB-P3AM5CX0C6AM",
+      "expect": {
+        "outcome": "resolved",
+        "exit_code": 0,
+        "id": "GAB-P3AM5CX0C6AM",
+        "type": "decision",
+        "title": "Edge Cache Strategy",
+        "path": "gab-decision-edge-cache.md"
+      }
+    },
+    {
+      "id": "C02",
+      "category": "exact_id",
+      "lookup": "GAB-HQK5X30DHRTR",
+      "expect": {
+        "outcome": "resolved",
+        "exit_code": 0,
+        "id": "GAB-HQK5X30DHRTR",
+        "type": "requirement",
+        "title": "Full-Text Search",
+        "path": "gab-requirement-full-text-search.md"
+      }
+    },
+    {
+      "id": "C03",
+      "category": "exact_id",
+      "lookup": "GAB-65WFQ474XMKK",
+      "expect": {
+        "outcome": "resolved",
+        "exit_code": 0,
+        "id": "GAB-65WFQ474XMKK",
+        "type": "prompt",
+        "title": "Draft Page Changelog",
+        "path": "gab-prompt-changelog.md"
+      }
+    },
+    {
+      "id": "C04",
+      "category": "case_insensitive",
+      "lookup": "gab-p3am5cx0c6am",
+      "expect": {
+        "outcome": "resolved",
+        "exit_code": 0,
+        "id": "GAB-P3AM5CX0C6AM",
+        "type": "decision",
+        "title": "Edge Cache Strategy"
+      }
+    },
+    {
+      "id": "C05",
+      "category": "case_insensitive",
+      "lookup": "Gab-7826516b3157",
+      "expect": {
+        "outcome": "resolved",
+        "exit_code": 0,
+        "id": "GAB-7826516B3157",
+        "type": "design",
+        "title": "Reader View"
+      }
+    },
+    {
+      "id": "C06",
+      "category": "legacy_alias",
+      "lookup": "gab-decision-edge-cache",
+      "expect": {
+        "outcome": "resolved",
+        "exit_code": 0,
+        "id": "GAB-P3AM5CX0C6AM",
+        "type": "decision",
+        "title": "Edge Cache Strategy"
+      }
+    },
+    {
+      "id": "C07",
+      "category": "legacy_alias",
+      "lookup": "gab-roadmap-v2-navigation",
+      "expect": {
+        "outcome": "resolved",
+        "exit_code": 0,
+        "id": "GAB-MTQSHZQ903JJ",
+        "type": "roadmap",
+        "title": "V2 Navigation"
+      }
+    },
+    {
+      "id": "C08",
+      "category": "duplicate",
+      "lookup": "GAB-YP0MNBY0KN43",
+      "expect": {
+        "outcome": "duplicate",
+        "exit_code": 1,
+        "paths": [
+          "gab-decision-dup-a.md",
+          "gab-decision-dup-b.md"
+        ]
+      }
+    },
+    {
+      "id": "C09",
+      "category": "not_found",
+      "lookup": "GAB-ZZZZZZZZZZZZ",
+      "expect": {
+        "outcome": "not-found",
+        "exit_code": 1
+      }
+    },
+    {
+      "id": "C10",
+      "category": "not_found",
+      "lookup": "no-such-page",
+      "expect": {
+        "outcome": "not-found",
+        "exit_code": 1
+      }
+    }
+  ]
+}

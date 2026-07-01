@@ -1,0 +1,85 @@
+{
+  "description": "get-related benchmark query set. Each case names an artifact and declares its EXACT expected incoming and outgoing edge sets, scored as set membership over the corpus-wide `rac relationships corpus/ --json` map (the outgoing direction was previously unguarded). depth>1 neighborhoods and the ADR-033 response budget are MCP-only and deferred to the MCP-stdio harness workstream.",
+  "cases": [
+    {
+      "id": "G01",
+      "category": "bidirectional",
+      "artifact": "GRB-4D11EAG0GAB9",
+      "expected_incoming": [
+        "GRB-65C1EA6PXMR7",
+        "GRB-5W12JRBWBRP5",
+        "GRB-FBXMXWKHGFXE",
+        "GRB-10VE0C4C03TG"
+      ],
+      "expected_outgoing": [
+        "GRB-2WGZ1JPH4SGA"
+      ],
+      "must_not_return": [
+        "GRB-GTR8ZA397CM1"
+      ]
+    },
+    {
+      "id": "G02",
+      "category": "incoming_only",
+      "artifact": "GRB-2WGZ1JPH4SGA",
+      "expected_incoming": [
+        "GRB-4D11EAG0GAB9"
+      ],
+      "expected_outgoing": [],
+      "must_not_return": [
+        "GRB-T58FM36EXGH1"
+      ]
+    },
+    {
+      "id": "G03",
+      "category": "bidirectional",
+      "artifact": "GRB-65C1EA6PXMR7",
+      "expected_incoming": [
+        "GRB-5W12JRBWBRP5"
+      ],
+      "expected_outgoing": [
+        "GRB-4D11EAG0GAB9"
+      ]
+    },
+    {
+      "id": "G04",
+      "category": "outgoing_only",
+      "artifact": "GRB-5W12JRBWBRP5",
+      "expected_incoming": [],
+      "expected_outgoing": [
+        "GRB-4D11EAG0GAB9",
+        "GRB-65C1EA6PXMR7"
+      ]
+    },
+    {
+      "id": "G06",
+      "category": "isolated",
+      "artifact": "GRB-GTR8ZA397CM1",
+      "expected_incoming": [],
+      "expected_outgoing": [],
+      "must_not_return": [
+        "GRB-4D11EAG0GAB9"
+      ]
+    },
+    {
+      "id": "G07",
+      "category": "bidirectional",
+      "artifact": "GRB-10VE0C4C03TG",
+      "expected_incoming": [
+        "GRB-T58FM36EXGH1"
+      ],
+      "expected_outgoing": [
+        "GRB-4D11EAG0GAB9"
+      ]
+    },
+    {
+      "id": "G08",
+      "category": "outgoing_only",
+      "artifact": "GRB-T58FM36EXGH1",
+      "expected_incoming": [],
+      "expected_outgoing": [
+        "GRB-10VE0C4C03TG"
+      ]
+    }
+  ]
+}
