@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autonomousqa"
+version = "0.1.0"
+description = "Deterministic benchmark for autonomous-QA agents over seeded Lore corpora and frozen sample apps"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.11"
+# Core spine is stdlib-only: the harness, scorer, proxy, and report generator
+# run with no third-party Python packages. The reference agent (Proofkeeper)
+# and the corpus export (rac) are external CLIs consumed over their published
+# contracts, never imported.
+dependencies = []
+
+[project.optional-dependencies]
+schema = ["jsonschema>=4.20"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+autonomousqa = "runner.cli:main"
+
+[tool.setuptools]
+packages = ["agents", "runner", "scoring"]
+
+[tool.setuptools.package-data]
+scoring = ["templates/*.html"]
