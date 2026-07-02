@@ -1,0 +1,97 @@
+name: autonomousqa
+
+# The member's battery: offline tests, corpus gates, and a smoke-scale run of
+# the real pipeline (published Proofkeeper CLI + scripted model, no key, no
+# token spend) so the harness itself cannot rot.
+#
+# Workflows must live at the repository root to run; this one scopes itself
+# to the autonomousqa/ member with path filters.
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "autonomousqa/**"
+      - ".github/workflows/autonomousqa.yml"
+  pull_request:
+    paths:
+      - "autonomousqa/**"
+      - ".github/workflows/autonomousqa.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: autonomousqa-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: autonomousqa
+
+jobs:
+  test:
+    name: test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev,schema]"
+      - name: Offline battery
+        run: python -m pytest -q
+
+  corpus:
+    name: rac corpus gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install rac
+        run: pip install "rac-core @ git+https://github.com/itsthelore/rac-core.git"
+      - name: Gate the member corpus
+        run: rac gate rac
+      - name: Validate every seeded app corpus
+        run: |
+          for corpus in apps/*/rac; do
+            echo "== $corpus"
+            rac validate "$corpus"
+          done
+
+  smoke:
+    name: smoke (scripted model, one capability)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: autonomousqa/workspace/package-lock.json
+      - name: Install the pinned agent workspace
+        run: npm ci
+        working-directory: autonomousqa/workspace
+      - name: Install the playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: autonomousqa/workspace
+      - name: Install the harness and rac
+        run: |
+          pip install -e .
+          pip install "rac-core @ git+https://github.com/itsthelore/rac-core.git"
+      - name: Smoke — drive, compile, fidelity-gate, meter, re-score
+        run: python -m runner.cli smoke
