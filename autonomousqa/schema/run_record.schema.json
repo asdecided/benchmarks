@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/itsthelore/rac-benchmarks/autonomousqa/schema/run_record.schema.json",
+  "title": "autonomousqa run record",
+  "description": "One agent run over one capability of one frozen sample app. Carries the exact harness configuration and the raw evidence (stdout + exit code) so verdicts re-derive deterministically without re-running the agent or re-spending tokens.",
+  "type": "object",
+  "required": [
+    "schema_version", "harness_version", "record_id", "timestamp_utc",
+    "app", "capability", "agent", "config", "outcome", "usage", "timing", "raw"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "harness_version": {"type": "string"},
+    "record_id": {"type": "string", "minLength": 8},
+    "timestamp_utc": {"type": "string", "format": "date-time"},
+    "app": {
+      "type": "object",
+      "required": ["name", "modality", "frozen"],
+      "properties": {
+        "name": {"type": "string"},
+        "modality": {"enum": ["browser", "api", "cli", "extension"]},
+        "frozen": {"type": "string"}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["id", "tier", "expected", "negative"],
+      "properties": {
+        "id": {"type": "string"},
+        "tier": {"enum": ["easy", "medium", "hard", "ambiguous"]},
+        "expected": {"enum": ["verifiable", "unverifiable"]},
+        "negative": {"type": "boolean"}
+      }
+    },
+    "agent": {
+      "type": "object",
+      "required": ["name", "version", "invocation"],
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "invocation": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "config": {
+      "type": "object",
+      "required": ["mode", "n"],
+      "properties": {
+        "mode": {"enum": ["byok", "scripted"]},
+        "model": {"type": ["string", "null"]},
+        "n": {"type": "integer", "minimum": 1},
+        "max_steps": {"type": ["integer", "null"]}
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["exit_code", "verified", "fidelity", "drive"],
+      "properties": {
+        "exit_code": {"type": "integer"},
+        "verified": {"type": "boolean"},
+        "fidelity": {
+          "type": "object",
+          "properties": {
+            "passed": {"type": ["integer", "null"]},
+            "attempts": {"type": ["integer", "null"]},
+            "stable": {"type": ["boolean", "null"]}
+          }
+        },
+        "drive": {
+          "type": "object",
+          "properties": {
+            "steps": {"type": ["integer", "null"]},
+            "finished": {"type": ["boolean", "null"]}
+          }
+        },
+        "spec_path": {"type": ["string", "null"]},
+        "error": {"type": ["string", "null"]}
+      }
+    },
+    "usage": {
+      "type": "object",
+      "required": ["requests", "prompt_tokens", "completion_tokens", "estimated"],
+      "properties": {
+        "requests": {"type": "integer", "minimum": 0},
+        "prompt_tokens": {"type": "integer", "minimum": 0},
+        "completion_tokens": {"type": "integer", "minimum": 0},
+        "estimated": {"type": "boolean"}
+      }
+    },
+    "timing": {
+      "type": "object",
+      "required": ["wall_clock_s"],
+      "properties": {"wall_clock_s": {"type": "number", "minimum": 0}}
+    },
+    "raw": {
+      "type": "object",
+      "required": ["stdout"],
+      "properties": {
+        "stdout": {"type": "string"},
+        "stderr_tail": {"type": "string"}
+      }
+    }
+  }
+}
