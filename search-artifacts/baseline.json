@@ -1,0 +1,44 @@
+{
+  "overall": {
+    "p_at_1": 1.0,
+    "p_at_3": 0.416667,
+    "p_at_5": 0.25,
+    "r_at_1": 0.888889,
+    "r_at_3": 1.0,
+    "r_at_5": 1.0,
+    "mrr": 1.0,
+    "negative_violations": 0
+  },
+  "by_category": {
+    "cross_type": {
+      "p_at_1": 1.0,
+      "r_at_5": 1.0,
+      "mrr": 1.0
+    },
+    "decision_lookup": {
+      "p_at_1": 1.0,
+      "r_at_5": 1.0,
+      "mrr": 1.0
+    },
+    "disambiguation": {
+      "p_at_1": 1.0,
+      "r_at_5": 1.0,
+      "mrr": 1.0
+    },
+    "feature_lookup": {
+      "p_at_1": 1.0,
+      "r_at_5": 1.0,
+      "mrr": 1.0
+    },
+    "supersession": {
+      "p_at_1": 1.0,
+      "r_at_5": 1.0,
+      "mrr": 1.0
+    },
+    "type_filter": {
+      "p_at_1": 1.0,
+      "r_at_5": 1.0,
+      "mrr": 1.0
+    }
+  }
+}

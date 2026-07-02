@@ -10,6 +10,7 @@ from __future__ import annotations
 from .answering import (
     AnsweringModel,
     ClaudeAnsweringModel,
+    OpenAICompatAnsweringModel,
     ScriptedAnsweringModel,
 )
 from .base import (
@@ -51,14 +52,21 @@ def make_answering_model(name: str, seed: int) -> AnsweringModel:
 
     `offline-stub` -> ScriptedAnsweringModel (deterministic, no network);
     `claude` -> ClaudeAnsweringModel (pinned Opus 4.8, needs the [real] extra +
-    ANTHROPIC_API_KEY). Lives here so both the CLI and the crossover can build
-    backends without importing each other.
+    ANTHROPIC_API_KEY); `litellm:<alias>` -> OpenAICompatAnsweringModel (an
+    OpenAI-compatible gateway's /chat/completions surface, stdlib transport,
+    needs LITELLM_BASE_URL + LITELLM_API_KEY). Lives here so both the CLI and
+    the crossover can build backends without importing each other.
     """
     if name == "offline-stub":
         return ScriptedAnsweringModel(seed=seed)
     if name == "claude":
         return ClaudeAnsweringModel(seed=seed)
-    raise ValueError(f"unknown answering model {name!r}; use 'offline-stub' or 'claude'.")
+    if name.startswith("litellm:"):
+        return OpenAICompatAnsweringModel(model=name.split(":", 1)[1], seed=seed)
+    raise ValueError(
+        f"unknown answering model {name!r}; use 'offline-stub', 'claude', or "
+        "'litellm:<model-alias>'."
+    )
 
 
 def build_provider(arm: str, answering_model, embedder_spec: str = "local-hash") -> Provider:
@@ -80,6 +88,7 @@ __all__ = [
     "AnsweringModel",
     "ScriptedAnsweringModel",
     "ClaudeAnsweringModel",
+    "OpenAICompatAnsweringModel",
     "make_answering_model",
     "build_provider",
     "Embedder",

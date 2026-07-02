@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rac-benchmarks-harness"
+version = "0.1.0"
+description = "Shared harness for the per-tool RAC benchmark suite: subprocess runner, deterministic scorer, scorecard writer, and CI gate. Consumes rac only as an external CLI on PATH (DG-ADR-0001); scoring is deterministic and offline (ADR-066)."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.11"
+# The harness is stdlib-only: no engine imports (rac is an external CLI on
+# PATH), no embeddings, no network, no third-party runtime dependency.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pyyaml>=6"]
+
+[tool.setuptools]
+packages = ["harness"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

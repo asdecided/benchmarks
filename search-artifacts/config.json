@@ -1,0 +1,45 @@
+{
+  "description": "search-artifacts gate config. Gated: negative_violations (full returned list), overall p_at_1 / r_at_5 / mrr, and per-category floors where the category has >= 4 cases. Floors are calibrated from the first green run; the committed baseline minus tolerance is the tight regression guard.",
+  "tool": "search_artifacts",
+  "tolerance": 0.02,
+  "floors": {
+    "negative_violations": 0,
+    "overall": {
+      "p_at_1": 0.9,
+      "r_at_5": 0.95,
+      "mrr": 0.9
+    },
+    "by_category": {
+      "decision_lookup": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      },
+      "feature_lookup": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      },
+      "disambiguation": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      },
+      "supersession": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      },
+      "cross_type": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      },
+      "type_filter": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      }
+    }
+  }
+}

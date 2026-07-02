@@ -1,0 +1,11 @@
+{
+  "description": "get-artifact gate config. A resolution contract is either honoured or it is not: conformance is gated at 1.0 with zero tolerance.",
+  "tool": "get_artifact",
+  "tolerance": 0.0,
+  "floors": {
+    "negative_violations": 0,
+    "overall": {
+      "conformance": 1.0
+    }
+  }
+}

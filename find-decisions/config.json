@@ -1,0 +1,30 @@
+{
+  "description": "find-decisions gate config. negative_violations gates the full returned list — a superseded, deprecated, proposed, or non-decision id appearing anywhere is a violation. Per-category floors only where a category has >= 4 cases (type_scope has 2 and is ungated; with 2 cases metrics quantize to {0, 0.5, 1.0}).",
+  "tool": "find_decisions",
+  "tolerance": 0.02,
+  "floors": {
+    "negative_violations": 0,
+    "overall": {
+      "p_at_1": 0.9,
+      "r_at_5": 0.95,
+      "mrr": 0.9
+    },
+    "by_category": {
+      "supersession_defense": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      },
+      "live_lookup": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      },
+      "liveness_filter": {
+        "p_at_1": 0.9,
+        "r_at_5": 0.9,
+        "mrr": 0.9
+      }
+    }
+  }
+}

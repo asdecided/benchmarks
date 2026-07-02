@@ -30,7 +30,10 @@ tags: [publication, paper, arxiv]
   work is a per-provider answering-model adapter with **equivalent structured
   outputs** (Anthropic `output_config` / OpenAI `response_format` / Gemini
   `response_schema`). The uniform adapter + `make_answering_model` factory already
-  abstract this; only the Claude adapter exists today.
+  abstract this. Two adapters exist today: Claude (Anthropic-native) and
+  `litellm:<alias>` (OpenAI-compatible gateways, ADR-0005) — the latter also
+  unlocks enterprise LiteLLM routing, and its shared prompt/schema helpers are
+  the equivalence pattern further per-provider adapters follow.
 - **Multi-seed variance** — sweep seeds and aggregate per (arm, N) into
   **mean ± confidence interval** so the crossover / falsifier verdict is
   statistical, not a single point. Needs harness support: a `--seeds` sweep,
@@ -69,3 +72,8 @@ tags: [publication, paper, arxiv]
 
 - DG-KVPW3XG9TDZY
 - DG-KVMRSS0C7T4M
+- DG-KWGPQK7M7RVQ
+
+## Related Tickets
+
+- itsthelore/rac-benchmarks#11

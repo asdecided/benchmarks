@@ -229,15 +229,49 @@ How to read the result:
   endpoint. Run the crossover **synchronously** through LiteLLM (drop `--batch`),
   and reserve `--batch` for a direct-Anthropic key.
 - **Structured outputs fail** → the proxy is an OpenAI-compatible gateway
-  (`/chat/completions`), not an Anthropic passthrough. The native code won't work
-  unmodified; it needs an OpenAI-client answering adapter (no Batch API, and
-  normalised JSON output instead of `output_config`).
+  (`/chat/completions`), not an Anthropic passthrough. Switch to the
+  OpenAI-compatible answering backend below — no code change needed.
+
+#### OpenAI-compatible gateways (`--answering litellm:<alias>`)
+
+If the gateway exposes only `/chat/completions` (the common enterprise LiteLLM
+config), use the `litellm:<model-alias>` answering backend. It sends the SAME
+scaffold, user prompt, and ProposedChange JSON schema as the native backend —
+only the wire format differs (`response_format: json_schema`, which LiteLLM
+translates per backend), so the held-constant contract (ADR-0001) is preserved.
+Probe first, then run:
+
+```bash
+export LITELLM_BASE_URL=https://your-litellm      # the OpenAI-compatible root
+export LITELLM_API_KEY=sk-litellm-virtual-key     # (fallbacks: OPENAI_BASE_URL / OPENAI_API_KEY)
+python -m scripts.litellm_probe --mode openai --model <alias>   # exact adapter request
+python -m runner.cli compare --answering litellm:<alias> --embedder local-hash \
+  --arms no_grounding,rac_grounding --ns 10,50 --seeds 0-4
+# or: ANSWERING=litellm:<alias> ./scripts/run_real.sh
+```
+
+Which mode is yours? Ask whoever runs the gateway, or just probe both — each
+probe is a couple of tiny calls:
+
+| Probe result | Run with |
+| --- | --- |
+| native mode passes | `--answering claude` + `ANTHROPIC_BASE_URL` (Batch OK if line 2 passed) |
+| only openai mode passes | `--answering litellm:<alias>` (synchronous only) |
+| neither passes | the gateway blocks schema-enforced JSON — scoring needs it; fix the gateway config |
+
+Two limits on the OpenAI surface: **no Batch API** (`--batch` / `make
+real-batch` refuse; they need a direct-Anthropic key), and **stdlib transport**
+(no extra dependency — `pip install -e '.[real]'` isn't needed for a
+litellm-only run).
 
 Two caveats when proxied, regardless of mode:
 
-- **Model identity.** Each report records `answering_model.version` as
-  `claude-opus-4-8` (a pinned constant). Make sure the proxy's model alias maps
-  to that exact model, or the recorded version is misleading.
+- **Model identity.** With `--answering claude` each report records
+  `answering_model.version` as `claude-opus-4-8` (a pinned constant) — make sure
+  the proxy's alias maps to that exact model. With `litellm:<alias>` the report
+  records the spec string itself, which is honest but only as meaningful as the
+  alias: **pin the gateway alias to a fixed model** (not "latest"), or the
+  recorded identity is misleading and the run isn't reproducible.
 - **Cost numbers.** `scoring/cost.py` prices at Anthropic's published list rates.
   Token counts stay accurate if the proxy forwards `usage`, but the £/$ figures
   are list-price estimates — they won't reflect a proxy's markup or your

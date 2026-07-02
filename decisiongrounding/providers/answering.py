@@ -201,6 +201,56 @@ _PROPOSED_CHANGE_SCHEMA = {
 }
 
 
+def _task_user_prompt(grounding: GroundingContext, task: Task) -> str:
+    """The single user-message text every REAL answering backend renders.
+
+    Shared so transport adapters (Anthropic-native, OpenAI-compatible) cannot
+    drift: the held-constant contract is (scaffold, this prompt, the
+    ProposedChange schema); only the wire format may differ per backend.
+    """
+    return (
+        f"GROUNDING (use only this):\n{grounding.text}\n\n"
+        f"TASK: {task.prompt}\n"
+        f"PROPOSED ACTION: {task.proposed_action}\n\n"
+        "Return a ProposedChange. Set asserts_prohibition=true and refrain "
+        "(no prohibited action in `actions`) if a governing decision forbids "
+        "the action; set asserts_permission=true and proceed otherwise. Cite "
+        "the decision id(s) you relied on. Do not invent constraints absent "
+        "from the grounding."
+    )
+
+
+def _proposed_change_from_json_text(text: str, backend: str) -> ProposedChange:
+    """Decode the structured-output JSON text into a ProposedChange.
+
+    Shared by every real backend's parse path. Fails loudly on non-JSON or a
+    missing field — a silent fallback would turn a transport problem into a
+    scored answer, which the determinism rules forbid.
+    """
+    import json
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"{backend} returned non-JSON despite the structured-output schema: {exc}"
+        ) from exc
+    try:
+        return ProposedChange(
+            summary=data["summary"],
+            actions=[
+                Action(a["kind"], a["target"], a["detail"]) for a in data["actions"]
+            ],
+            cites_decisions=list(data["cites_decisions"]),
+            asserts_prohibition=bool(data["asserts_prohibition"]),
+            asserts_permission=bool(data["asserts_permission"]),
+        )
+    except (KeyError, TypeError) as exc:
+        raise RuntimeError(
+            f"{backend} JSON missing an expected ProposedChange field: {exc}"
+        ) from exc
+
+
 class ClaudeAnsweringModel(AnsweringModel):
     """Real pinned answering model (Claude Opus 4.8), wired behind `[real]`.
 
@@ -245,16 +295,7 @@ class ClaudeAnsweringModel(AnsweringModel):
         submitted together via the Batch API (50% of standard price). No
         temperature / seed: Opus 4.8 rejects them; effort is pinned and structured
         output forces the ProposedChange shape — identical across arms."""
-        user = (
-            f"GROUNDING (use only this):\n{grounding.text}\n\n"
-            f"TASK: {task.prompt}\n"
-            f"PROPOSED ACTION: {task.proposed_action}\n\n"
-            "Return a ProposedChange. Set asserts_prohibition=true and refrain "
-            "(no prohibited action in `actions`) if a governing decision forbids "
-            "the action; set asserts_permission=true and proceed otherwise. Cite "
-            "the decision id(s) you relied on. Do not invent constraints absent "
-            "from the grounding."
-        )
+        user = _task_user_prompt(grounding, task)
         return {
             "model": self.version,
             "max_tokens": 2048,
@@ -272,8 +313,6 @@ class ClaudeAnsweringModel(AnsweringModel):
         if getattr(resp, "stop_reason", None) == "refusal":
             # Treat a safety refusal as a non-answer: assert nothing, cite nothing.
             return ProposedChange(summary="model refused", actions=[])
-        import json
-
         text = next(
             (b.text for b in resp.content if getattr(b, "type", None) == "text"), None
         )
@@ -282,26 +321,7 @@ class ClaudeAnsweringModel(AnsweringModel):
                 f"claude returned no text block to parse (stop_reason="
                 f"{getattr(resp, 'stop_reason', None)!r})."
             )
-        try:
-            data = json.loads(text)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(
-                f"claude returned non-JSON despite the structured-output schema: {exc}"
-            ) from exc
-        try:
-            return ProposedChange(
-                summary=data["summary"],
-                actions=[
-                    Action(a["kind"], a["target"], a["detail"]) for a in data["actions"]
-                ],
-                cites_decisions=list(data["cites_decisions"]),
-                asserts_prohibition=bool(data["asserts_prohibition"]),
-                asserts_permission=bool(data["asserts_permission"]),
-            )
-        except (KeyError, TypeError) as exc:
-            raise RuntimeError(
-                f"claude JSON missing an expected ProposedChange field: {exc}"
-            ) from exc
+        return _proposed_change_from_json_text(text, "claude")
 
     def respond(
         self, scaffold: str, grounding: GroundingContext, task: Task
@@ -310,3 +330,141 @@ class ClaudeAnsweringModel(AnsweringModel):
         resp = client.messages.create(**self.build_request(scaffold, grounding, task))
         self.last_usage = usage_dict(getattr(resp, "usage", None))
         return self.parse_message(resp)
+
+
+class OpenAICompatAnsweringModel(AnsweringModel):
+    """Real answering model behind an OpenAI-compatible gateway (LiteLLM).
+
+    Enterprise routing commonly exposes models only through LiteLLM's
+    OpenAI-format `/chat/completions` surface with virtual keys, not
+    Anthropic's native route. This adapter keeps the held-constant contract
+    identical to :class:`ClaudeAnsweringModel` — same scaffold as the system
+    message, same :func:`_task_user_prompt` user message, same
+    ``_PROPOSED_CHANGE_SCHEMA`` — and changes ONLY the wire format:
+    structured output is requested via OpenAI ``response_format`` /
+    ``json_schema`` (which LiteLLM translates per backend) and parsed from
+    ``choices[0].message.content``.
+
+    Transport is stdlib ``urllib`` — the core spine stays dependency-free.
+    Configuration: base URL from ``LITELLM_BASE_URL`` (fallback
+    ``OPENAI_BASE_URL``), key from ``LITELLM_API_KEY`` (fallback
+    ``OPENAI_API_KEY``). ``version`` records the full ``litellm:<alias>``
+    spec string so a report is honest that a gateway alias, not a first-party
+    pin, answered — pin the alias to a fixed model on the gateway, or the
+    recorded identity is misleading. The Batch API is not part of the OpenAI
+    surface: this backend is synchronous only.
+    """
+
+    name = "litellm"
+    temperature = None
+
+    def __init__(self, model: str, seed: int = 0, timeout: float = 300.0) -> None:
+        if not model:
+            raise ValueError("litellm answering model needs an alias: litellm:<model>")
+        self.model = model
+        self.version = f"litellm:{model}"
+        self.seed = seed  # bookkeeping only, like the claude backend
+        self.timeout = timeout
+
+    @staticmethod
+    def _base_url() -> str:
+        base = os.environ.get("LITELLM_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
+        if not base:
+            raise RuntimeError(
+                "the litellm answering model needs LITELLM_BASE_URL (or "
+                "OPENAI_BASE_URL) pointing at the gateway's OpenAI-compatible root."
+            )
+        return base.rstrip("/")
+
+    @staticmethod
+    def _api_key() -> str:
+        key = os.environ.get("LITELLM_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        if not key:
+            raise RuntimeError(
+                "the litellm answering model needs LITELLM_API_KEY (or "
+                "OPENAI_API_KEY) set to the gateway's virtual key."
+            )
+        return key
+
+    def build_request(
+        self, scaffold: str, grounding: GroundingContext, task: Task
+    ) -> dict:
+        """The exact `/chat/completions` body for this cell.
+
+        Same (scaffold, prompt, schema) triple as the Anthropic-native
+        backend; ``strict`` asks the gateway to enforce the schema where the
+        underlying provider supports it.
+        """
+        return {
+            "model": self.model,
+            "max_tokens": 2048,
+            "messages": [
+                {"role": "system", "content": scaffold},
+                {"role": "user", "content": _task_user_prompt(grounding, task)},
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "proposed_change",
+                    "strict": True,
+                    "schema": _PROPOSED_CHANGE_SCHEMA,
+                },
+            },
+        }
+
+    def parse_response(self, payload: dict) -> ProposedChange:
+        """Decode a `/chat/completions` JSON payload into a ProposedChange."""
+        choices = payload.get("choices") or []
+        if not choices:
+            raise RuntimeError(f"litellm returned no choices: {payload!r}")
+        choice = choices[0]
+        if choice.get("finish_reason") == "content_filter":
+            # The OpenAI-surface analogue of an Anthropic refusal stop.
+            return ProposedChange(summary="model refused", actions=[])
+        text = (choice.get("message") or {}).get("content")
+        if not text:
+            raise RuntimeError(
+                f"litellm returned no message content "
+                f"(finish_reason={choice.get('finish_reason')!r})."
+            )
+        return _proposed_change_from_json_text(text, "litellm")
+
+    @staticmethod
+    def parse_usage(payload: dict) -> dict | None:
+        """Normalise OpenAI-shape usage into {input_tokens, output_tokens}."""
+        usage = payload.get("usage")
+        if not isinstance(usage, dict):
+            return None
+        inp = usage.get("prompt_tokens")
+        out = usage.get("completion_tokens")
+        if inp is None and out is None:
+            return None
+        return {"input_tokens": int(inp or 0), "output_tokens": int(out or 0)}
+
+    def respond(
+        self, scaffold: str, grounding: GroundingContext, task: Task
+    ) -> ProposedChange:
+        import json
+        import urllib.error
+        import urllib.request
+
+        body = json.dumps(self.build_request(scaffold, grounding, task)).encode("utf-8")
+        request = urllib.request.Request(
+            f"{self._base_url()}/chat/completions",
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self._api_key()}",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:500]
+            raise RuntimeError(
+                f"litellm gateway returned HTTP {exc.code}: {detail}"
+            ) from None
+        self.last_usage = self.parse_usage(payload)
+        return self.parse_response(payload)

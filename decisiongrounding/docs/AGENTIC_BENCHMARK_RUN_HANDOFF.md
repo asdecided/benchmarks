@@ -7,8 +7,10 @@ session.
 
 ## How to use
 
-1. Start a Claude Code session with the `itsthelore/decisiongrounding` repository
-   in scope.
+1. Start a Claude Code session with the `itsthelore/rac-benchmarks` repository
+   in scope. The benchmark lives in its `decisiongrounding/` subdirectory (the
+   standalone `itsthelore/decisiongrounding` repo was archived into it, history
+   preserved); every command below runs from that subdirectory.
 2. Export your credentials (see the prompt) — for a LiteLLM/proxy run, set
    `ANTHROPIC_BASE_URL` and the virtual key.
 3. Paste the prompt block below as your first message and let the session drive.
@@ -29,7 +31,9 @@ clone), and the `paper/` LaTeX scaffold + `scripts/paper_figs.py`.
 ---
 
 ```text
-You are Claude Code working on the itsthelore/decisiongrounding repository — a
+You are Claude Code working on the itsthelore/rac-benchmarks repository. The
+benchmark is its decisiongrounding/ subdirectory — treat that directory as your
+working directory for every command below. It is a
 reproducible benchmark testing whether deterministic, supersession-aware
 decision-grounding makes a coding agent follow prior decisions better than
 context-dump, naive RAG, or no grounding, reported as an adherence-vs-N crossover
@@ -38,16 +42,28 @@ with token cost. Before doing anything, read CLAUDE.md, README.md (especially th
 (the credibility rules are binding).
 
 ## Goal
-Produce the FIRST real benchmark data through a LiteLLM-routed Anthropic endpoint,
-generate the report, preserve the artifacts, and open a data-provision PR. The
-harness, multi-seed variance, batch mode, report generator, dashboard, and paper
-scaffold are all on main and tested — this run produces the numbers.
+Produce the FIRST real adherence-vs-N crossover data (the discriminating
+rac-vs-naive_rag result), generate the report, preserve the artifacts, and open a
+data-provision PR. A real base-N headline compare already exists —
+results/published/2026-06-20-headline-opus-4-8-voyage.md (grounding decisive at
+0.95 vs 0.00; all grounding arms tie at base N, as designed) — so the crossover
+is the missing number. The harness, multi-seed variance, batch mode, report
+generator, dashboard, and paper scaffold are all on main and tested — this run
+produces the numbers.
 
 ## Environment (LiteLLM routing)
-The official `anthropic` SDK honours ANTHROPIC_BASE_URL, so no code change is
-needed IF the proxy exposes Anthropic's native /v1/messages route. Set:
-  export ANTHROPIC_BASE_URL=<litellm endpoint, Anthropic-native route>
-  export ANTHROPIC_API_KEY=<litellm virtual key>
+Both LiteLLM surfaces are supported; probe tells you which one you have (Step 1).
+- Anthropic-native passthrough (/v1/messages proxied): the `anthropic` SDK
+  honours ANTHROPIC_BASE_URL — run with --answering claude as normal. Set:
+    export ANTHROPIC_BASE_URL=<litellm endpoint, Anthropic-native route>
+    export ANTHROPIC_API_KEY=<litellm virtual key>
+- OpenAI-compatible only (/chat/completions): use the litellm backend —
+  --answering litellm:<model-alias> (or ANSWERING=litellm:<alias> for
+  run_real.sh). Same scaffold/prompt/schema as the claude backend; synchronous
+  only (no --batch). Set:
+    export LITELLM_BASE_URL=<litellm endpoint, OpenAI-compatible root>
+    export LITELLM_API_KEY=<litellm virtual key>
+Either way:
   export VOYAGE_API_KEY=<voyage key>            # strong embeddings for naive_rag
 
 ## Step 0 — branch & install
@@ -65,12 +81,17 @@ It reuses the exact request the benchmark sends and prints a verdict on
 (1) messages.create + structured outputs + usage, and (2) the Batch API.
 - Both pass  -> Anthropic passthrough: proceed and use --batch.
 - Structured outputs FAIL -> it's an OpenAI-compatible gateway, NOT a passthrough.
-  STOP and tell the maintainer: the native code (output_config + Batch API) needs
-  an OpenAI-client answering adapter; do not hack around it.
+  Re-probe that surface:  python -m scripts.litellm_probe --mode openai --model <alias>
+  If it passes, run everything with --answering litellm:<alias> (synchronous
+  only — skip --batch/BATCH=1 and Step 3's `batch` variant). If BOTH modes fail,
+  STOP and tell the maintainer: the gateway blocks schema-enforced JSON and
+  scoring needs it; do not hack around it with free-text parsing.
 - Batch FAILS but structured outputs pass -> run synchronously (drop --batch);
   reserve batch for a direct Anthropic key.
-Also confirm the proxy's model alias maps to EXACTLY claude-opus-4-8 (the report
-records that as the version); if it routes elsewhere, fix the alias or note it.
+Model identity: with --answering claude confirm the proxy's alias maps to EXACTLY
+claude-opus-4-8 (the report records that as the version). With litellm:<alias>
+the report records the spec string itself — confirm the alias is pinned to a
+fixed model on the gateway (not "latest"), or the run isn't reproducible.
 
 ## Step 2 — cheap validation before the full spend
 python -m runner.cli demo --scenarios scenarios_real \
@@ -80,7 +101,11 @@ Confirm real usage is recorded, the dataset is green, the .partial.jsonl sidecar
 streams, and each curve point carries adherence_rate_ci / _values. Report the
 observed per-cell token cost so the full run can be estimated.
 
-## Step 3 — headline base-N compare (all arms, once)
+## Step 3 — headline base-N compare (all arms — only if the pin changed)
+A seed-0 opus-4-8 + voyage headline already exists
+(results/published/2026-06-20-headline-opus-4-8-voyage.md). Re-run it ONLY if
+your answering model or embedder differs from that pin; otherwise reuse it and
+spend the budget on Step 4:
 python -m runner.cli compare --scenarios scenarios_real \
   --arms context_dump,naive_rag,no_grounding,rac \
   --answering claude --embedder voyage:voyage-4-large --seed 0
@@ -121,8 +146,10 @@ those N via:  python -m runner.cli demo ... --augment <crossover_dataset.json>
   "_Generated by Claude Code_" footer — immediately call
   mcp__github__update_pull_request with the same body to strip it (update does NOT
   re-append), then read the PR body back to verify it's clean.
-- Subscribe to the PR and drive CI to green (the test matrix + the `rac corpus
-  gate` job both run).
+- Subscribe to the PR and drive CI to green. The benchmark's CI lives at the
+  repo root — .github/workflows/decisiongrounding-ci.yml (test matrix, offline
+  demo smoke, rac corpus gate), path-filtered to decisiongrounding/** — plus the
+  per-tool suite's workflow if your diff touches shared paths.
 
 ## Honesty / credibility (non-negotiable — CONTRIBUTING.md)
 - The verdict is computed from the numbers. If naive_rag does NOT decay (grounded ≈

@@ -1,0 +1,11 @@
+{
+  "description": "get-related gate config. Edge sets either match their declaration or they do not: conformance is gated at 1.0 with zero tolerance, and a must_not_return id in either returned edge set is a violation.",
+  "tool": "get_related",
+  "tolerance": 0.0,
+  "floors": {
+    "negative_violations": 0,
+    "overall": {
+      "conformance": 1.0
+    }
+  }
+}

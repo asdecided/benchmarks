@@ -1,0 +1,6 @@
+__pycache__/
+*.egg-info/
+.pytest_cache/
+gitchameleon/dataset/
+gitchameleon/corpus-build/
+gitchameleon/out/
