@@ -1,0 +1,9 @@
+{
+  "name": "autonomousqa-workspace",
+  "private": true,
+  "description": "Pinned node workspace the harness runs the reference agent from. The benchmark consumes @itsthelore/proofkeeper strictly over its published CLI.",
+  "dependencies": {
+    "@itsthelore/proofkeeper": "2026.7.1",
+    "@playwright/test": "1.56.0"
+  }
+}
