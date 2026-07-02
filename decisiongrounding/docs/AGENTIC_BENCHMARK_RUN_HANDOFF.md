@@ -52,10 +52,18 @@ generator, dashboard, and paper scaffold are all on main and tested — this run
 produces the numbers.
 
 ## Environment (LiteLLM routing)
-The official `anthropic` SDK honours ANTHROPIC_BASE_URL, so no code change is
-needed IF the proxy exposes Anthropic's native /v1/messages route. Set:
-  export ANTHROPIC_BASE_URL=<litellm endpoint, Anthropic-native route>
-  export ANTHROPIC_API_KEY=<litellm virtual key>
+Both LiteLLM surfaces are supported; probe tells you which one you have (Step 1).
+- Anthropic-native passthrough (/v1/messages proxied): the `anthropic` SDK
+  honours ANTHROPIC_BASE_URL — run with --answering claude as normal. Set:
+    export ANTHROPIC_BASE_URL=<litellm endpoint, Anthropic-native route>
+    export ANTHROPIC_API_KEY=<litellm virtual key>
+- OpenAI-compatible only (/chat/completions): use the litellm backend —
+  --answering litellm:<model-alias> (or ANSWERING=litellm:<alias> for
+  run_real.sh). Same scaffold/prompt/schema as the claude backend; synchronous
+  only (no --batch). Set:
+    export LITELLM_BASE_URL=<litellm endpoint, OpenAI-compatible root>
+    export LITELLM_API_KEY=<litellm virtual key>
+Either way:
   export VOYAGE_API_KEY=<voyage key>            # strong embeddings for naive_rag
 
 ## Step 0 — branch & install
@@ -73,12 +81,17 @@ It reuses the exact request the benchmark sends and prints a verdict on
 (1) messages.create + structured outputs + usage, and (2) the Batch API.
 - Both pass  -> Anthropic passthrough: proceed and use --batch.
 - Structured outputs FAIL -> it's an OpenAI-compatible gateway, NOT a passthrough.
-  STOP and tell the maintainer: the native code (output_config + Batch API) needs
-  an OpenAI-client answering adapter; do not hack around it.
+  Re-probe that surface:  python -m scripts.litellm_probe --mode openai --model <alias>
+  If it passes, run everything with --answering litellm:<alias> (synchronous
+  only — skip --batch/BATCH=1 and Step 3's `batch` variant). If BOTH modes fail,
+  STOP and tell the maintainer: the gateway blocks schema-enforced JSON and
+  scoring needs it; do not hack around it with free-text parsing.
 - Batch FAILS but structured outputs pass -> run synchronously (drop --batch);
   reserve batch for a direct Anthropic key.
-Also confirm the proxy's model alias maps to EXACTLY claude-opus-4-8 (the report
-records that as the version); if it routes elsewhere, fix the alias or note it.
+Model identity: with --answering claude confirm the proxy's alias maps to EXACTLY
+claude-opus-4-8 (the report records that as the version). With litellm:<alias>
+the report records the spec string itself — confirm the alias is pinned to a
+fixed model on the gateway (not "latest"), or the run isn't reproducible.
 
 ## Step 2 — cheap validation before the full spend
 python -m runner.cli demo --scenarios scenarios_real \
