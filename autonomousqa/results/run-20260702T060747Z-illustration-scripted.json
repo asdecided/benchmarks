@@ -1,0 +1,358 @@
+{
+  "schema_version": "1",
+  "harness_version": "0.1.0",
+  "label": "illustration-scripted",
+  "created_utc": "20260702T060747Z",
+  "runs": [
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "10b686fb39f9",
+      "timestamp_utc": "2026-07-02T06:08:02Z",
+      "app": {
+        "name": "browser-notes",
+        "modality": "browser",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "NOTES-0000000000R1",
+        "tier": "easy",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060747Z-NOTES-0000000000R1-0/graph.json",
+          "--url",
+          "http://127.0.0.1:59431/",
+          "--capability",
+          "NOTES-0000000000R1",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R1-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R1-0/notes-0000000000r1.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 1351,
+        "completion_tokens": 177,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.616
+      },
+      "raw": {
+        "stdout": "Capability: NOTES-0000000000R1 \u2014 Adding a Note Shows It on the Board\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R1-0/notes-0000000000r1.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "123cdd0a35c8",
+      "timestamp_utc": "2026-07-02T06:08:17Z",
+      "app": {
+        "name": "browser-notes",
+        "modality": "browser",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "NOTES-0000000000R2",
+        "tier": "easy",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060747Z-NOTES-0000000000R2-0/graph.json",
+          "--url",
+          "http://127.0.0.1:38517/",
+          "--capability",
+          "NOTES-0000000000R2",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R2-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R2-0/notes-0000000000r2.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 1390,
+        "completion_tokens": 223,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 14.804
+      },
+      "raw": {
+        "stdout": "Capability: NOTES-0000000000R2 \u2014 The Notes Count Tracks the Board\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R2-0/notes-0000000000r2.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "bb9435d81b38",
+      "timestamp_utc": "2026-07-02T06:08:31Z",
+      "app": {
+        "name": "browser-notes",
+        "modality": "browser",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "NOTES-0000000000R3",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": true
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060747Z-NOTES-0000000000R3-0/graph.json",
+          "--url",
+          "http://127.0.0.1:54225/",
+          "--capability",
+          "NOTES-0000000000R3",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R3-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R3-0/notes-0000000000r3.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 1352,
+        "completion_tokens": 183,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.613
+      },
+      "raw": {
+        "stdout": "Capability: NOTES-0000000000R3 \u2014 Empty Notes Are Rejected with a Visible Error\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R3-0/notes-0000000000r3.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "3443ad3d5879",
+      "timestamp_utc": "2026-07-02T06:08:48Z",
+      "app": {
+        "name": "browser-notes",
+        "modality": "browser",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "NOTES-0000000000R4",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060747Z-NOTES-0000000000R4-0/graph.json",
+          "--url",
+          "http://127.0.0.1:39873/",
+          "--capability",
+          "NOTES-0000000000R4",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R4-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 4,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R4-0/notes-0000000000r4.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 4,
+        "prompt_tokens": 3598,
+        "completion_tokens": 372,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 15.99
+      },
+      "raw": {
+        "stdout": "Capability: NOTES-0000000000R4 \u2014 Search Filters the Visible Notes\nDrive: 4 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R4-0/notes-0000000000r4.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "e073188733db",
+      "timestamp_utc": "2026-07-02T06:09:04Z",
+      "app": {
+        "name": "browser-notes",
+        "modality": "browser",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "NOTES-0000000000R5",
+        "tier": "hard",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060747Z-NOTES-0000000000R5-0/graph.json",
+          "--url",
+          "http://127.0.0.1:45023/",
+          "--capability",
+          "NOTES-0000000000R5",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R5-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 4,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R5-0/notes-0000000000r5.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 4,
+        "prompt_tokens": 3605,
+        "completion_tokens": 372,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 15.484
+      },
+      "raw": {
+        "stdout": "Capability: NOTES-0000000000R5 \u2014 Deleting a Note Removes Exactly That Note\nDrive: 4 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060747Z-NOTES-0000000000R5-0/notes-0000000000r5.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    }
+  ]
+}
