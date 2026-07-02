@@ -1,0 +1,708 @@
+{
+  "schema_version": "1",
+  "harness_version": "0.1.0",
+  "label": "illustration-scripted",
+  "created_utc": "20260702T060514Z",
+  "runs": [
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "4d9955996e2b",
+      "timestamp_utc": "2026-07-02T06:05:27Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R1",
+        "tier": "easy",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R1-0/graph.json",
+          "--url",
+          "http://127.0.0.1:57623/",
+          "--capability",
+          "LEDGER-0000000000R1",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R1-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R1-0/ledger-0000000000r1.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3327,
+        "completion_tokens": 154,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 12.747
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R1 \u2014 Health Endpoint Reports Service Status\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R1-0/ledger-0000000000r1.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "9c4e76725a88",
+      "timestamp_utc": "2026-07-02T06:05:41Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R1",
+        "tier": "easy",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R1-1/graph.json",
+          "--url",
+          "http://127.0.0.1:36473/",
+          "--capability",
+          "LEDGER-0000000000R1",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R1-1"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R1-1/ledger-0000000000r1.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3327,
+        "completion_tokens": 154,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.547
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R1 \u2014 Health Endpoint Reports Service Status\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R1-1/ledger-0000000000r1.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "4fe67a3c68fe",
+      "timestamp_utc": "2026-07-02T06:05:55Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R2",
+        "tier": "easy",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R2-0/graph.json",
+          "--url",
+          "http://127.0.0.1:47615/",
+          "--capability",
+          "LEDGER-0000000000R2",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R2-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R2-0/ledger-0000000000r2.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3290,
+        "completion_tokens": 220,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.06
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R2 \u2014 Recording an Entry Returns the Stored Entry\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R2-0/ledger-0000000000r2.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "c000242deae1",
+      "timestamp_utc": "2026-07-02T06:06:09Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R2",
+        "tier": "easy",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R2-1/graph.json",
+          "--url",
+          "http://127.0.0.1:47613/",
+          "--capability",
+          "LEDGER-0000000000R2",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R2-1"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R2-1/ledger-0000000000r2.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3290,
+        "completion_tokens": 220,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.092
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R2 \u2014 Recording an Entry Returns the Stored Entry\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R2-1/ledger-0000000000r2.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "66041cc731cd",
+      "timestamp_utc": "2026-07-02T06:06:24Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R3",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": true
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R3-0/graph.json",
+          "--url",
+          "http://127.0.0.1:39879/",
+          "--capability",
+          "LEDGER-0000000000R3",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R3-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R3-0/ledger-0000000000r3.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3270,
+        "completion_tokens": 188,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 14.103
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R3 \u2014 Invalid Amounts Are Rejected\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R3-0/ledger-0000000000r3.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "b3e989c2bc53",
+      "timestamp_utc": "2026-07-02T06:06:38Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R3",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": true
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R3-1/graph.json",
+          "--url",
+          "http://127.0.0.1:54635/",
+          "--capability",
+          "LEDGER-0000000000R3",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R3-1"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R3-1/ledger-0000000000r3.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3270,
+        "completion_tokens": 188,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.854
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R3 \u2014 Invalid Amounts Are Rejected\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R3-1/ledger-0000000000r3.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "4782192954e3",
+      "timestamp_utc": "2026-07-02T06:06:52Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R4",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": true
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R4-0/graph.json",
+          "--url",
+          "http://127.0.0.1:39105/",
+          "--capability",
+          "LEDGER-0000000000R4",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R4-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R4-0/ledger-0000000000r4.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3244,
+        "completion_tokens": 159,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.289
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R4 \u2014 Unknown Entry Lookups Return Not Found\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R4-0/ledger-0000000000r4.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "8b267040e953",
+      "timestamp_utc": "2026-07-02T06:07:07Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R4",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": true
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R4-1/graph.json",
+          "--url",
+          "http://127.0.0.1:44191/",
+          "--capability",
+          "LEDGER-0000000000R4",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R4-1"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R4-1/ledger-0000000000r4.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 3244,
+        "completion_tokens": 159,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 13.7
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R4 \u2014 Unknown Entry Lookups Return Not Found\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R4-1/ledger-0000000000r4.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "1e8cce9bad0a",
+      "timestamp_utc": "2026-07-02T06:07:22Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R5",
+        "tier": "hard",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R5-0/graph.json",
+          "--url",
+          "http://127.0.0.1:48677/",
+          "--capability",
+          "LEDGER-0000000000R5",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R5-0"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 5,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R5-0/ledger-0000000000r5.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 5,
+        "prompt_tokens": 14570,
+        "completion_tokens": 494,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 14.597
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R5 \u2014 Balance Reflects Recorded Entries\nDrive: 5 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R5-0/ledger-0000000000r5.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "c8df0503019a",
+      "timestamp_utc": "2026-07-02T06:07:37Z",
+      "app": {
+        "name": "api-ledger",
+        "modality": "api",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "LEDGER-0000000000R5",
+        "tier": "hard",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T060514Z-LEDGER-0000000000R5-1/graph.json",
+          "--url",
+          "http://127.0.0.1:36305/",
+          "--capability",
+          "LEDGER-0000000000R5",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R5-1"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 5,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R5-1/ledger-0000000000r5.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 5,
+        "prompt_tokens": 14570,
+        "completion_tokens": 494,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 14.236
+      },
+      "raw": {
+        "stdout": "Capability: LEDGER-0000000000R5 \u2014 Balance Reflects Recorded Entries\nDrive: 5 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T060514Z-LEDGER-0000000000R5-1/ledger-0000000000r5.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    }
+  ]
+}

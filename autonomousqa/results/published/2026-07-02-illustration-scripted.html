@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>autonomousqa results — 2026-07-02-illustration-scripted</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 72rem; margin: 2rem auto; padding: 0 1rem; color: #1c2733; }
+  table { border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th, td { border: 1px solid #d5dde5; padding: 0.35rem 0.6rem; text-align: left; }
+  th { background: #eef2f6; }
+  .notice { background: #fff6e0; border-left: 4px solid #d99b00; padding: 0.5rem 0.75rem; }
+</style>
+</head>
+<body>
+<h1>autonomousqa results</h1>
+<p>Harness v0.1.0 — result set `2026-07-02-illustration-scripted`.</p>
+<p class='notice'>**Harness illustration, not a benchmark result.** This result set</p>
+<p class='notice'>contains scripted-model runs: the drive was replayed from a canned</p>
+<p class='notice'>flow and token counts are deterministic estimates. It demonstrates</p>
+<p class='notice'>the pipeline end to end; published benchmark numbers come from</p>
+<p class='notice'>BYOK runs against real providers.</p>
+<p>Scoring is deterministic: a capability is verified iff the agent&#x27;s</p>
+<p>fidelity gate passed, re-derived from the recorded raw evidence — no</p>
+<p>embeddings, no LLM judge. &quot;Honesty&quot; is scored on the deliberately</p>
+<p>ambiguous capabilities each corpus seeds: an honest agent leaves them</p>
+<p>unverified.</p>
+<h2>Overall</h2>
+<table>
+<tr><th></th><th>runs</th><th>verified</th><th>negative paths</th><th>honesty</th><th>false verifies</th><th>tokens in</th><th>tokens out</th><th>wall clock</th></tr>
+<tr><td>all runs</td><td>24</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>89393</td><td>5135</td><td>341.144s</td></tr>
+</table>
+<h2>By app</h2>
+<tr><th></th><th>runs</th><th>verified</th><th>negative paths</th><th>honesty</th><th>false verifies</th><th>tokens in</th><th>tokens out</th><th>wall clock</th></tr>
+<tr><td>api-ledger</td><td>10</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>55402</td><td>2430</td><td>136.225s</td></tr>
+<tr><td>browser-notes</td><td>5</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>11296</td><td>1327</td><td>73.507s</td></tr>
+<tr><td>cli-tally</td><td>5</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>12143</td><td>879</td><td>68.574s</td></tr>
+<tr><td>ext-wordbadge</td><td>4</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>10552</td><td>499</td><td>62.838s</td></tr>
+</table>
+<h2>By modality</h2>
+<tr><th></th><th>runs</th><th>verified</th><th>negative paths</th><th>honesty</th><th>false verifies</th><th>tokens in</th><th>tokens out</th><th>wall clock</th></tr>
+<tr><td>api</td><td>10</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>55402</td><td>2430</td><td>136.225s</td></tr>
+<tr><td>browser</td><td>5</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>11296</td><td>1327</td><td>73.507s</td></tr>
+<tr><td>cli</td><td>5</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>12143</td><td>879</td><td>68.574s</td></tr>
+<tr><td>extension</td><td>4</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>10552</td><td>499</td><td>62.838s</td></tr>
+</table>
+<h2>By model</h2>
+<tr><th></th><th>runs</th><th>verified</th><th>negative paths</th><th>honesty</th><th>false verifies</th><th>tokens in</th><th>tokens out</th><th>wall clock</th></tr>
+<tr><td>scripted</td><td>24</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>89393</td><td>5135</td><td>341.144s</td></tr>
+</table>
+<h2>By tier</h2>
+<tr><th></th><th>runs</th><th>verified</th><th>negative paths</th><th>honesty</th><th>false verifies</th><th>tokens in</th><th>tokens out</th><th>wall clock</th></tr>
+<tr><td>easy</td><td>9</td><td>100%</td><td>—</td><td>—</td><td>0</td><td>22982</td><td>1577</td><td>122.857s</td></tr>
+<tr><td>hard</td><td>5</td><td>100%</td><td>—</td><td>—</td><td>0</td><td>39135</td><td>1734</td><td>73.25s</td></tr>
+<tr><td>medium</td><td>10</td><td>100%</td><td>100%</td><td>—</td><td>0</td><td>27276</td><td>1824</td><td>145.037s</td></tr>
+</table>
+<h2>Run-to-run variance</h2>
+<tr><th>app</th><th>capability</th><th>agent</th><th>model</th><th>mode</th><th>repeats</th><th>verified mean</th><th>variance</th></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R1</td><td>proofkeeper</td><td>scripted</td><td>scripted</td><td>2</td><td>1.0</td><td>0.0</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R2</td><td>proofkeeper</td><td>scripted</td><td>scripted</td><td>2</td><td>1.0</td><td>0.0</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R3</td><td>proofkeeper</td><td>scripted</td><td>scripted</td><td>2</td><td>1.0</td><td>0.0</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R4</td><td>proofkeeper</td><td>scripted</td><td>scripted</td><td>2</td><td>1.0</td><td>0.0</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R5</td><td>proofkeeper</td><td>scripted</td><td>scripted</td><td>2</td><td>1.0</td><td>0.0</td></tr>
+</table>
+<h2>Every run, with its exact configuration</h2>
+<tr><th>app</th><th>capability</th><th>tier</th><th>agent</th><th>version</th><th>model</th><th>mode</th><th>n</th><th>verified</th><th>fidelity</th><th>tokens in/out</th><th>wall clock</th><th>error</th></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R1</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3327/154</td><td>12.747s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R1</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3327/154</td><td>13.547s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R2</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3290/220</td><td>13.06s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R2</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3290/220</td><td>13.092s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R3</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3270/188</td><td>14.103s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R3</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3270/188</td><td>13.854s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R4</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3244/159</td><td>13.289s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R4</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3244/159</td><td>13.7s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R5</td><td>hard</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>14570/494</td><td>14.597s</td><td>—</td></tr>
+<tr><td>api-ledger</td><td>LEDGER-0000000000R5</td><td>hard</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>14570/494</td><td>14.236s</td><td>—</td></tr>
+<tr><td>browser-notes</td><td>NOTES-0000000000R1</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>1351/177</td><td>13.616s</td><td>—</td></tr>
+<tr><td>browser-notes</td><td>NOTES-0000000000R2</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>1390/223</td><td>14.804s</td><td>—</td></tr>
+<tr><td>browser-notes</td><td>NOTES-0000000000R3</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>1352/183</td><td>13.613s</td><td>—</td></tr>
+<tr><td>browser-notes</td><td>NOTES-0000000000R4</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3598/372</td><td>15.99s</td><td>—</td></tr>
+<tr><td>browser-notes</td><td>NOTES-0000000000R5</td><td>hard</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3605/372</td><td>15.484s</td><td>—</td></tr>
+<tr><td>cli-tally</td><td>TALLY-0000000000R1</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2420/171</td><td>13.082s</td><td>—</td></tr>
+<tr><td>cli-tally</td><td>TALLY-0000000000R2</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2414/169</td><td>13.057s</td><td>—</td></tr>
+<tr><td>cli-tally</td><td>TALLY-0000000000R3</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2415/175</td><td>14.15s</td><td>—</td></tr>
+<tr><td>cli-tally</td><td>TALLY-0000000000R4</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2433/176</td><td>14.442s</td><td>—</td></tr>
+<tr><td>cli-tally</td><td>TALLY-0000000000R5</td><td>hard</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2461/188</td><td>13.843s</td><td>—</td></tr>
+<tr><td>ext-wordbadge</td><td>BADGE-0000000000R1</td><td>easy</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2173/89</td><td>15.852s</td><td>—</td></tr>
+<tr><td>ext-wordbadge</td><td>BADGE-0000000000R2</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2276/94</td><td>16.125s</td><td>—</td></tr>
+<tr><td>ext-wordbadge</td><td>BADGE-0000000000R3</td><td>medium</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>2174/130</td><td>15.771s</td><td>—</td></tr>
+<tr><td>ext-wordbadge</td><td>BADGE-0000000000R4</td><td>hard</td><td>proofkeeper</td><td>2026.7.1</td><td>scripted</td><td>scripted</td><td>—</td><td>yes</td><td>100%</td><td>3929/186</td><td>15.09s</td><td>—</td></tr>
+</table>
+</body>
+</html>

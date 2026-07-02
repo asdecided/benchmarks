@@ -1,0 +1,296 @@
+{
+  "schema_version": "1",
+  "harness_version": "0.1.0",
+  "label": "illustration-scripted",
+  "created_utc": "20260702T061016Z",
+  "runs": [
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "2e945ccfc061",
+      "timestamp_utc": "2026-07-02T06:10:33Z",
+      "app": {
+        "name": "ext-wordbadge",
+        "modality": "extension",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "BADGE-0000000000R1",
+        "tier": "easy",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T061016Z-BADGE-0000000000R1-0/graph.json",
+          "--url",
+          "http://127.0.0.1:44747/article.html",
+          "--capability",
+          "BADGE-0000000000R1",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R1-0",
+          "--extension",
+          "/home/user/rac-benchmarks/autonomousqa/apps/ext-wordbadge/extension"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R1-0/badge-0000000000r1.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 2173,
+        "completion_tokens": 89,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 15.852
+      },
+      "raw": {
+        "stdout": "Capability: BADGE-0000000000R1 \u2014 The Badge Appears on Pages with Main Content\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R1-0/badge-0000000000r1.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "af59b9f9a293",
+      "timestamp_utc": "2026-07-02T06:10:50Z",
+      "app": {
+        "name": "ext-wordbadge",
+        "modality": "extension",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "BADGE-0000000000R2",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T061016Z-BADGE-0000000000R2-0/graph.json",
+          "--url",
+          "http://127.0.0.1:44099/article.html",
+          "--capability",
+          "BADGE-0000000000R2",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R2-0",
+          "--extension",
+          "/home/user/rac-benchmarks/autonomousqa/apps/ext-wordbadge/extension"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R2-0/badge-0000000000r2.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 2276,
+        "completion_tokens": 94,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 16.125
+      },
+      "raw": {
+        "stdout": "Capability: BADGE-0000000000R2 \u2014 The Badge Reports the Main Content's Word Count\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R2-0/badge-0000000000r2.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "9b05e82d4c7f",
+      "timestamp_utc": "2026-07-02T06:11:06Z",
+      "app": {
+        "name": "ext-wordbadge",
+        "modality": "extension",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "BADGE-0000000000R3",
+        "tier": "medium",
+        "expected": "verifiable",
+        "negative": true
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T061016Z-BADGE-0000000000R3-0/graph.json",
+          "--url",
+          "http://127.0.0.1:44377/article.html",
+          "--capability",
+          "BADGE-0000000000R3",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R3-0",
+          "--extension",
+          "/home/user/rac-benchmarks/autonomousqa/apps/ext-wordbadge/extension"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 2,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R3-0/badge-0000000000r3.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 2174,
+        "completion_tokens": 130,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 15.771
+      },
+      "raw": {
+        "stdout": "Capability: BADGE-0000000000R3 \u2014 Text Outside Main Content Is Never Counted\nDrive: 2 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R3-0/badge-0000000000r3.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    },
+    {
+      "schema_version": "1",
+      "harness_version": "0.1.0",
+      "record_id": "e71def36344f",
+      "timestamp_utc": "2026-07-02T06:11:22Z",
+      "app": {
+        "name": "ext-wordbadge",
+        "modality": "extension",
+        "frozen": "2026-07"
+      },
+      "capability": {
+        "id": "BADGE-0000000000R4",
+        "tier": "hard",
+        "expected": "verifiable",
+        "negative": false
+      },
+      "agent": {
+        "name": "proofkeeper",
+        "version": "2026.7.1",
+        "invocation": [
+          "node",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/node_modules/@itsthelore/proofkeeper/dist/cli.js",
+          "qa",
+          "--graph-file",
+          "/home/user/rac-benchmarks/autonomousqa/runs/20260702T061016Z-BADGE-0000000000R4-0/graph.json",
+          "--url",
+          "http://127.0.0.1:52825/article.html",
+          "--capability",
+          "BADGE-0000000000R4",
+          "--n",
+          "3",
+          "--out-dir",
+          "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R4-0",
+          "--extension",
+          "/home/user/rac-benchmarks/autonomousqa/apps/ext-wordbadge/extension"
+        ]
+      },
+      "config": {
+        "mode": "scripted",
+        "model": "scripted",
+        "n": 3,
+        "max_steps": null
+      },
+      "outcome": {
+        "exit_code": 0,
+        "verified": true,
+        "fidelity": {
+          "passed": 3,
+          "attempts": 3,
+          "stable": true
+        },
+        "drive": {
+          "steps": 3,
+          "finished": true
+        },
+        "spec_path": "/home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R4-0/badge-0000000000r4.spec.ts",
+        "error": null
+      },
+      "usage": {
+        "requests": 3,
+        "prompt_tokens": 3929,
+        "completion_tokens": 186,
+        "estimated": true
+      },
+      "timing": {
+        "wall_clock_s": 15.09
+      },
+      "raw": {
+        "stdout": "Capability: BADGE-0000000000R4 \u2014 Each Page Gets Its Own Count, and Punctuation Is Not a Word\nDrive: 3 step(s), finished\nCompiled: /home/user/rac-benchmarks/autonomousqa/workspace/generated/20260702T061016Z-BADGE-0000000000R4-0/badge-0000000000r4.spec.ts\nFidelity: 3/3 re-runs green \u2014 stable\nWrite-back: not requested (pass --propose to open a PR)\n",
+        "stderr_tail": ""
+      }
+    }
+  ]
+}
