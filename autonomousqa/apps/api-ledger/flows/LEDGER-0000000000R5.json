@@ -1,0 +1,26 @@
+{
+  "capability": "LEDGER-0000000000R5",
+  "turns": [
+    [
+      {"name": "request", "arguments": {"method": "POST", "url": "{base_url}/reset"}},
+      {"name": "expect_status", "arguments": {"status": 200}},
+      {"name": "expect_json", "arguments": {"path": "balance", "equals": 0}}
+    ],
+    [
+      {"name": "request", "arguments": {"method": "POST", "url": "{base_url}/entries", "headers": {"content-type": "application/json"}, "body": "{\"label\": \"pay\", \"amount\": 10}"}},
+      {"name": "expect_status", "arguments": {"status": 201}}
+    ],
+    [
+      {"name": "request", "arguments": {"method": "POST", "url": "{base_url}/entries", "headers": {"content-type": "application/json"}, "body": "{\"label\": \"snack\", \"amount\": -3}"}},
+      {"name": "expect_status", "arguments": {"status": 201}}
+    ],
+    [
+      {"name": "request", "arguments": {"method": "GET", "url": "{base_url}/balance"}},
+      {"name": "expect_status", "arguments": {"status": 200}},
+      {"name": "expect_json", "arguments": {"path": "balance", "equals": 7}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

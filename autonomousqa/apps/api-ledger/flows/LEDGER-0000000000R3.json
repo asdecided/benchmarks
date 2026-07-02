@@ -1,0 +1,13 @@
+{
+  "capability": "LEDGER-0000000000R3",
+  "turns": [
+    [
+      {"name": "request", "arguments": {"method": "POST", "url": "{base_url}/entries", "headers": {"content-type": "application/json"}, "body": "{\"label\": \"oops\", \"amount\": 0}"}},
+      {"name": "expect_status", "arguments": {"status": 400}},
+      {"name": "expect_json", "arguments": {"path": "error.code", "equals": "invalid_amount"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

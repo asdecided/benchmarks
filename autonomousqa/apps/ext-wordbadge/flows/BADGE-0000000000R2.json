@@ -1,0 +1,11 @@
+{
+  "capability": "BADGE-0000000000R2",
+  "turns": [
+    [
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "wordbadge", "text": "60 words"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

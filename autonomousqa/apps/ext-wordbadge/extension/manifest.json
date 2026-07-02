@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "wordbadge",
+  "version": "1.0.0",
+  "description": "Shows a word-count badge for the page's main content.",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1/*", "http://localhost/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

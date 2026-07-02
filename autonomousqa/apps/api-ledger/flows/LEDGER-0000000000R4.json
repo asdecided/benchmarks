@@ -1,0 +1,13 @@
+{
+  "capability": "LEDGER-0000000000R4",
+  "turns": [
+    [
+      {"name": "request", "arguments": {"method": "GET", "url": "{base_url}/entries/999999"}},
+      {"name": "expect_status", "arguments": {"status": 404}},
+      {"name": "expect_json", "arguments": {"path": "error.code", "equals": "not_found"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

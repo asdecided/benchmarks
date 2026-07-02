@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>browser-notes</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; color: #222; }
+  h1 { font-size: 1.4rem; }
+  .row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+  input[type="text"] { flex: 1; padding: 0.4rem; font-size: 1rem; }
+  button { padding: 0.4rem 0.8rem; font-size: 0.95rem; cursor: pointer; }
+  #error-banner { display: none; background: #fde8e8; color: #8a1f1f; padding: 0.5rem 0.75rem; border-radius: 4px; margin-bottom: 0.75rem; }
+  #error-banner.visible { display: block; }
+  ul { list-style: none; padding: 0; }
+  li { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid #eee; }
+  .muted { color: #666; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>browser-notes</h1>
+  <p class="muted">A small notes board. Notes live in page memory only.</p>
+
+  <div id="error-banner" data-testid="error-banner" role="alert"></div>
+
+  <div class="row">
+    <input type="text" id="note-input" data-testid="note-input" aria-label="New note" placeholder="Write a note">
+    <button id="add-note" data-testid="add-note">Add note</button>
+  </div>
+
+  <div class="row">
+    <input type="text" id="search-input" data-testid="search-input" aria-label="Search notes" placeholder="Search notes">
+  </div>
+
+  <p><span id="notes-count" data-testid="notes-count">0 notes</span></p>
+  <ul id="notes-list" data-testid="notes-list"></ul>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var notes = [];
+  var input = document.getElementById("note-input");
+  var addButton = document.getElementById("add-note");
+  var search = document.getElementById("search-input");
+  var list = document.getElementById("notes-list");
+  var count = document.getElementById("notes-count");
+  var banner = document.getElementById("error-banner");
+
+  function render() {
+    var query = search.value.trim().toLowerCase();
+    list.innerHTML = "";
+    var visible = 0;
+    notes.forEach(function (text, index) {
+      if (query && text.toLowerCase().indexOf(query) === -1) return;
+      visible += 1;
+      var item = document.createElement("li");
+      var span = document.createElement("span");
+      span.className = "note-text";
+      span.setAttribute("data-testid", "note-text");
+      span.textContent = text;
+      var remove = document.createElement("button");
+      remove.textContent = "Delete";
+      remove.setAttribute("aria-label", "Delete " + text);
+      remove.addEventListener("click", function () {
+        notes.splice(index, 1);
+        render();
+      });
+      item.appendChild(span);
+      item.appendChild(remove);
+      list.appendChild(item);
+    });
+    count.textContent = notes.length === 1 ? "1 note" : notes.length + " notes";
+    void visible;
+  }
+
+  function showError(message) {
+    banner.textContent = message;
+    banner.className = "visible";
+  }
+
+  function clearError() {
+    banner.textContent = "";
+    banner.className = "";
+  }
+
+  addButton.addEventListener("click", function () {
+    var text = input.value.trim();
+    if (!text) {
+      showError("A note needs some text.");
+      return;
+    }
+    clearError();
+    notes.push(text);
+    input.value = "";
+    render();
+  });
+
+  search.addEventListener("input", render);
+  render();
+})();
+</script>
+</body>
+</html>

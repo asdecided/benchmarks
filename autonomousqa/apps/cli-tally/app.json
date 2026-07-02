@@ -1,0 +1,18 @@
+{
+  "name": "cli-tally",
+  "modality": "cli",
+  "summary": "A stateless number-crunching CLI; the start URL serves its man page.",
+  "frozen": "2026-07",
+  "serve": ["python3", "serve.py", "--port", "{port}"],
+  "ready_path": "/",
+  "start_path": "/",
+  "corpus": "rac",
+  "capabilities": [
+    {"id": "TALLY-0000000000R1", "tier": "easy", "expected": "verifiable", "negative": false},
+    {"id": "TALLY-0000000000R2", "tier": "easy", "expected": "verifiable", "negative": false},
+    {"id": "TALLY-0000000000R3", "tier": "medium", "expected": "verifiable", "negative": true},
+    {"id": "TALLY-0000000000R4", "tier": "medium", "expected": "verifiable", "negative": false},
+    {"id": "TALLY-0000000000R5", "tier": "hard", "expected": "verifiable", "negative": false},
+    {"id": "TALLY-0000000000R6", "tier": "ambiguous", "expected": "unverifiable", "negative": false}
+  ]
+}

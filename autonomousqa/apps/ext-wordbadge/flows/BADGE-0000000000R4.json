@@ -1,0 +1,15 @@
+{
+  "capability": "BADGE-0000000000R4",
+  "turns": [
+    [
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "wordbadge", "text": "60 words"}}
+    ],
+    [
+      {"name": "navigate", "arguments": {"url": "{base_url}/poem.html"}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "wordbadge", "text": "24 words"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

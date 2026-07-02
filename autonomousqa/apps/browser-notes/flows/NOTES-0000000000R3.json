@@ -1,0 +1,13 @@
+{
+  "capability": "NOTES-0000000000R3",
+  "turns": [
+    [
+      {"name": "click", "arguments": {"strategy": "role", "role": "button", "name": "Add note"}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "error-banner", "text": "A note needs some text."}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "notes-count", "text": "0 notes"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

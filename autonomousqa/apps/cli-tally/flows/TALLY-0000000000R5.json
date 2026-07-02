@@ -1,0 +1,13 @@
+{
+  "capability": "TALLY-0000000000R5",
+  "turns": [
+    [
+      {"name": "run_command", "arguments": {"command": "python3 {app_dir}/tally.py stats --json 3 4 5"}},
+      {"name": "expect_output", "arguments": {"match": "exact", "stream": "stdout", "value": "{\"count\": 3, \"min\": 3, \"max\": 5, \"sum\": 12}\n"}},
+      {"name": "expect_exit", "arguments": {"code": 0}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

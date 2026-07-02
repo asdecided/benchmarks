@@ -1,0 +1,21 @@
+{
+  "capability": "NOTES-0000000000R4",
+  "turns": [
+    [
+      {"name": "fill", "arguments": {"strategy": "testId", "testId": "note-input", "value": "Buy milk"}},
+      {"name": "click", "arguments": {"strategy": "role", "role": "button", "name": "Add note"}}
+    ],
+    [
+      {"name": "fill", "arguments": {"strategy": "testId", "testId": "note-input", "value": "Call dad"}},
+      {"name": "click", "arguments": {"strategy": "role", "role": "button", "name": "Add note"}}
+    ],
+    [
+      {"name": "fill", "arguments": {"strategy": "testId", "testId": "search-input", "value": "milk"}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "note-text", "text": "Buy milk"}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "notes-count", "text": "2 notes"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}
