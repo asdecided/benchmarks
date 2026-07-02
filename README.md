@@ -16,6 +16,7 @@ corpus.
 
 | Subdir | Benchmark |
 | --- | --- |
+| [`autonomousqa/`](autonomousqa/) | Autonomous-QA benchmark — frozen sample apps across four drive modalities with seeded corpora; agent-agnostic, deterministic evidence-based scoring (ADR-066), Proofkeeper as the reference agent over its published CLI. |
 | [`decisiongrounding/`](decisiongrounding/) | Decision-grounding eval — does an agent connected to RAC respect recorded decisions? Deterministic scoring, no embeddings / no LLM judge (ADR-066). |
 | [`search-artifacts/`](search-artifacts/) | Ranked retrieval quality of the `search_artifacts` MCP tool: P@k / R@k / MRR over a 30-artifact, five-type corpus; full-list hard negatives. |
 | [`find-decisions/`](find-decisions/) | The live-decision query's supersession defense: retired decisions must never surface, even as the lexically best match. |
