@@ -1,0 +1,71 @@
+name: decisiongrounding CI
+
+# The decisiongrounding benchmark arrived from its standalone repository with
+# its workflow at decisiongrounding/.github/workflows/ci.yml — a path GitHub
+# does not read in a subdirectory. This root workflow re-homes those same jobs
+# (test matrix, offline demo smoke, rac corpus gate) unchanged in substance,
+# scoped to the subdirectory.
+
+on:
+  push:
+    branches: [main]
+    paths: ["decisiongrounding/**"]
+  pull_request:
+    paths: ["decisiongrounding/**"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: decisiongrounding
+
+jobs:
+  test:
+    name: test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install (dev + schema extras)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,schema]"
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Smoke the offline demo
+        run: python -m runner.cli demo
+
+  corpus:
+    # Dogfood RAC: enforce the benchmark's own knowledge corpus the same way
+    # the benchmark studies — validation, relationships, and review must pass.
+    name: rac corpus gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install rac
+        run: |
+          python -m pip install --upgrade pip
+          pip install "git+https://github.com/itsthelore/rac-core.git"
+
+      - name: Gate the RAC corpus (validate + relationships + review)
+        run: rac gate rac
