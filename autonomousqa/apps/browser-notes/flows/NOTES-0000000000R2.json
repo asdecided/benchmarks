@@ -1,0 +1,14 @@
+{
+  "capability": "NOTES-0000000000R2",
+  "turns": [
+    [
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "notes-count", "text": "0 notes"}},
+      {"name": "fill", "arguments": {"strategy": "testId", "testId": "note-input", "value": "Water the plants"}},
+      {"name": "click", "arguments": {"strategy": "role", "role": "button", "name": "Add note"}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "notes-count", "text": "1 note"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

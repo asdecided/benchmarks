@@ -1,0 +1,13 @@
+{
+  "capability": "LEDGER-0000000000R1",
+  "turns": [
+    [
+      {"name": "request", "arguments": {"method": "GET", "url": "{base_url}/health"}},
+      {"name": "expect_status", "arguments": {"status": 200}},
+      {"name": "expect_json", "arguments": {"path": "status", "equals": "ok"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

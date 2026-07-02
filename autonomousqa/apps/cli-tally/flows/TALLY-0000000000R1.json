@@ -1,0 +1,13 @@
+{
+  "capability": "TALLY-0000000000R1",
+  "turns": [
+    [
+      {"name": "run_command", "arguments": {"command": "python3 {app_dir}/tally.py --version"}},
+      {"name": "expect_output", "arguments": {"match": "exact", "stream": "stdout", "value": "tally 1.0.0\n"}},
+      {"name": "expect_exit", "arguments": {"code": 0}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

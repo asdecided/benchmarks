@@ -1,0 +1,18 @@
+{
+  "name": "ext-wordbadge",
+  "modality": "extension",
+  "summary": "An unpacked MV3 extension that badges pages with their main-content word count; fixed target pages.",
+  "frozen": "2026-07",
+  "serve": ["python3", "serve.py", "--port", "{port}"],
+  "ready_path": "/",
+  "start_path": "/article.html",
+  "corpus": "rac",
+  "extension_dir": "extension",
+  "capabilities": [
+    {"id": "BADGE-0000000000R1", "tier": "easy", "expected": "verifiable", "negative": false},
+    {"id": "BADGE-0000000000R2", "tier": "medium", "expected": "verifiable", "negative": false},
+    {"id": "BADGE-0000000000R3", "tier": "medium", "expected": "verifiable", "negative": true},
+    {"id": "BADGE-0000000000R4", "tier": "hard", "expected": "verifiable", "negative": false},
+    {"id": "BADGE-0000000000R5", "tier": "ambiguous", "expected": "unverifiable", "negative": false}
+  ]
+}

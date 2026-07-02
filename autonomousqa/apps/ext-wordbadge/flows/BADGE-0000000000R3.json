@@ -1,0 +1,12 @@
+{
+  "capability": "BADGE-0000000000R3",
+  "turns": [
+    [
+      {"name": "navigate", "arguments": {"url": "{base_url}/decoys.html"}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "wordbadge", "text": "12 words"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

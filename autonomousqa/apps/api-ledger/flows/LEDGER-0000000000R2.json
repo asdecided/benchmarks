@@ -1,0 +1,14 @@
+{
+  "capability": "LEDGER-0000000000R2",
+  "turns": [
+    [
+      {"name": "request", "arguments": {"method": "POST", "url": "{base_url}/entries", "headers": {"content-type": "application/json"}, "body": "{\"label\": \"coffee\", \"amount\": -3}"}},
+      {"name": "expect_status", "arguments": {"status": 201}},
+      {"name": "expect_json", "arguments": {"path": "label", "equals": "coffee"}},
+      {"name": "expect_json", "arguments": {"path": "amount", "equals": -3}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}

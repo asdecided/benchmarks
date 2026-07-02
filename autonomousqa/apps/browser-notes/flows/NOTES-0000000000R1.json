@@ -1,0 +1,13 @@
+{
+  "capability": "NOTES-0000000000R1",
+  "turns": [
+    [
+      {"name": "fill", "arguments": {"strategy": "testId", "testId": "note-input", "value": "Buy milk"}},
+      {"name": "click", "arguments": {"strategy": "role", "role": "button", "name": "Add note"}},
+      {"name": "expect_text", "arguments": {"strategy": "testId", "testId": "note-text", "text": "Buy milk"}}
+    ],
+    [
+      {"name": "finish", "arguments": {}}
+    ]
+  ]
+}
