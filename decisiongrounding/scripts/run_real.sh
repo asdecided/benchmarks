@@ -14,20 +14,46 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ARMS="${ARMS:-context_dump,naive_rag,no_grounding,rac}"
+# The held-constant answering backend. Default: the pinned Anthropic-native
+# model. For an OpenAI-compatible gateway (LiteLLM's common enterprise config),
+# set ANSWERING=litellm:<model-alias> with LITELLM_BASE_URL + LITELLM_API_KEY
+# (probe first: python -m scripts.litellm_probe --mode openai). Synchronous
+# only — the Batch API is not part of that surface.
+ANSWERING="${ANSWERING:-claude}"
 SCENARIOS="${SCENARIOS:-scenarios_real}"
 SEED="${SEED:-0}"
 CROSSOVER="${CROSSOVER:-0}"
 NS="${NS:-10,50}"
 POOL="${POOL:-scenarios_real/peps_pool}"
 
-# 1. Credentials. Anthropic is required; without it nothing real can run.
-if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
-  echo "ANTHROPIC_API_KEY is not set. Add it to the environment, then re-run." >&2
-  exit 1
-fi
+# 1. Credentials. The claude backend needs an Anthropic key; the litellm
+#    backend needs the gateway's base URL + virtual key instead.
+case "$ANSWERING" in
+  litellm:*)
+    if [ -z "${LITELLM_BASE_URL:-}${OPENAI_BASE_URL:-}" ] || [ -z "${LITELLM_API_KEY:-}${OPENAI_API_KEY:-}" ]; then
+      echo "ANSWERING=$ANSWERING needs LITELLM_BASE_URL and LITELLM_API_KEY set." >&2
+      exit 1
+    fi
+    if [ "${BATCH:-0}" = "1" ]; then
+      echo "BATCH=1 is not available through an OpenAI-compatible gateway;" >&2
+      echo "unset BATCH (synchronous run) or use a direct-Anthropic key." >&2
+      exit 1
+    fi
+    ;;
+  *)
+    if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+      echo "ANTHROPIC_API_KEY is not set. Add it to the environment, then re-run." >&2
+      exit 1
+    fi
+    ;;
+esac
 
-# 2. Dependencies. The real answering model needs `anthropic`; install if absent.
-python3 -c "import anthropic" 2>/dev/null || pip install -q "anthropic>=0.109"
+# 2. Dependencies. The Anthropic-native backend needs `anthropic`; the litellm
+#    backend is stdlib-only.
+case "$ANSWERING" in
+  litellm:*) : ;;
+  *) python3 -c "import anthropic" 2>/dev/null || pip install -q "anthropic>=0.109" ;;
+esac
 
 # 3. Embedder for the naive_rag arm: prefer hosted Voyage (the strong, publishable
 #    baseline); else a local sentence-transformers model; else the offline hash
@@ -83,7 +109,7 @@ HEADLINE_CMD="compare"
 [ "${BATCH:-0}" = "1" ] && HEADLINE_CMD="batch"
 python3 -m runner.cli "$HEADLINE_CMD" \
   --arms "$ARMS" --scenarios "$SCENARIOS" \
-  --answering claude --embedder "$EMBEDDER" --seed "$SEED"
+  --answering "$ANSWERING" --embedder "$EMBEDDER" --seed "$SEED"
 
 # 7. Optional adherence-vs-N crossover over a real distractor pool.
 #    BATCH=1 routes the sweep's answering calls through the Batch API (~50% of
@@ -101,7 +127,7 @@ if [ "$CROSSOVER" = "1" ]; then
   python3 -m runner.cli demo \
     --scenarios "$SCENARIOS" --arms "$ARMS" \
     --distractors real --pool "$POOL" --ns "$NS" $CROSS_BATCH $CROSS_SEEDS \
-    --answering claude --embedder "$EMBEDDER" --seed "$SEED"
+    --answering "$ANSWERING" --embedder "$EMBEDDER" --seed "$SEED"
 fi
 
 echo

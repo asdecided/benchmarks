@@ -583,7 +583,10 @@ def main(argv: list[str] | None = None) -> int:
         sp.add_argument("--out", default=str(_DEFAULT_RESULTS))
         sp.add_argument("--seed", type=int, default=0)
         sp.add_argument(
-            "--answering", default="offline-stub", choices=["offline-stub", "claude"]
+            "--answering",
+            default="offline-stub",
+            help="offline-stub | claude | litellm:<model-alias> "
+            "(OpenAI-compatible gateway; needs LITELLM_BASE_URL + LITELLM_API_KEY)",
         )
         sp.add_argument(
             "--embedder",
