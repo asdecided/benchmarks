@@ -12,10 +12,14 @@ from conftest import BENCHMARKS, REPO_ROOT
 _ENGINE_IMPORT = re.compile(r"^\s*(?:import\s+rac\b|from\s+rac\b)", re.MULTILINE)
 
 
+# Non-gated evidence-run subdirs are inside the engine boundary too.
+EVIDENCE_DIRS = ("gitchameleon",)
+
+
 def _suite_python_files():
     yield from (REPO_ROOT / "harness").rglob("*.py")
     yield from (REPO_ROOT / "tests").rglob("*.py")
-    for bench in BENCHMARKS:
+    for bench in BENCHMARKS + EVIDENCE_DIRS:
         yield from (REPO_ROOT / bench).rglob("*.py")
 
 
