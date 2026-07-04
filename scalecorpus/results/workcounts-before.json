@@ -1,0 +1,100 @@
+{
+  "metadata": {
+    "corpus": "/home/user/corpora/c1k",
+    "label": "legacy"
+  },
+  "runs": [
+    {
+      "argv": [
+        "validate",
+        "/home/user/corpora/c1k"
+      ],
+      "exit": 0,
+      "stdout_bytes": 102,
+      "counts": {
+        "classify": 3000,
+        "find_markdown_files": 1,
+        "parse_file": 1000,
+        "walk_corpus": 1001
+      }
+    },
+    {
+      "argv": [
+        "index",
+        "/home/user/corpora/c1k",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_bytes": 281605,
+      "counts": {
+        "classify": 1000,
+        "find_markdown_files": 1,
+        "parse_file": 1000,
+        "walk_corpus": 1001
+      }
+    },
+    {
+      "argv": [
+        "find",
+        "zanzibar",
+        "/home/user/corpora/c1k",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_bytes": 1299,
+      "counts": {
+        "classify": 1000,
+        "find_markdown_files": 1,
+        "parse_file": 1000,
+        "walk_corpus": 1001
+      }
+    },
+    {
+      "argv": [
+        "find",
+        "pipeline",
+        "/home/user/corpora/c1k",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_bytes": 506602,
+      "counts": {
+        "classify": 1000,
+        "find_markdown_files": 1,
+        "parse_file": 1000,
+        "walk_corpus": 1001
+      }
+    },
+    {
+      "argv": [
+        "resolve",
+        "RAC-SC0000000500",
+        "/home/user/corpora/c1k",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_bytes": 209,
+      "counts": {
+        "classify": 1000,
+        "find_markdown_files": 1,
+        "parse_file": 1000,
+        "walk_corpus": 1001
+      }
+    },
+    {
+      "argv": [
+        "relationships",
+        "/home/user/corpora/c1k",
+        "--validate"
+      ],
+      "exit": 0,
+      "stdout_bytes": 74,
+      "counts": {
+        "classify": 1000,
+        "find_markdown_files": 1,
+        "parse_file": 1000,
+        "walk_corpus": 1001
+      }
+    }
+  ]
+}

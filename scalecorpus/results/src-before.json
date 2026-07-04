@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "src": "/home/user/rac-core/src/rac",
+    "label": "legacy"
+  },
+  "loc": {
+    "files": 107,
+    "total_lines": 27309,
+    "code_lines": 21599,
+    "comment_lines": 1501,
+    "blank_lines": 4209
+  },
+  "docstrings": {
+    "modules": 107,
+    "modules_doc": 107,
+    "classes": 233,
+    "classes_doc": 231,
+    "functions": 1138,
+    "functions_doc": 577,
+    "functions_fully_annotated": 1119
+  },
+  "radon": {
+    "cc_blocks": 1332,
+    "cc_total": 4415,
+    "cc_mean": 3.31,
+    "cc_max": 42,
+    "cc_blocks_over_10": 54,
+    "mi_files": 107,
+    "mi_mean": 69.9,
+    "mi_min": 0.0,
+    "mi_files_under_65": 42
+  },
+  "duplication": {
+    "duplicate_blocks": 0,
+    "duplicate_line_span": 0,
+    "min_similarity_lines": 8
+  }
+}
