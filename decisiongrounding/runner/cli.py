@@ -269,12 +269,28 @@ def _write_report(
                 n_context_exceeded=cwe_counts.get(arm, 0),
             ).as_dict(),
         )
+
+    from scoring.stats import paired_significance, records_from_runs
+
+    # Pre-registered paired analysis (spec/analysis-plan-amendment-1.md):
+    # adherence is the co-primary outcome; the other rates are supporting.
+    # Report-only — never a gate (ADR-066 / ADR-097). Cells that errored or
+    # exceeded the context window never produced a Score, so they carry no
+    # outcome boolean and records_from_runs naturally excludes them — the
+    # paired analysis, like adherence_rate, is over completed cells only.
+    stats = {
+        outcome: paired_significance(
+            records_from_runs(results, outcome=outcome), outcome=outcome
+        )
+        for outcome in ("adherent", "stale_decision_followed", "false_permit")
+    }
     report = {
         "harness_version": HARNESS_VERSION,
         "generated": datetime.now(timezone.utc).isoformat(),
         "label": label,
         "backend_versions": _backend_versions(),
         "metrics_by_arm": metrics,
+        "stats": stats,
         "runs": results,
         "errors": errors or [],
     }
