@@ -52,17 +52,42 @@ def test_real_scenarios_present():
 @pytest.mark.parametrize("scenario", _SCENARIOS, ids=_IDS)
 def test_gold_label_is_consistent(scenario):
     gold = scenario.gold_label
+    assert gold.verdict in ("permitted", "prohibited")
+    # Pre-registration discipline: the rationale states it was authored blind.
+    assert "blind" in gold.rationale.lower()
+    if scenario.scenario_type == "negative_control":
+        # No decision governs; the gold label must say so, not name one.
+        assert gold.governing_decision is None
+        assert gold.verdict == "permitted"
+        assert not gold.prohibited_actions
+        return
     # Discriminating scenarios name a governing decision that is in the corpus.
     assert gold.governing_decision is not None
     corpus_ids = {a.id for a in scenario.corpus}
     assert gold.governing_decision in corpus_ids
-    assert gold.verdict in ("permitted", "prohibited")
-    # Pre-registration discipline: the rationale states it was authored blind.
-    assert "blind" in gold.rationale.lower()
 
 
-@pytest.mark.parametrize("scenario", _SCENARIOS, ids=_IDS)
+_DISCRIMINATING = [s for s in _SCENARIOS if s.scenario_type != "negative_control"]
+_CONTROLS = [s for s in _SCENARIOS if s.scenario_type == "negative_control"]
+
+
+@pytest.mark.parametrize(
+    "scenario", _DISCRIMINATING, ids=[s.scenario_id for s in _DISCRIMINATING]
+)
 def test_grounded_beats_ungrounded(scenario):
     # context_dump (sees everything) adheres; no_grounding (sees nothing) cannot.
     assert _answer("context_dump", scenario).adherent, "context_dump should adhere"
     assert not _answer("no_grounding", scenario).adherent, "no_grounding should fail"
+
+
+@pytest.mark.parametrize(
+    "scenario", _CONTROLS, ids=[s.scenario_id for s in _CONTROLS]
+)
+def test_negative_control_label_is_genuinely_permissive(scenario):
+    # The gold label must permit proceeding: an arm that sees nothing (and so
+    # cannot invent a constraint from the corpus) scores adherent. Whether a
+    # *grounded* arm over-applies the adjacent document is the measurement the
+    # control exists to take — deliberately not asserted for any arm here.
+    result = _answer("no_grounding", scenario)
+    assert result.adherent, "an ungrounded proceed must satisfy a negative control"
+    assert not result.false_prohibit
