@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "corpus": "c1m",
+    "size": 1000000,
+    "seed": 7,
+    "rac_version": "rac 0.1.dev50",
+    "label": "",
+    "cpu_count": 4,
+    "timestamp": "2026-07-05T16:35:44Z"
+  },
+  "metrics": {
+    "warm_retrieval": {
+      "cache": true,
+      "crashed": true,
+      "error": "ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)"
+    }
+  }
+}

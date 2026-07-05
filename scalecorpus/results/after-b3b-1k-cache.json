@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "corpus": "c1k",
+    "size": 1000,
+    "seed": 7,
+    "rac_version": "rac 0.1.dev50+g44d48d40a",
+    "label": "",
+    "cpu_count": 4,
+    "timestamp": "2026-07-05T15:58:31Z"
+  },
+  "metrics": {
+    "warm_retrieval": {
+      "cache": true,
+      "calls": 60,
+      "dnf": 0,
+      "n": 60,
+      "p50_ms": 189.48,
+      "p95_ms": 248.08,
+      "p99_ms": 295.89,
+      "mean_ms": 112.38,
+      "max_ms": 295.89,
+      "per_tool": {
+        "get_artifact": {
+          "n": 15,
+          "p50_ms": 10.79,
+          "p95_ms": 12.41,
+          "p99_ms": 12.41,
+          "mean_ms": 10.94,
+          "max_ms": 12.41
+        },
+        "get_related": {
+          "n": 15,
+          "p50_ms": 6.97,
+          "p95_ms": 7.76,
+          "p99_ms": 7.76,
+          "mean_ms": 7.13,
+          "max_ms": 7.76
+        },
+        "search_artifacts": {
+          "n": 30,
+          "p50_ms": 222.11,
+          "p95_ms": 248.59,
+          "p99_ms": 295.89,
+          "mean_ms": 215.73,
+          "max_ms": 295.89
+        }
+      },
+      "server_rss_mb": 89.9,
+      "server_peak_rss_mb": 89.9
+    }
+  }
+}

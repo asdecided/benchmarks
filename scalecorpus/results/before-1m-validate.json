@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "corpus": "c1m",
+    "size": 1000000,
+    "seed": 7,
+    "rac_version": "rac 0.1.dev50",
+    "label": "",
+    "cpu_count": 4,
+    "timestamp": "2026-07-05T15:59:21Z"
+  },
+  "metrics": {
+    "full_validate": {
+      "wall_s": 1163.84,
+      "exit": 0,
+      "peak_rss_mb": 6319.1
+    }
+  }
+}
