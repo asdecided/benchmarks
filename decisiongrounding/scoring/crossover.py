@@ -28,6 +28,7 @@ from providers.base import SCAFFOLD, ContextWindowExceededError, CorpusArtifact,
 from scenarios.loader import Scenario
 from scoring.metrics import summarize
 from scoring.scorer import score
+from scoring.stats import stats_by_n
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 _STOP = {"the", "a", "an", "to", "of", "and", "or", "for", "in", "on", "with", "is", "are"}
@@ -167,7 +168,7 @@ def _point(n, adhered, total, retrieved_flags, token_estimates, usages, cwe_coun
 
 
 def _envelope(discriminating, use_real, pool, seed, ns, model_version, embedder_spec,
-              pool_dir, scenarios_dir, arms, points, per_scenario, errors):
+              pool_dir, scenarios_dir, arms, points, per_scenario, errors, cells):
     """The dataset dict both builders return."""
     return {
         "metric": "decision_adherence_rate",
@@ -190,6 +191,11 @@ def _envelope(discriminating, use_real, pool, seed, ns, model_version, embedder_
         "arms": {arm: points[arm] for arm in arms},
         "per_scenario": per_scenario,
         "errors": errors,
+        # Raw per-cell booleans — the statistical record the pre-registered
+        # paired analysis (spec/analysis-plan-amendment-1.md) runs on. The
+        # aggregated fractions above are for display; these are for inference.
+        "cells": cells,
+        "stats": stats_by_n(cells) if cells else None,
     }
 
 
@@ -242,6 +248,7 @@ def build_dataset(
         arm: {s.scenario_id: [] for s in discriminating} for arm in arms
     }
     errors: list[dict] = []
+    cell_records: list[dict] = []
     total_cells = len(ns) * len(arms) * len(discriminating)
     idx = 0
     for n in ns:
@@ -293,6 +300,15 @@ def build_dataset(
                     {"N": n, "adherent": adherent, "stale_decision_followed": stale,
                      "governing_decision_retrieved": gov_retrieved}
                 )
+                # A context-window-exceeded cell was never answered — it has no
+                # real adherent value (forced False above only for the summary
+                # counters), so it is excluded from the paired-statistics record
+                # entirely rather than biasing a McNemar/effect-size comparison
+                # with a fabricated non-adherent outcome (mirrors `adhered`'s own
+                # exclusion just above, and `_point`'s adherence_rate handling).
+                if cell_kind != "context_window_exceeded":
+                    cell_records.append({"seed": seed, "N": n, "arm": arm,
+                                         "scenario_id": sc.scenario_id, "adherent": adherent})
                 if progress is not None:
                     progress({"record": "cell", "idx": idx, "total": total_cells, "N": n,
                               "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
@@ -303,7 +319,8 @@ def build_dataset(
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
                                       token_estimates, usages, cwe_count=cwe_count))
     return _envelope(discriminating, use_real, pool, seed, ns, answering_model.version,
-                     embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors)
+                     embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors,
+                     cell_records)
 
 
 def build_dataset_batched(
@@ -382,6 +399,7 @@ def build_dataset_batched(
         arm: {s.scenario_id: [] for s in discriminating} for arm in arms
     }
     errors: list[dict] = []
+    cell_records: list[dict] = []
     total_cells = len(cells)
     it = iter(cells)
     idx = 0
@@ -429,6 +447,11 @@ def build_dataset_batched(
                     {"N": n, "adherent": adherent, "stale_decision_followed": stale,
                      "governing_decision_retrieved": gov_retrieved}
                 )
+                # Same exclusion as build_dataset: a cell that never got
+                # answered is not a paired-statistics observation.
+                if not is_cwe:
+                    cell_records.append({"seed": seed, "N": n, "arm": arm,
+                                         "scenario_id": sc.scenario_id, "adherent": adherent})
                 if progress is not None:
                     progress({"record": "cell", "idx": idx, "total": total_cells, "N": n,
                               "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
@@ -439,7 +462,8 @@ def build_dataset_batched(
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
                                       token_estimates, usages, cwe_count=cwe_count))
     return _envelope(discriminating, use_real, pool, seed, ns, model.version,
-                     embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors)
+                     embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors,
+                     cell_records)
 
 
 # --- multi-seed aggregation -------------------------------------------------
@@ -626,6 +650,11 @@ def _aggregate_seeds(per_seed, arms, ns, pair) -> dict:
     base["seeds"] = [s for s, _ in per_seed]
     base["n_seeds"] = len(per_seed)
     base["seed"] = per_seed[0][0]
+    # Concatenate the seed-tagged per-cell booleans; the paired unit for the
+    # cross-seed statistics is scenario x seed (common random numbers).
+    cells = [c for _, ds in per_seed for c in (ds.get("cells") or [])]
+    base["cells"] = cells
+    base["stats"] = stats_by_n(cells) if cells else None
     paired = _paired(per_seed, ns, pair)
     if paired:
         base["paired"] = paired
@@ -686,6 +715,17 @@ def merge_seed_datasets(existing: dict, new_per_seed, arms, ns, pair) -> dict:
     base["errors"] = list(existing.get("errors", [])) + [e for _, ds in add for e in ds["errors"]]
     base["seeds"] = all_seeds
     base["n_seeds"] = len(all_seeds)
+    # Per-cell records: only a dataset that carries them can extend them. A
+    # legacy dataset (fractions only) cannot reconstruct booleans, so the
+    # merged stats are honestly absent rather than approximated.
+    old_cells = existing.get("cells")
+    if old_cells is not None:
+        cells = list(old_cells) + [c for _, ds in add for c in (ds.get("cells") or [])]
+        base["cells"] = cells
+        base["stats"] = stats_by_n(cells) if cells else None
+    else:
+        base["cells"] = None
+        base["stats"] = None
     return base
 
 
