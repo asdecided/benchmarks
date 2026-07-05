@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rac-benchmarks-scale"
+version = "0.1.0"
+description = "Scale evidence member for RAC: a deterministic corpus generator and a latency/memory harness that measures the rac engine across a corpus-size curve. Drives rac only as an external CLI/MCP server on PATH (DG-ADR-0001); never a merge gate (ADR-066/ADR-097)."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.11"
+# Stdlib-only: no engine imports (rac is an external CLI on PATH), no
+# embeddings, no network, no third-party runtime dependency.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+py-modules = ["_common", "generate_corpus", "measure", "gate"]
