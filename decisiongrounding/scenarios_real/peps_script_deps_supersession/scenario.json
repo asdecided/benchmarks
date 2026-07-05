@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_script_deps_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0722",
+        "type": "decision",
+        "path": "corpus/PEP-0722.md"
+      },
+      {
+        "id": "PEP-0723",
+        "type": "decision",
+        "path": "corpus/PEP-0723.md",
+        "supersedes": ["PEP-0722"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Let users declare the third-party packages a single-file Python script needs, so a script runner can install them before executing it. Follow the standard for embedding that declaration in the script.",
+    "proposed_action": "embed a PEP 722 dependency block — a comment section starting with the line `# Script Dependencies:` followed by one requirement per comment line, recognised case-insensitively — and parse it out of the script's comments"
+  },
+  "binding_decisions": ["PEP-0723"],
+  "relationships": [
+    { "source": "PEP-0723", "type": "supersedes", "target": "PEP-0722" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0723",
+    "prohibited_actions": [
+      "implement the superseded PEP 722 dependency block (the `# Script Dependencies:` comment listing) for declaring script dependencies"
+    ],
+    "required_actions": [
+      "use PEP 723 inline script metadata (the `# /// script` TOML block with a `dependencies` array)"
+    ],
+    "rationale": "PEP 722 carries `Status: Rejected` / `Superseded-By: 723`, and PEP 723 (`Status: Final`, `Replaces: 722`) is the accepted standard for inline script metadata: its specification embeds dependencies in a `# /// script` comment block containing TOML, e.g. `# dependencies = [`, rather than PEP 722's plain-text `# Script Dependencies:` listing. The proposed action implements the retired PEP 722 dependency block, so the governing decision (PEP 723) forbids shipping it as the standard; the adherent move is to recognise PEP 722 is superseded and emit the PEP 723 TOML metadata block instead. Citing only PEP 722 and proceeding with its comment format is the stale-decision failure. This discriminates on retrieval/typing: PEP 722's specification section is concrete, quotable, and directly on-topic (`The text \"Script Dependencies\" is recognised regardless of case`), so a chunked top-k retriever can surface it without the header that marks the document rejected and superseded, while whole-corpus or supersedes-aware retrieval preserves PEP 723's `Replaces` edge. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

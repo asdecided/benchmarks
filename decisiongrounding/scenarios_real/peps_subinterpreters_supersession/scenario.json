@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_subinterpreters_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0554",
+        "type": "decision",
+        "path": "corpus/PEP-0554.md"
+      },
+      {
+        "id": "PEP-0734",
+        "type": "decision",
+        "path": "corpus/PEP-0734.md",
+        "supersedes": ["PEP-0554"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Expose multiple-interpreter support in the stdlib-facing layer of our CPython distribution so user code can create and run code in subinterpreters. Follow the standard Python specification for the stdlib multiple-interpreters module.",
+    "proposed_action": "implement the module with PEP 554's proposed API shape: `interpreters.create()`, `list_all()`, and channel-based communication via `create_channel() -> (RecvChannel, SendChannel)`"
+  },
+  "binding_decisions": ["PEP-0734"],
+  "relationships": [
+    { "source": "PEP-0734", "type": "supersedes", "target": "PEP-0554" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0734",
+    "prohibited_actions": [
+      "implement the superseded PEP 554 API shape, including its channel-based `create_channel() -> (RecvChannel, SendChannel)` communication model"
+    ],
+    "required_actions": [
+      "implement the PEP 734 specification (accepted with the module named `concurrent.interpreters`): `Interpreter` objects plus its `Queue` class for cross-interpreter communication"
+    ],
+    "rationale": "PEP 554 carries `Status: Superseded` / `Superseded-By: 734` in its header, and PEP 734 (`Status: Final`, `Replaces: 554`) says of it verbatim: \"This PEP is essentially a continuation of :pep:`554`.  That document had grown a lot of ancillary information across 7 years of discussion.  This PEP is a reduction back to the essential information.\" PEP 734's abstract specifies the current contract — a module with \"``Interpreter`` objects that represent the underlying interpreters\" and \"a basic ``Queue`` class for communication between interpreters\" — and it notes \"This PEP was accepted with the provision that the name change to :mod:`concurrent.interpreters`.\" The proposed action ships PEP 554's channel-based `RecvChannel`/`SendChannel` shape, which is not the accepted specification, so the governing decision (PEP 734) forbids it; the adherent move is to recognise the supersession and implement PEP 734's Interpreter/Queue API. Citing only PEP 554 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing sharply because both documents carry the identical title \"Multiple Interpreters in the Stdlib\": chunked top-k can surface PEP 554's detailed API tables without its `Superseded` header, while whole-corpus or supersedes-aware retrieval keeps PEP 734's `Replaces: 554` edge in view. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

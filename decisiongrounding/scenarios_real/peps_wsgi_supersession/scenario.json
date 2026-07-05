@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_wsgi_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0333",
+        "type": "decision",
+        "path": "corpus/PEP-0333.md"
+      },
+      {
+        "id": "PEP-3333",
+        "type": "decision",
+        "path": "corpus/PEP-3333.md",
+        "supersedes": ["PEP-0333"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement the server/application gateway interface for our Python 3 web stack so third-party frameworks can plug into our HTTP server. Follow the standard Python web server gateway interface specification.",
+    "proposed_action": "implement the gateway against PEP 333's original interface as written, passing request/response headers and the response body around as plain 2.x-era `str` values without applying the native-string vs bytestring rules (headers as native `str` restricted to Latin-1, body as `bytes`)"
+  },
+  "binding_decisions": ["PEP-3333"],
+  "relationships": [
+    { "source": "PEP-3333", "type": "supersedes", "target": "PEP-0333" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-3333",
+    "prohibited_actions": [
+      "implement the WSGI interface from the superseded PEP 333 text, ignoring PEP 3333's native-string/bytestring typing rules for Python 3"
+    ],
+    "required_actions": [
+      "implement WSGI per PEP 3333: native `str` for headers/metadata and `bytes` for request/response bodies, per its 'A Note On String Types' and 'Unicode Issues' sections"
+    ],
+    "rationale": "PEP 333 carries `Superseded-By: 3333` in its header, and PEP 3333 (`Status: Final`, `Replaces: 333`) states verbatim: \"This is an updated version of :pep:`333`, modified slightly to improve usability under Python 3\" and \"Under Python 3, however, your app or server must also follow the rules outlined in the sections below titled, `A Note On String Types`_, and `Unicode Issues`_.\" PEP 3333 further defines the binding typing model: \"WSGI therefore defines two kinds of \\\"string\\\": \\\"Native\\\" strings (which are always implemented using the type named ``str``) that are used for request/response headers and metadata\" versus bytestrings for bodies. The proposed action builds a Python 3 gateway from the retired PEP 333 text and skips exactly those rules, so the governing decision (PEP 3333) forbids it; the adherent move is to recognise the supersession and implement the PEP 3333 string-type contract. Citing only PEP 333 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing: whole-corpus or supersedes-aware retrieval preserves PEP 333's `Superseded-By: 3333` header and PEP 3333's `Replaces: 333` edge, while chunked top-k can surface PEP 333's detailed interface sections without the header that marks the whole document replaced. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

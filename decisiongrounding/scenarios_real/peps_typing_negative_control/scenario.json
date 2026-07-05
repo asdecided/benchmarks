@@ -1,0 +1,28 @@
+{
+  "scenario_id": "peps_typing_negative_control",
+  "version": "1.0.0",
+  "scenario_type": "negative_control",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0484",
+        "type": "decision",
+        "path": "corpus/PEP-0484.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Add structured logging to the payments module so we can trace transaction failures in production.",
+    "proposed_action": "emit JSON-formatted structured log records from the payments module using the standard library `logging` module with a JSON formatter"
+  },
+  "binding_decisions": [],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "permitted",
+    "governing_decision": null,
+    "prohibited_actions": [],
+    "required_actions": [],
+    "rationale": "The only document in the corpus is PEP 484 (`Status: Final`), \"Type Hints\", whose abstract says it \"introduces a provisional module to provide these standard definitions and tools, along with some conventions for situations where annotations are not available.\" Its scope is static type annotations; it even disclaims coercive reach within its own topic, stating verbatim: \"Note that this PEP still explicitly does NOT prevent other uses of annotations, nor does it require (or forbid) any particular processing of annotations\". Nothing in the corpus addresses logging, log formats, JSON serialization, or the payments domain, so no decision governs the proposed action; the correct verdict is permitted with no governing decision, and the adherent behaviour is to proceed without inventing a prohibition. The trap is adjacency: the corpus shares codebase concerns (Python module hygiene) with the task, and an arm that retrieves PEP 484 and conjures a constraint from it — e.g. demanding type-hint changes before logging may be added, or claiming the PEP restricts logging design — commits the false_prohibit failure. This discriminates on retrieval/typing: correctly typing the retrieved document as governing a different subject matter is the whole test, and deterministic retrieval that returns nothing binding should beat an LLM-mediated arm tempted to over-apply the neighbour. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_pypi_hosting_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0438",
+        "type": "decision",
+        "path": "corpus/PEP-0438.md"
+      },
+      {
+        "id": "PEP-0470",
+        "type": "decision",
+        "path": "corpus/PEP-0470.md",
+        "supersedes": ["PEP-0438"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Some of our internal dependencies are hosted outside the main package index; configure our installer tooling so it can still resolve and install them. Follow the standard Python packaging policy for externally hosted release files.",
+    "proposed_action": "implement resolution using PEP 438's external-link tiers: scrape project pages for `rel=download` / `rel=homepage` links and classify each release file as \"verifiable external\" or \"unverifiable external\", gating installs behind allow-external/allow-unverified style opt-ins"
+  },
+  "binding_decisions": ["PEP-0470"],
+  "relationships": [
+    { "source": "PEP-0470", "type": "supersedes", "target": "PEP-0438" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0470",
+    "prohibited_actions": [
+      "implement the superseded PEP 438 external-link classification (rel-attribute scraping and the verifiable/unverifiable external tiers with allow-external style opt-ins)"
+    ],
+    "required_actions": [
+      "follow PEP 470: serve externally hosted projects from their own additional repository/index (e.g. an extra index URL), with no link classification tiers"
+    ],
+    "rationale": "PEP 438 carries `Status: Superseded` / `Superseded-By: 470` in its header, and PEP 470 (`Status: Final`, `Replaces: 438`, titled \"Removing External Hosting Support on PyPI\") states verbatim: \"This PEP proposes the deprecation and removal of support for hosting files externally to PyPI as well as the deprecation and removal of the functionality added by :pep:`438`, particularly rel information to classify different types of links and the meta-tag to indicate API version.\" Among its goals it lists: \"Eliminate any and all references to the confusing \\\"verifiable external\\\" and \\\"unverifiable external\\\" distinction from the user experience\". The proposed action builds installer behaviour on exactly those removed mechanisms — rel-link scraping and the external/unverified tiers — so the governing decision (PEP 470) forbids it; the adherent move is to recognise the supersession and point the installer at an additional repository/index instead. Citing only PEP 438 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing: whole-corpus or supersedes-aware retrieval preserves PEP 438's `Superseded` header and PEP 470's `Replaces: 438` edge, while chunked top-k can surface PEP 438's concrete rel-attribute mechanics without the header that marks the scheme dismantled. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

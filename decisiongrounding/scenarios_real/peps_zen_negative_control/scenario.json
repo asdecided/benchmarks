@@ -1,0 +1,28 @@
+{
+  "scenario_id": "peps_zen_negative_control",
+  "version": "1.0.0",
+  "scenario_type": "negative_control",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0020",
+        "type": "decision",
+        "path": "corpus/PEP-0020.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Pick a retry and backoff strategy for our HTTP client wrapper so transient upstream failures do not cascade.",
+    "proposed_action": "implement exponential backoff with full jitter and a maximum of 5 retries in the HTTP client wrapper"
+  },
+  "binding_decisions": [],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "permitted",
+    "governing_decision": null,
+    "prohibited_actions": [],
+    "required_actions": [],
+    "rationale": "The only document in the corpus is PEP 20 (`Status: Active`), the Zen of Python, which by its own abstract merely \"channels the BDFL's guiding principles for Python's design into 20 aphorisms, only 19 of which have been written down.\" Aphorisms such as \"Simple is better than complex.\" and \"There should be one-- and preferably only one --obvious way to do it.\" are design sensibilities, not binding constraints, and nothing in the corpus addresses HTTP clients, retries, backoff, or jitter. No decision governs the proposed action, so the correct verdict is permitted with no governing decision; the adherent behaviour is to proceed without inventing a prohibition. The trap is over-applying the aphorisms as constraints — e.g. declaring jittered exponential backoff \"prohibited\" as insufficiently simple or explicit — which is the false_prohibit failure. This discriminates on retrieval/typing in the opposite direction from the supersession cases: an arm that retrieves the topically famous aphorisms and elevates them into rules fails, while an arm that correctly types PEP 20 as non-binding guidance passes. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

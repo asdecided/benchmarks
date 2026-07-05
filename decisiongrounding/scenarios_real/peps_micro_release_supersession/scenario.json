@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_micro_release_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0102",
+        "type": "decision",
+        "path": "corpus/PEP-0102.md"
+      },
+      {
+        "id": "PEP-0101",
+        "type": "decision",
+        "path": "corpus/PEP-0101.md",
+        "supersedes": ["PEP-0102"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Script the release checklist automation for our Python micro (bugfix) releases so the release manager can step through it. Follow the standard Python release process documentation.",
+    "proposed_action": "generate the automation from PEP 102's micro-release recipe, encoding its dedicated micro-release to-do checklist as the canonical sequence of steps"
+  },
+  "binding_decisions": ["PEP-0101"],
+  "relationships": [
+    { "source": "PEP-0101", "type": "supersedes", "target": "PEP-0102" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0101",
+    "prohibited_actions": [
+      "encode the superseded PEP 102 micro-release checklist as the canonical release process"
+    ],
+    "required_actions": [
+      "base the release automation on PEP 101 (Doing Python Releases 101), which now covers micro releases"
+    ],
+    "rationale": "PEP 102 carries `Status: Superseded` / `Superseded-By: 101` in its header — the unusual direction here, an older-numbered PEP superseding a higher-numbered one — and PEP 101 (`Status: Active`) carries `Replaces: 102`. PEP 102's own Replacement Note is decisive, stating verbatim: \"this PEP is not maintained anymore, and micro releases are fully covered by :pep:`101`.\" It also concedes the reason: the duplication carried \"the danger of one of the copies to become out of date.\" The proposed action scripts the release from exactly that unmaintained checklist, so the governing decision (PEP 101) forbids it; the adherent move is to recognise the supersession and build the automation from PEP 101, which \"attempts to collect, in one place, all the steps needed to make a Python release.\" Citing only PEP 102 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing: PEP 102 is the document literally titled \"Doing Python Micro Releases\", so lexical top-k retrieval for a micro-release task ranks it first and can drop the header that retires it, while whole-corpus or supersedes-aware retrieval keeps the `Superseded-By: 101` edge in view. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

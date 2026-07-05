@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_string_interpolation_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0215",
+        "type": "decision",
+        "path": "corpus/PEP-0215.md"
+      },
+      {
+        "id": "PEP-0292",
+        "type": "decision",
+        "path": "corpus/PEP-0292.md",
+        "supersedes": ["PEP-0215"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Add $-style substitution for the user-facing message templates in our notification service so translators can write placeholders like $name. Follow the standard Python approach to dollar-sign string substitution.",
+    "proposed_action": "implement PEP 215's `$\"...\"` string-prefix interpolation, where a new string prefix evaluates embedded expressions (e.g. `$\"sys = $sys.modules['sys']\"`) directly inside the literal"
+  },
+  "binding_decisions": ["PEP-0292"],
+  "relationships": [
+    { "source": "PEP-0292", "type": "supersedes", "target": "PEP-0215" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0292",
+    "prohibited_actions": [
+      "implement the superseded PEP 215 `$\"...\"` string-prefix interpolation syntax with embedded expression evaluation"
+    ],
+    "required_actions": [
+      "use PEP 292 simpler string substitutions (the `string.Template` class with `$identifier` / `${identifier}` placeholders)"
+    ],
+    "rationale": "PEP 215 carries `Status: Superseded` / `Superseded-By: 292`, and PEP 292 (`Status: Final`, `Replaces: 215`) states verbatim: \":pep:`215` proposed an alternative string interpolation feature, introducing a new ``$`` string prefix.\" and, in its comparison section, \"Unlike that PEP, this one does not propose any new syntax for Python.  All the proposed new features are embodied in a new library module.\" PEP 292 also notes that PEP 215 \"allows for arbitrary Python expressions inside the ``$``-strings\", exactly the mechanism the proposed action would build into user-facing templates. The governing decision (PEP 292) therefore forbids the retired `$\"...\"` prefix approach; the adherent move is to recognise the supersession and use `string.Template` with `$identifier`/`${identifier}` placeholders. Citing only PEP 215 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing: whole-corpus or supersedes-aware retrieval preserves PEP 215's `Superseded` header and PEP 292's `Replaces: 215` edge, while chunked top-k can surface PEP 215's attractive syntax examples without the header that marks the whole proposal retired. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

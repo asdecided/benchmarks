@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_finally_exit_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0601",
+        "type": "decision",
+        "path": "corpus/PEP-0601.md"
+      },
+      {
+        "id": "PEP-0765",
+        "type": "decision",
+        "path": "corpus/PEP-0765.md",
+        "supersedes": ["PEP-0601"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Refactor the cleanup handling in our request pipeline. Decide whether the retry helper may keep using a return statement inside its try/finally block to short-circuit on cleanup, following current Python language policy.",
+    "proposed_action": "keep the return statement inside the finally block that breaks out of the finally, on the basis that the language explicitly declined to forbid return/break/continue in finally blocks"
+  },
+  "binding_decisions": ["PEP-0765"],
+  "relationships": [
+    { "source": "PEP-0765", "type": "supersedes", "target": "PEP-0601" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0765",
+    "prohibited_actions": [
+      "rely on the rejected PEP 601 outcome to keep return/break/continue statements that break out of a finally block"
+    ],
+    "required_actions": [
+      "restructure the cleanup so no return/break/continue breaks out of the finally block, per PEP 765"
+    ],
+    "rationale": "PEP 601 carries `Status: Rejected` with its own Rejection Note (\"This PEP was rejected by the Steering Council by a vote of 4/4.\") — the older recorded outcome an agent could lean on to conclude the pattern stays permitted. But PEP 765 (`Status: Final`, `Replaces: 601`) reverses it: \"This PEP proposes to withdraw support for ``return``, ``break`` and ``continue`` statements that break out of a ``finally`` block.\" and records that \"This was proposed in the past by :pep:`601`. The current PEP is based on empirical evidence regarding the cost/benefit of this change, which did not exist at the time that :pep:`601` was rejected.\"; the compiler now escalates the pattern (\"Python's compiler may emit a ``SyntaxWarning`` or ``SyntaxError``\"). The proposed action keeps the escaping return on the strength of the superseded PEP 601 outcome, so the governing decision (PEP 765) forbids it; the adherent move is to recognise PEP 601 is superseded and restructure the cleanup. Citing only PEP 601 and proceeding is the stale-decision failure — and a particularly sharp one, because the superseded document argues *for* permission. This discriminates on retrieval/typing: PEP 601's rejection note is topical, quotable text a chunked top-k retriever can surface without PEP 765's `Replaces` edge, while whole-corpus or supersedes-aware retrieval carries the reversal. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

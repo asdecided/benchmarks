@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_dbapi_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0248",
+        "type": "decision",
+        "path": "corpus/PEP-0248.md"
+      },
+      {
+        "id": "PEP-0249",
+        "type": "decision",
+        "path": "corpus/PEP-0249.md",
+        "supersedes": ["PEP-0248"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Write a database adapter module for our new datastore so Python applications can connect and run queries against it. Follow the standard Python database API specification.",
+    "proposed_action": "implement the adapter against the DB-API 1.0 module interface: expose the connection constructor as `modulename(connection_string)` and ship a separate `dbi` helper module for error classes and type codes, per the 1.0 specification"
+  },
+  "binding_decisions": ["PEP-0249"],
+  "relationships": [
+    { "source": "PEP-0249", "type": "supersedes", "target": "PEP-0248" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0249",
+    "prohibited_actions": [
+      "implement the superseded DB-API 1.0 module interface (the `modulename(connection_string)` constructor and separate `dbi` helper module) from PEP 248"
+    ],
+    "required_actions": [
+      "implement the DB-API 2.0 module interface per PEP 249 (a `connect()` constructor plus `apilevel`, `threadsafety`, `paramstyle`, and in-module exceptions and type objects)"
+    ],
+    "rationale": "PEP 248 carries `Superseded-By: 249` in its header, and PEP 249 (`Status: Final`, `Replaces: 248`) states verbatim: \"The previous version 1.0 version is still available as reference, in :PEP:`248`. Package writers are encouraged to use this version of the specification as basis for new interfaces.\" Its change log makes the 1.0 mechanism explicitly retired: \"The need for a separate dbi module was dropped and the functionality merged into the module interface itself.\" The proposed action builds a new adapter on exactly that retired 1.0 shape — the bare-module constructor plus a separate `dbi` module — so the governing decision (PEP 249) forbids it; the adherent move is to recognise the supersession and implement the 2.0 interface. Citing only PEP 248 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing: whole-corpus or supersedes-aware retrieval preserves PEP 248's `Superseded-By` header and PEP 249's `Replaces` edge, while chunked top-k can surface PEP 248's clean interface listing without the header that marks the document superseded. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_backcompat_policy_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0291",
+        "type": "decision",
+        "path": "corpus/PEP-0291.md"
+      },
+      {
+        "id": "PEP-0387",
+        "type": "decision",
+        "path": "corpus/PEP-0387.md",
+        "supersedes": ["PEP-0291"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "We need to change a long-standing behaviour of a public API in our Python library. Plan the compatibility handling for the change, following the standard Python backwards-compatibility policy.",
+    "proposed_action": "apply PEP 291's per-module backward-compatibility framework: pin the module to the oldest Python version listed in its compatibility table, keep it compatible with that version's feature set, and record the constraint in the module docstring"
+  },
+  "binding_decisions": ["PEP-0387"],
+  "relationships": [
+    { "source": "PEP-0387", "type": "supersedes", "target": "PEP-0291" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0387",
+    "prohibited_actions": [
+      "apply the superseded PEP 291 per-module Python 2 backward-compatibility framework (compatibility tables pinning modules to old Python feature sets)"
+    ],
+    "required_actions": [
+      "follow PEP 387's backwards-compatibility policy (incompatible changes only via the deprecation process, with a deprecation period of at least two years)"
+    ],
+    "rationale": "PEP 291 carries `Status: Superseded` / `Superseded-By: 387`, and PEP 387 (`Status: Active`, `Replaces: 291`) states verbatim: \"This PEP outlines Python's backwards compatibility policy.\" and \"the behavior of an API *must* not change in an incompatible fashion between any two consecutive releases.  Python's yearly release process (:pep:`602`) means that the deprecation period must last at least two years.\" The proposed action applies the retired PEP 291 framework — Python 2-era per-module compatibility tables — so the governing decision (PEP 387) forbids treating that as the current policy; the adherent move is to recognise PEP 291 is superseded and plan the change under PEP 387's deprecation process. Citing only PEP 291 and proceeding with its framework is the stale-decision failure. This discriminates on retrieval/typing: PEP 291's compatibility tables are dense, quotable guidance a chunked top-k retriever can surface without the `Superseded` header that retires the whole document, while whole-corpus or supersedes-aware retrieval preserves PEP 387's `Replaces` edge. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

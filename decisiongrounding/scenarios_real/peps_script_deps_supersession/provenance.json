@@ -1,0 +1,39 @@
+{
+  "source_repo": "python/peps",
+  "pinned_commit": "f866e77409305866038471574f075cd8d83eee9e",
+  "peps": [
+    {
+      "id": "PEP-0722",
+      "number": 722,
+      "file": "corpus/PEP-0722.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0722.rst",
+      "source_sha256": "efbeb4b4bfaa6732220433c25f4bdd9c5ac729b3aca73798b9f131862cf3ac78",
+      "status": "Rejected",
+      "title": "Dependency specification for single-file scripts",
+      "replaces": [],
+      "superseded_by": [
+        "PEP-0723"
+      ]
+    },
+    {
+      "id": "PEP-0723",
+      "number": 723,
+      "file": "corpus/PEP-0723.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0723.rst",
+      "source_sha256": "17de64ccc1b03003dcd031abb0372c6c946ae9bbdc802ae3af7ede4437507e59",
+      "status": "Final",
+      "title": "Inline script metadata",
+      "replaces": [
+        "PEP-0722"
+      ],
+      "superseded_by": []
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "PEP-0723",
+      "type": "supersedes",
+      "target": "PEP-0722"
+    }
+  ]
+}
