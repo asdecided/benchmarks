@@ -6,7 +6,7 @@
     "rac_version": "rac 0.1.dev50+g44d48d40a",
     "label": "",
     "cpu_count": 4,
-    "timestamp": "2026-07-05T17:16:17Z"
+    "timestamp": "2026-07-05T17:44:44Z"
   },
   "metrics": {
     "warm_retrieval": {
@@ -14,47 +14,47 @@
       "calls": 80,
       "dnf": 0,
       "n": 80,
-      "p50_ms": 1895.87,
-      "p95_ms": 6190.4,
-      "p99_ms": 6344.04,
-      "mean_ms": 2046.96,
-      "max_ms": 6344.04,
+      "p50_ms": 22.88,
+      "p95_ms": 4310.2,
+      "p99_ms": 4574.53,
+      "mean_ms": 1014.45,
+      "max_ms": 4574.53,
       "per_tool": {
         "get_artifact": {
           "n": 20,
-          "p50_ms": 43.0,
-          "p95_ms": 498.09,
-          "p99_ms": 498.09,
-          "mean_ms": 109.86,
-          "max_ms": 498.09
+          "p50_ms": 16.03,
+          "p95_ms": 18.35,
+          "p99_ms": 18.35,
+          "mean_ms": 16.17,
+          "max_ms": 18.35
         },
         "get_related": {
           "n": 20,
-          "p50_ms": 41.66,
-          "p95_ms": 526.28,
-          "p99_ms": 526.28,
-          "mean_ms": 109.54,
-          "max_ms": 526.28
+          "p50_ms": 21.27,
+          "p95_ms": 92.23,
+          "p99_ms": 92.23,
+          "mean_ms": 24.69,
+          "max_ms": 92.23
         },
         "search_artifacts[mid]": {
           "n": 20,
-          "p50_ms": 5983.03,
-          "p95_ms": 6344.04,
-          "p99_ms": 6344.04,
-          "mean_ms": 5832.05,
-          "max_ms": 6344.04
+          "p50_ms": 4060.77,
+          "p95_ms": 4574.53,
+          "p99_ms": 4574.53,
+          "mean_ms": 3992.63,
+          "max_ms": 4574.53
         },
         "search_artifacts[rare]": {
           "n": 20,
-          "p50_ms": 1991.47,
-          "p95_ms": 2482.06,
-          "p99_ms": 2482.06,
-          "mean_ms": 2136.39,
-          "max_ms": 2482.06
+          "p50_ms": 24.37,
+          "p95_ms": 28.85,
+          "p99_ms": 28.85,
+          "mean_ms": 24.3,
+          "max_ms": 28.85
         }
       },
-      "server_rss_mb": 338.4,
-      "server_peak_rss_mb": 349.4
+      "server_rss_mb": 165.9,
+      "server_peak_rss_mb": 320.0
     }
   }
 }

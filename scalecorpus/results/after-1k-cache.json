@@ -6,7 +6,7 @@
     "rac_version": "rac 0.1.dev50+g44d48d40a",
     "label": "",
     "cpu_count": 4,
-    "timestamp": "2026-07-05T17:42:54Z"
+    "timestamp": "2026-07-05T17:44:05Z"
   },
   "metrics": {
     "warm_retrieval": {
@@ -14,47 +14,47 @@
       "calls": 80,
       "dnf": 0,
       "n": 80,
-      "p50_ms": 8.32,
-      "p95_ms": 73.58,
-      "p99_ms": 89.45,
-      "mean_ms": 22.18,
-      "max_ms": 89.45,
+      "p50_ms": 10.19,
+      "p95_ms": 83.09,
+      "p99_ms": 124.72,
+      "mean_ms": 25.5,
+      "max_ms": 124.72,
       "per_tool": {
         "get_artifact": {
           "n": 20,
-          "p50_ms": 8.29,
-          "p95_ms": 9.08,
-          "p99_ms": 9.08,
-          "mean_ms": 8.38,
-          "max_ms": 9.08
+          "p50_ms": 10.44,
+          "p95_ms": 11.29,
+          "p99_ms": 11.29,
+          "mean_ms": 10.22,
+          "max_ms": 11.29
         },
         "get_related": {
           "n": 20,
-          "p50_ms": 5.63,
-          "p95_ms": 8.39,
-          "p99_ms": 8.39,
-          "mean_ms": 5.78,
-          "max_ms": 8.39
+          "p50_ms": 6.92,
+          "p95_ms": 8.57,
+          "p99_ms": 8.57,
+          "mean_ms": 6.92,
+          "max_ms": 8.57
         },
         "search_artifacts[mid]": {
           "n": 20,
-          "p50_ms": 65.1,
-          "p95_ms": 89.45,
-          "p99_ms": 89.45,
-          "mean_ms": 66.08,
-          "max_ms": 89.45
+          "p50_ms": 69.87,
+          "p95_ms": 124.72,
+          "p99_ms": 124.72,
+          "mean_ms": 74.56,
+          "max_ms": 124.72
         },
         "search_artifacts[rare]": {
           "n": 20,
-          "p50_ms": 8.32,
-          "p95_ms": 10.1,
-          "p99_ms": 10.1,
-          "mean_ms": 8.47,
-          "max_ms": 10.1
+          "p50_ms": 10.19,
+          "p95_ms": 12.6,
+          "p99_ms": 12.6,
+          "mean_ms": 10.29,
+          "max_ms": 12.6
         }
       },
-      "server_rss_mb": 77.5,
-      "server_peak_rss_mb": 87.2
+      "server_rss_mb": 77.6,
+      "server_peak_rss_mb": 87.1
     }
   }
 }

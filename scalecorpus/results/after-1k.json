@@ -6,7 +6,7 @@
     "rac_version": "rac 0.1.dev50+g44d48d40a",
     "label": "",
     "cpu_count": 4,
-    "timestamp": "2026-07-05T17:43:00Z"
+    "timestamp": "2026-07-05T17:44:12Z"
   },
   "metrics": {
     "warm_retrieval": {
@@ -14,43 +14,43 @@
       "calls": 12,
       "dnf": 0,
       "n": 12,
-      "p50_ms": 1161.43,
-      "p95_ms": 1249.66,
-      "p99_ms": 1249.66,
-      "mean_ms": 1109.08,
-      "max_ms": 1249.66,
+      "p50_ms": 1166.07,
+      "p95_ms": 1261.68,
+      "p99_ms": 1261.68,
+      "mean_ms": 1128.22,
+      "max_ms": 1261.68,
       "per_tool": {
         "get_artifact": {
           "n": 3,
-          "p50_ms": 1025.45,
-          "p95_ms": 1039.61,
-          "p99_ms": 1039.61,
-          "mean_ms": 1013.9,
-          "max_ms": 1039.61
+          "p50_ms": 1027.27,
+          "p95_ms": 1082.2,
+          "p99_ms": 1082.2,
+          "mean_ms": 1039.72,
+          "max_ms": 1082.2
         },
         "get_related": {
           "n": 3,
-          "p50_ms": 993.73,
-          "p95_ms": 1044.45,
-          "p99_ms": 1044.45,
-          "mean_ms": 1006.57,
-          "max_ms": 1044.45
+          "p50_ms": 1009.31,
+          "p95_ms": 1037.28,
+          "p99_ms": 1037.28,
+          "mean_ms": 1018.56,
+          "max_ms": 1037.28
         },
         "search_artifacts[mid]": {
           "n": 3,
-          "p50_ms": 1223.24,
-          "p95_ms": 1249.66,
-          "p99_ms": 1249.66,
-          "mean_ms": 1225.74,
-          "max_ms": 1249.66
+          "p50_ms": 1235.55,
+          "p95_ms": 1254.31,
+          "p99_ms": 1254.31,
+          "mean_ms": 1229.86,
+          "max_ms": 1254.31
         },
         "search_artifacts[rare]": {
           "n": 3,
-          "p50_ms": 1200.31,
-          "p95_ms": 1208.59,
-          "p99_ms": 1208.59,
-          "mean_ms": 1190.11,
-          "max_ms": 1208.59
+          "p50_ms": 1246.51,
+          "p95_ms": 1261.68,
+          "p99_ms": 1261.68,
+          "mean_ms": 1224.75,
+          "max_ms": 1261.68
         }
       },
       "server_rss_mb": 77.9,
@@ -60,19 +60,19 @@
       "resolve": {
         "runs": [
           {
-            "wall_s": 1.2,
-            "exit": 0,
-            "peak_rss_mb": 28.3
-          },
-          {
-            "wall_s": 1.19,
+            "wall_s": 1.22,
             "exit": 0,
             "peak_rss_mb": 28.4
           },
           {
-            "wall_s": 1.2,
+            "wall_s": 1.19,
             "exit": 0,
             "peak_rss_mb": 28.5
+          },
+          {
+            "wall_s": 1.2,
+            "exit": 0,
+            "peak_rss_mb": 28.4
           }
         ],
         "median_wall_s": 1.2,
@@ -81,14 +81,14 @@
       "find_rare": {
         "runs": [
           {
-            "wall_s": 1.39,
+            "wall_s": 1.38,
             "exit": 0,
-            "peak_rss_mb": 41.6
+            "peak_rss_mb": 41.7
           },
           {
-            "wall_s": 1.42,
+            "wall_s": 1.38,
             "exit": 0,
-            "peak_rss_mb": 41.6
+            "peak_rss_mb": 41.8
           },
           {
             "wall_s": 1.42,
@@ -96,17 +96,17 @@
             "peak_rss_mb": 41.6
           }
         ],
-        "median_wall_s": 1.42,
+        "median_wall_s": 1.38,
         "dnf": 0
       }
     },
     "full_validate": {
-      "wall_s": 1.21,
+      "wall_s": 1.2,
       "exit": 0,
       "peak_rss_mb": 33.7
     },
     "incremental_validate": {
-      "wall_s": 1.21,
+      "wall_s": 1.22,
       "exit": 0,
       "peak_rss_mb": 33.7
     }
