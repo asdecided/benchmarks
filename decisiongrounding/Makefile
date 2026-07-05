@@ -37,11 +37,57 @@ pool:
 rfc-pool:
 	python -m ingest.rfcs pool build
 
-# Verify the real scenario corpora reproduce from their pins (one per domain).
+# Verify every real scenario corpus reproduces from its pin (network).
 corpora-verify:
-	python -m ingest.peps verify  --out scenarios_real/peps_version_supersession
-	python -m ingest.rfcs verify  --out scenarios_real/rfc_tls_version_supersession
-	python -m ingest.w3c  verify  --out scenarios_real/w3c_xml_edition_supersession
+	python -m ingest.peps verify --out scenarios_real/pep8_none_identity_prohibition
+	python -m ingest.peps verify --out scenarios_real/peps_annotations_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_dbapi_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_dict_version_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_enum_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_exception_context_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_fd_inheritance_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_backcompat_policy_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_local_version_prohibition
+	python -m ingest.peps verify --out scenarios_real/peps_manylinux_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_metadata_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_finally_exit_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_micro_release_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_pattern_matching_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_pypi_hosting_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_script_deps_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_string_interpolation_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_style_negative_control
+	python -m ingest.peps verify --out scenarios_real/peps_subinterpreters_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_timezone_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_typing_negative_control
+	python -m ingest.peps verify --out scenarios_real/peps_version_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_wsgi_supersession
+	python -m ingest.peps verify --out scenarios_real/peps_zen_negative_control
+	python -m ingest.rfcs verify --out scenarios_real/rfc_content_length_te_prohibition
+	python -m ingest.rfcs verify --out scenarios_real/rfc_cookies_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_date_header_prohibition
+	python -m ingest.rfcs verify --out scenarios_real/rfc_email_format_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_http_messaging_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_http_semantics_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_imap_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_json_bom_prohibition
+	python -m ingest.rfcs verify --out scenarios_real/rfc_json_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_keywords_negative_control
+	python -m ingest.rfcs verify --out scenarios_real/rfc_language_tags_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_md5_prohibition
+	python -m ingest.rfcs verify --out scenarios_real/rfc_ntp_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_rc4_prohibition
+	python -m ingest.rfcs verify --out scenarios_real/rfc_smtp_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_sslv3_prohibition
+	python -m ingest.rfcs verify --out scenarios_real/rfc_timestamps_negative_control
+	python -m ingest.rfcs verify --out scenarios_real/rfc_tls_identity_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_tls_legacy_prohibition
+	python -m ingest.rfcs verify --out scenarios_real/rfc_tls_version_supersession
+	python -m ingest.rfcs verify --out scenarios_real/rfc_uri_supersession
+	python -m ingest.w3c  verify --out scenarios_real/w3c_xhtml_edition_supersession
+	python -m ingest.w3c  verify --out scenarios_real/w3c_xml_edition_supersession
+	python -m ingest.w3c  verify --out scenarios_real/w3c_xml_names_edition_supersession
+	python -m ingest.w3c  verify --out scenarios_real/w3c_xpath_edition_supersession
 
 # Real adherence-vs-N curve over the real PEP pool. Offline by default
 # (illustration); add ANSWERING=claude EMBEDDER=voyage:voyage-4-large + keys for
