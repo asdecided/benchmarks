@@ -21,8 +21,22 @@ tags: [publication, paper, arxiv]
 - **Figure pipeline** — `scripts/paper_figs.py` + `make paper-figs` emit
   paper-ready figures (PDF via the `[chart]` extra, else SVG) from the crossover
   dataset. *(done)*
-- **Funded data run** — produce the real adherence-vs-N crossover + report (the
-  data-provision PR); fill the results/figures/verdict into the paper.
+- **Paired significance** — exact McNemar, Wilson intervals, and paired effect
+  sizes per arm pair (`scoring/stats.py`), per-cell retention in crossover
+  datasets, report/paper rendering, and the frozen analysis-plan amendment
+  (`spec/analysis-plan-amendment-1.md`). *(done)*
+- **Executable co-primary** — the GitChameleon evidence run
+  (`../gitchameleon/`) publishes as the decision-conditioned resolution
+  outcome: solutions/score/stats pipeline seams, resolution-record schema,
+  offline fixtures (GCB-ADR-0002, `co-primary-outcomes`). *(built; awaits the
+  funded run)*
+- **Study-grade corpus** — `scenarios_real` scaled from the 19-scenario pilot
+  to the 49-scenario roster (PEP/RFC/W3C supersessions and prohibitions plus 5
+  negative controls), pinned by the roster test and the amendment. *(done)*
+- **Funded data run** — produce the real adherence-vs-N crossover + report AND
+  the GitChameleon resolution records (the data-provision PR;
+  `docs/AGENTIC_BENCHMARK_RUN_HANDOFF.md` covers both); fill the
+  results/figures/verdicts into the paper.
 - **Multi-model generalization** — re-run the full benchmark with several
   held-constant answering models (e.g. Claude, OpenAI, Gemini, an open model)
   behind the *same* arms, to show the grounding effect is not model-specific (not
@@ -36,19 +50,21 @@ tags: [publication, paper, arxiv]
   the equivalence pattern further per-provider adapters follow.
 - **Multi-seed variance** — sweep seeds and aggregate per (arm, N) into
   **mean ± confidence interval** so the crossover / falsifier verdict is
-  statistical, not a single point. Needs harness support: a `--seeds` sweep,
-  cross-seed aggregation, and CI bands on the figures (the part most worth
-  building, since the answering model is stochastic even at pinned temperature).
+  statistical, not a single point: the `--seeds` sweep, cross-seed
+  aggregation, and CI bands on the dashboard/report figures. *(done; wiring
+  bands into the paper figures is a noted follow-up in the handoff)*
 - **Submit** — resolve arXiv endorsement / affiliated submitter, pick a template,
   and post the preprint.
 
 ## Success Measures
 
-- `make paper-figs` produces the figures and `make paper` builds `main.pdf`.
+- `make paper-figs` produces the figures (including `stats_table.tex`) and
+  `make paper` builds `main.pdf`.
 - Every `\todo` in `paper/` is resolved (results, counts, model/seed strings,
   citation verification, archived dataset DOI/release).
 - The reported numbers match the committed `results/published/` dataset and report.
-- Curves report **mean ± CI across seeds**, and the grounding ordering holds across
+- Curves report **mean ± CI across seeds**; both co-primary outcomes carry the
+  pre-registered paired tests; and the grounding ordering holds across
   **≥2 answering models** (the generalization claim).
 
 ## Assumptions
@@ -73,7 +89,10 @@ tags: [publication, paper, arxiv]
 - DG-KVPW3XG9TDZY
 - DG-KVMRSS0C7T4M
 - DG-KWGPQK7M7RVQ
+- DG-KWRRC0E9R6Y4
+- DG-KWRRC1NTBW25
 
 ## Related Tickets
 
 - itsthelore/rac-benchmarks#11
+- itsthelore/rac-core#295
