@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scoring.charts import grouped_bar_chart, line_chart  # noqa: E402
 from scoring.cost import cost_by_arm, dollars  # noqa: E402
+from scoring.stats import paired_significance  # noqa: E402
 
 _ARM_DESC = {
     "context_dump": "pastes the entire corpus into the prompt (the no-retrieval ceiling)",
@@ -197,6 +198,83 @@ def _cost_curve_table(curve: dict, model: str) -> str:
     return "\n".join(rows)
 
 
+def _fmt_p(p: float) -> str:
+    return "<0.0001" if p < 1e-4 else f"{p:.4f}"
+
+
+def _stats_pair_rows(pairs_block: dict) -> list[str]:
+    """Markdown rows for one paired-significance block (per arm pair)."""
+    rows = [
+        "| pair | n | b | c | McNemar p | risk diff [95% CI] | odds ratio [95% CI] |",
+        "|---|--:|--:|--:|--:|--:|--:|",
+    ]
+    for name, st in pairs_block.items():
+        mc, rd, orr = st["mcnemar"], st["risk_difference"], st["odds_ratio"]
+        p_txt = _fmt_p(mc["p_value"]) + (" (degenerate)" if mc.get("degenerate") else "")
+        or_txt = ("n/a (zero discordant cell)" if orr.get("degenerate")
+                  else f"{orr['or']:.2f} [{orr['ci'][0]:.2f}, {orr['ci'][1]:.2f}]")
+        rows.append(
+            f"| `{name}` | {st['n_pairs']} | {mc['b']} | {mc['c']} | {p_txt} | "
+            f"{rd['diff']:+.2f} [{rd['ci'][0]:+.2f}, {rd['ci'][1]:+.2f}] | {or_txt} |"
+        )
+    return rows
+
+
+def _stats_section(run: dict, dataset: dict | None) -> list[str]:
+    """The pre-registered paired-significance section. Empty when neither the
+    run nor the dataset carries a stats block (older artifacts)."""
+    parts: list[str] = []
+    run_stats = (run.get("stats") or {}).get("adherent") or {}
+    if run_stats.get("pairs"):
+        parts += ["**Base-N adherence (paired by scenario):**", "",
+                  *_stats_pair_rows(run_stats["pairs"]), ""]
+    ds_stats = (dataset or {}).get("stats") or {}
+    for n in sorted(ds_stats, key=lambda k: int(k)):
+        block = ds_stats[n]
+        if block.get("pairs"):
+            parts += [f"**Crossover N={n} adherence (paired by scenario × seed):**", "",
+                      *_stats_pair_rows(block["pairs"]), ""]
+    if not parts:
+        return []
+    intro = [
+        "## Paired significance (pre-registered)",
+        "",
+        "Exact McNemar tests on the discordant pairs, with paired risk differences "
+        "and conditional odds ratios, per `spec/analysis-plan-amendment-1.md`. "
+        "`b` = first arm adherent where the second is not; `c` = the reverse. "
+        "Analysis only — these statistics never gate anything (ADR-066/ADR-097).",
+        "",
+    ]
+    return intro + parts
+
+
+def _resolution_section(records: list[dict]) -> list[str]:
+    """The decision-conditioned resolution co-primary outcome, from gitchameleon
+    resolution records (per-(example, arm) upstream-test pass booleans)."""
+    by_arm: dict[str, list[dict]] = {}
+    for r in records:
+        by_arm.setdefault(r["arm"], []).append(r)
+    parts = [
+        "## Decision-conditioned resolution (co-primary outcome)",
+        "",
+        "Executable task success on version-conditioned problems, scored by the "
+        "upstream test harness (`../gitchameleon/`; we add no scorer). Pass rate "
+        "per arm, with the pre-registered paired analysis:",
+        "",
+        "| arm | n | pass rate |",
+        "|---|--:|--:|",
+    ]
+    for arm in sorted(by_arm):
+        rs = by_arm[arm]
+        rate = sum(1 for r in rs if r["passed"]) / len(rs)
+        parts.append(f"| `{arm}` | {len(rs)} | {rate:.2f} |")
+    st = paired_significance(records, outcome="passed")
+    if st["pairs"]:
+        parts += ["", *_stats_pair_rows(st["pairs"])]
+    parts.append("")
+    return parts
+
+
 def _head_to_head(dataset: dict, run: dict) -> str:
     """rac vs naive_rag only — the comparison that actually adjudicates the thesis."""
     arms = dataset["arms"]
@@ -256,6 +334,9 @@ def _head_to_head(dataset: dict, run: dict) -> str:
                 "the thesis is not supported by this run."
             )
         lines.append(verdict)
+        mc_line = _mcnemar_line(dataset, top)
+        if mc_line:
+            lines += ["", mc_line]
         return "\n".join(lines)
     # auto verdict — strictly from the numbers (single seed)
     if rac_da is not None and rag_da is not None:
@@ -280,7 +361,29 @@ def _head_to_head(dataset: dict, run: dict) -> str:
                 "supported by this run; reported as-is."
             )
         lines.append(verdict)
+        mc_line = _mcnemar_line(dataset, top)
+        if mc_line:
+            lines += ["", mc_line]
     return "\n".join(lines)
+
+
+def _mcnemar_line(dataset: dict, top) -> str | None:
+    """The pre-registered confirmatory sentence for rac vs naive_rag at the top
+    N, when the dataset carries per-cell stats."""
+    ds_stats = dataset.get("stats") or {}
+    block = ds_stats.get(top) or ds_stats.get(str(top)) or {}
+    st = (block.get("pairs") or {}).get("rac_vs_naive_rag")
+    if not st:
+        return None
+    mc = st["mcnemar"]
+    if mc.get("degenerate"):
+        return (f"Pre-registered confirmatory test at N={top}: exact McNemar is "
+                "degenerate (the arms never disagreed on any paired cell) — "
+                "no discordant evidence either way.")
+    return (f"Pre-registered confirmatory test at N={top}: exact McNemar "
+            f"b={mc['b']}, c={mc['c']}, p={_fmt_p(mc['p_value'])}; paired risk "
+            f"difference {st['risk_difference']['diff']:+.2f} "
+            f"[{st['risk_difference']['ci'][0]:+.2f}, {st['risk_difference']['ci'][1]:+.2f}].")
 
 
 _PROSE_PIPELINE = """\
@@ -405,7 +508,8 @@ def _img(charts: dict, key: str, alt: str) -> list[str]:
     return [f"![{alt}]({charts[key]})", ""] if key in charts else []
 
 
-def build_report(run: dict, dataset: dict | None, cost_curve: dict | None, charts: dict | None = None) -> str:
+def build_report(run: dict, dataset: dict | None, cost_curve: dict | None, charts: dict | None = None,
+                 resolution: list[dict] | None = None) -> str:
     charts = charts or {}
     model = run["runs"][0]["answering_model"]["version"] if run["runs"] else "?"
     emb = next((r["embedder"]["name"] for r in run["runs"] if r.get("embedder")), "n/a")
@@ -464,6 +568,13 @@ def build_report(run: dict, dataset: dict | None, cost_curve: dict | None, chart
                   *_img(charts, "head_to_head", "rac vs naive RAG adherence vs N"),
                   _head_to_head(dataset, run), ""]
 
+    # 4b. Pre-registered paired significance (when the artifacts carry stats).
+    parts += _stats_section(run, dataset)
+
+    # 4c. The executable co-primary outcome (when resolution records are given).
+    if resolution:
+        parts += _resolution_section(resolution)
+
     # 5-9 prose
     parts += [
         "## Arms", "",
@@ -501,11 +612,18 @@ def main(argv=None) -> int:
     ap.add_argument("--cost-curve", action="store_true", help="compute offline token-cost-vs-N")
     ap.add_argument("--pool", help="distractor pool dir (for --cost-curve when the dataset lacks provenance)")
     ap.add_argument("--scenarios", help="scenarios dir (for --cost-curve when the dataset lacks provenance)")
+    ap.add_argument("--resolution",
+                    help="gitchameleon resolution_records.jsonl — renders the "
+                         "decision-conditioned resolution co-primary section")
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
 
     run = json.loads(Path(args.run).read_text())
     dataset = json.loads(Path(args.crossover).read_text()) if args.crossover else None
+    resolution = None
+    if args.resolution:
+        resolution = [json.loads(line) for line in
+                      Path(args.resolution).read_text().splitlines() if line.strip()]
     curve = None
     if args.cost_curve and dataset:
         curve = _offline_cost_curve(dataset, args.pool, args.scenarios)
@@ -516,7 +634,7 @@ def main(argv=None) -> int:
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     charts = emit_charts(run, dataset, curve, out.parent)
-    md = build_report(run, dataset, curve, charts)
+    md = build_report(run, dataset, curve, charts, resolution)
     out.write_text(md, encoding="utf-8")
     print(f"wrote {out}  ({len(md):,} bytes)")
     for k, f in charts.items():
