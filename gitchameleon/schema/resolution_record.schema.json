@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decisiongrounding.dev/schema/resolution_record.schema.json",
+  "title": "ResolutionRecord",
+  "description": "One per-(example, arm) decision-conditioned resolution verdict, normalized from the upstream GitChameleon harness's eval_results CSV (GCB-ADR-0002). The upstream executable tests are the scorer; this record only carries their verdict plus provenance. Feeds the paired analysis with `passed` as the outcome.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["example_id", "arm", "passed"],
+  "properties": {
+    "example_id": {
+      "type": "string",
+      "description": "The upstream dataset example id (the paired-join key)."
+    },
+    "arm": {
+      "type": "string",
+      "enum": ["no_grounding", "rac", "naive_rag"]
+    },
+    "passed": {
+      "type": "boolean",
+      "description": "The upstream hidden-test verdict for the solution."
+    },
+    "compiled": {
+      "type": ["boolean", "null"],
+      "description": "The upstream compile verdict, when the CSV carries it."
+    },
+    "answering_model": {
+      "type": ["string", "null"],
+      "description": "The pinned answering model that produced the solutions."
+    },
+    "seed": { "type": ["integer", "null"] },
+    "dataset_revision": {
+      "type": ["string", "null"],
+      "description": "The pinned upstream dataset revision (dataset/provenance.json)."
+    },
+    "upstream_harness": {
+      "type": ["string", "null"],
+      "description": "The GitChameleonBenchmark commit/tag that scored the solutions."
+    }
+  }
+}

@@ -1,0 +1,4 @@
+example_id,code_id,output,passed,compiled,output_manual,passed_manual
+0,solution_code,,True,True,,True
+121,solution_code,AssertionError,False,True,,False
+263,solution_code,AttributeError: module has no attribute,False,True,,False
