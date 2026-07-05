@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decisiongrounding.dev/schema/paired_stats.schema.json",
+  "title": "PairedSignificance",
+  "description": "The pre-registered paired-analysis block (spec/analysis-plan-amendment-1.md) attached to run reports and crossover datasets. Analysis only: never consumed by any gate (ADR-066 / ADR-097).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outcome", "pairs"],
+  "properties": {
+    "outcome": {
+      "type": "string",
+      "description": "The boolean outcome the pairs are joined on (e.g. adherent, passed)."
+    },
+    "pairs": {
+      "type": "object",
+      "description": "One entry per arm pair, keyed '<a>_vs_<b>'.",
+      "additionalProperties": { "$ref": "#/$defs/pairStats" }
+    }
+  },
+  "$defs": {
+    "pairStats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arms", "n_pairs", "table", "rate_a", "rate_a_ci", "rate_b",
+        "rate_b_ci", "mcnemar", "risk_difference", "odds_ratio"
+      ],
+      "properties": {
+        "arms": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "n_pairs": { "type": "integer", "minimum": 0 },
+        "table": {
+          "type": "array",
+          "description": "Paired 2x2 counts [a, b, c, d]: both succeed / first only / second only / both fail.",
+          "items": { "type": "integer", "minimum": 0 },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "rate_a": { "type": "number" },
+        "rate_a_ci": { "$ref": "#/$defs/interval" },
+        "rate_b": { "type": "number" },
+        "rate_b_ci": { "$ref": "#/$defs/interval" },
+        "mcnemar": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["b", "c", "n_discordant", "statistic", "p_value", "method"],
+          "properties": {
+            "b": { "type": "integer", "minimum": 0 },
+            "c": { "type": "integer", "minimum": 0 },
+            "n_discordant": { "type": "integer", "minimum": 0 },
+            "statistic": { "type": "integer", "minimum": 0 },
+            "p_value": { "type": "number", "minimum": 0, "maximum": 1 },
+            "method": { "const": "mcnemar-exact-binomial" },
+            "degenerate": { "const": true }
+          }
+        },
+        "risk_difference": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["diff", "ci"],
+          "properties": {
+            "diff": { "type": "number" },
+            "ci": { "$ref": "#/$defs/interval" },
+            "degenerate": { "const": true }
+          }
+        },
+        "odds_ratio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["or", "ci"],
+          "properties": {
+            "or": { "type": ["number", "null"] },
+            "ci": {
+              "oneOf": [ { "$ref": "#/$defs/interval" }, { "type": "null" } ]
+            },
+            "degenerate": { "const": true }
+          }
+        }
+      }
+    },
+    "interval": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  }
+}
