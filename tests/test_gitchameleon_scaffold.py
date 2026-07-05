@@ -131,7 +131,105 @@ def test_naive_rag_refuses_until_embedder_is_pinned(tmp_path):
     assert "embedder" in completed.stderr
 
 
-def test_non_dry_run_refuses_in_the_scaffold(tmp_path):
+def test_bare_invocation_points_at_the_modes(tmp_path):
     completed = _run("run.py", "--dataset", str(FIXTURES))
     assert completed.returncode == 2
-    assert "funded-run seam" in completed.stderr
+    assert "solutions / score / stats" in completed.stderr
+
+
+# --- the resolution co-primary pipeline (GCB-ADR-0002), offline ---------------
+
+EVAL_RAC = GCB / "fixtures" / "sample_eval_results_rac.csv"
+EVAL_NONE = GCB / "fixtures" / "sample_eval_results_no_grounding.csv"
+
+
+def _bundles_file(tmp_path) -> str:
+    corpus = _build(tmp_path)
+    out = tmp_path / "bundles.jsonl"
+    completed = _run(
+        "run.py", "--dry-run", "--dataset", str(FIXTURES), "--corpus", str(corpus),
+        "--out", str(out),
+    )
+    assert completed.returncode == 0, completed.stderr
+    return str(out)
+
+
+def _solutions(tmp_path, out_name: str) -> dict[str, list[dict]]:
+    completed = _run(
+        "run.py", "solutions", "--bundles", _bundles_file(tmp_path),
+        "--answering", "offline-stub", "--out", str(tmp_path / out_name),
+    )
+    assert completed.returncode == 0, completed.stderr
+    out: dict[str, list[dict]] = {}
+    for path in sorted((tmp_path / out_name).glob("solutions-*.jsonl")):
+        arm = path.stem.removeprefix("solutions-")
+        out[arm] = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    return out
+
+
+def test_offline_stub_solutions_are_deterministic_and_upstream_shaped(tmp_path):
+    first = _solutions(tmp_path, "sol-a")
+    second = _solutions(tmp_path, "sol-b")
+    assert first == second
+    assert set(first) == {"no_grounding", "rac"}
+    for arm, records in first.items():
+        assert len(records) == len(_fixture_rows())
+        for rec in records:
+            # the upstream Solution contract: example_id + answer (extras ignored)
+            assert isinstance(rec["example_id"], str) and rec["answer"]
+            assert rec["arm"] == arm
+            assert "offline-stub" in rec["answer"]  # plumbing output is labelled
+
+
+def test_solutions_refuse_real_backends_without_keys(tmp_path, monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)  # the subprocess inherits os.environ
+    completed = _run(
+        "run.py", "solutions", "--bundles", _bundles_file(tmp_path),
+        "--answering", "claude", "--out", str(tmp_path / "sol"),
+    )
+    assert completed.returncode != 0
+    assert "ANTHROPIC_API_KEY" in (completed.stderr + completed.stdout)
+
+
+def _score_records(tmp_path) -> list[dict]:
+    records = tmp_path / "resolution_records.jsonl"
+    completed = _run(
+        "run.py", "score", "--arm", "rac", "--eval-results", str(EVAL_RAC),
+        "--out", str(records), "--answering-model", "claude-opus-4-8",
+        "--upstream-harness", "test-commit",
+    )
+    assert completed.returncode == 0, completed.stderr
+    completed = _run(
+        "run.py", "score", "--arm", "no_grounding", "--eval-results", str(EVAL_NONE),
+        "--out", str(records), "--append",
+    )
+    assert completed.returncode == 0, completed.stderr
+    return [json.loads(line) for line in records.read_text(encoding="utf-8").splitlines()]
+
+
+def test_score_emits_schema_valid_paired_records(tmp_path):
+    records = _score_records(tmp_path)
+    assert len(records) == 6  # 3 examples x 2 arms
+    try:
+        import jsonschema  # type: ignore
+    except ImportError:
+        for rec in records:
+            assert {"example_id", "arm", "passed"} <= set(rec)
+        return
+    schema = json.loads((GCB / "schema" / "resolution_record.schema.json").read_text())
+    for rec in records:
+        jsonschema.validate(rec, schema)
+
+
+def test_stats_reproduces_the_hand_computed_mcnemar(tmp_path):
+    records = tmp_path / "resolution_records.jsonl"
+    _score_records(tmp_path)
+    completed = _run("run.py", "stats", "--records", str(records))
+    assert completed.returncode == 0, completed.stderr
+    stats = json.loads(completed.stdout)
+    pair = stats["pairs"]["rac_vs_no_grounding"]
+    # fixture design: rac passes 3/3, no_grounding 1/3 -> a=1, b=2, c=0, d=0
+    assert pair["table"] == [1, 2, 0, 0]
+    # exact two-sided binomial at min(2,0)=0 of 2 discordant: 2 * (1/4) = 0.5
+    assert pair["mcnemar"]["p_value"] == 0.5
+    assert pair["odds_ratio"]["degenerate"] is True
