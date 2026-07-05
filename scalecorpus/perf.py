@@ -72,10 +72,10 @@ def query_set(size: int, calls: int) -> list[tuple[str, dict]]:
             queries.append(("get_related", {"id": generate.artifact_id(idx)}))
         elif kind == 2:
             term = generate.MID[k % len(generate.MID)]
-            queries.append(("search_artifacts", {"query": term}))
+            queries.append(("search_artifacts[mid]", {"query": term}))
         else:
             term = generate.RARE[k % len(generate.RARE)]
-            queries.append(("search_artifacts", {"query": term}))
+            queries.append(("search_artifacts[rare]", {"query": term}))
     return queries
 
 
@@ -114,13 +114,14 @@ async def bench_warm(corpus: str, size: int, calls: int, cache: bool, timeout: f
             await asyncio.wait_for(session.initialize(), timeout=timeout)
             for tool, arg in queries[:warmups]:  # warm-up, excluded
                 try:
-                    await asyncio.wait_for(session.call_tool(tool, arg), timeout=timeout)
+                    await asyncio.wait_for(session.call_tool(tool.split("[", 1)[0], arg), timeout=timeout)
                 except asyncio.TimeoutError:
                     return {"dnf": True, "note": f"warm-up call exceeded {timeout}s", "cache": cache}
             for tool, arg in queries:
+                wire_tool = tool.split("[", 1)[0]
                 t0 = time.monotonic()
                 try:
-                    await asyncio.wait_for(session.call_tool(tool, arg), timeout=timeout)
+                    await asyncio.wait_for(session.call_tool(wire_tool, arg), timeout=timeout)
                 except asyncio.TimeoutError:
                     dnf += 1
                     continue
