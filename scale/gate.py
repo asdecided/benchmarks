@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 # The single-node scale budgets. Documented in scale/README.md; the gate is the
@@ -133,7 +132,7 @@ def _gate_one(result: dict, path: Path, report: Report) -> None:
 def _flatness(results: list[tuple[Path, dict]], report: Report) -> None:
     """Largest-vs-smallest ratios across the corpus-size curve."""
     ordered = sorted(results, key=lambda pr: pr[1].get("corpus", {}).get("count", 0))
-    (small_p, small), (large_p, large) = ordered[0], ordered[-1]
+    (_, small), (_, large) = ordered[0], ordered[-1]
     ratio = SCALE_TARGET["flatness_ratio"]
     report.section(
         f"[flatness] {small.get('corpus', {}).get('count')} -> "
@@ -146,11 +145,20 @@ def _flatness(results: list[tuple[Path, dict]], report: Report) -> None:
         r = big / base
         report.check(label, r <= ratio, f"{r:.2f}x (small={base:.2f}, large={big:.2f})")
 
+    def _gated(t: dict | None) -> dict | None:
+        # Same class preference as the absolute budgets: flatness must be
+        # measured on the series that is gated, or the curve claim would mix
+        # query classes across checks.
+        if not t:
+            return t
+        classes = t.get("classes", {})
+        return classes.get("selective") or classes.get("lookup") or t
+
     st, lt = _warm_tools(small), _warm_tools(large)
     for tool in WARM_TOOLS:
-        s, l = st.get(tool), lt.get(tool)
-        _ratio_check(f"warm.{tool}.p50", s and s.get("p50_ms"), l and l.get("p50_ms"))
-        _ratio_check(f"warm.{tool}.p99", s and s.get("p99_ms"), l and l.get("p99_ms"))
+        s, lg = _gated(st.get(tool)), _gated(lt.get(tool))
+        _ratio_check(f"warm.{tool}.p50", s and s.get("p50_ms"), lg and lg.get("p50_ms"))
+        _ratio_check(f"warm.{tool}.p99", s and s.get("p99_ms"), lg and lg.get("p99_ms"))
 
     sv = small.get("measurements", {}).get("incremental", {}).get("validate", {})
     lv = large.get("measurements", {}).get("incremental", {}).get("validate", {})
