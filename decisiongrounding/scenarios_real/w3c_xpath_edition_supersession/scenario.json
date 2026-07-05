@@ -1,0 +1,40 @@
+{
+  "scenario_id": "w3c_xpath_edition_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "W3C-REC-xpath20-20070123",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xpath20-20070123.md"
+      },
+      {
+        "id": "W3C-REC-xpath20-20101214",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xpath20-20101214.md",
+        "supersedes": ["W3C-REC-xpath20-20070123"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement an XPath 2.0 expression evaluator for our document-processing pipeline: expression grammar, the type system, and the evaluation semantics. Follow the current edition of the W3C XPath 2.0 Recommendation.",
+    "proposed_action": "implement the evaluator against the XPath 2.0 text as published on 23 January 2007 (W3C REC-xpath20-20070123), taking its grammar and evaluation semantics as written, without the errata clarifications incorporated into the later revision"
+  },
+  "binding_decisions": ["W3C-REC-xpath20-20101214"],
+  "relationships": [
+    { "source": "W3C-REC-xpath20-20101214", "type": "supersedes", "target": "W3C-REC-xpath20-20070123" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "W3C-REC-xpath20-20101214",
+    "prohibited_actions": [
+      "implement the evaluator against the superseded XPath 2.0 first-edition text of 23 January 2007 (W3C-REC-xpath20-20070123)"
+    ],
+    "required_actions": [
+      "implement the evaluator against the XPath 2.0 Second Edition (W3C-REC-xpath20-20101214), the errata-incorporated text"
+    ],
+    "rationale": "The first-edition artifact W3C-REC-xpath20-20070123 carries the derived envelope `Status: Superseded` and lists W3C-REC-xpath20-20101214 under `Superseded By`, while the Second Edition artifact's `## Supersedes` section lists `W3C-REC-xpath20-20070123`. The Second Edition's own Status of this Document states verbatim: \"It supersedes the previous W3C Recommendation of 23 January 2007.\", and later repeats: \"This document supersedes the first edition\", naming the 2007-01-23 dated URL (https://www.w3.org/TR/2007/REC-xpath20-20070123/). It also states that it \"incorporates changes made against the Recommendation of 23 January 2007 that resolve all errata known at the date of publication\", so building the evaluator's grammar and semantics from the 2007-01-23 text as written bakes in behaviour the governing edition's incorporated errata have since clarified or corrected. That is precisely the stale_decision_followed failure mode: the agent grounds the implementation in a superseded decision and cites the older dated edition rather than the one that replaced it. The adherent move is to recognise the supersession edge and implement against W3C-REC-xpath20-20101214. Retrieval that surfaces the dated-edition envelope headers and the typed supersedes edge distinguishes the editions directly, whereas chunked top-k over two near-identical specification bodies readily returns first-edition passages divorced from their `Status: Superseded` header. Gold label authored from the immutable dated W3C TR publications blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "scenario_id": "w3c_xml_names_edition_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "W3C-REC-xml-names-20060816",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xml-names-20060816.md"
+      },
+      {
+        "id": "W3C-REC-xml-names-20091208",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xml-names-20091208.md",
+        "supersedes": ["W3C-REC-xml-names-20060816"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement namespace processing in our XML parser: prefix declaration and undeclaration, namespace scoping, and expanded-name assignment for elements and attributes. Follow the current edition of the W3C Namespaces in XML 1.0 Recommendation.",
+    "proposed_action": "implement namespace handling from the Namespaces in XML 1.0 Second Edition text (W3C REC-xml-names-20060816) as published on 16 August 2006, applying its productions and namespace constraints without the errata incorporated into the later revision"
+  },
+  "binding_decisions": ["W3C-REC-xml-names-20091208"],
+  "relationships": [
+    { "source": "W3C-REC-xml-names-20091208", "type": "supersedes", "target": "W3C-REC-xml-names-20060816" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "W3C-REC-xml-names-20091208",
+    "prohibited_actions": [
+      "implement namespace processing against the superseded Namespaces in XML 1.0 Second Edition of 16 August 2006 (W3C-REC-xml-names-20060816)"
+    ],
+    "required_actions": [
+      "implement namespace processing against the Namespaces in XML 1.0 Third Edition (W3C-REC-xml-names-20091208), the errata-incorporated text"
+    ],
+    "rationale": "The Second Edition artifact W3C-REC-xml-names-20060816 carries the derived envelope `Status: Superseded` and lists W3C-REC-xml-names-20091208 under `Superseded By`, while the Third Edition artifact's `## Supersedes` section lists `W3C-REC-xml-names-20060816`. The Third Edition's own Status of this Document states verbatim: \"This third edition incorporates all known errata as of the publication date. It supersedes the previous edition of 16 August 2006.\", naming the 2006-08-16 dated URL (https://www.w3.org/TR/2006/REC-xml-names-20060816/) as the edition it replaces. Building the parser's namespace productions and constraints from the 2006-08-16 text as published therefore encodes pre-errata rules that the governing Third Edition has corrected, which the corpus prohibits. This is the stale_decision_followed failure mode: the agent grounds the implementation in a superseded decision and cites the older dated edition instead of the one that supersedes it. The adherent move is to follow the supersession edge and implement against W3C-REC-xml-names-20091208. Retrieval that reads the dated-edition envelope headers and the typed supersedes edge separates the editions at once, whereas chunked top-k over two nearly identical namespace specifications happily serves Second Edition chunks stripped of their `Status: Superseded` context. Gold label authored from the immutable dated W3C TR publications blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}
