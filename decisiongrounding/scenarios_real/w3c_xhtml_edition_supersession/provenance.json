@@ -1,0 +1,41 @@
+{
+  "source": "w3.org/TR",
+  "immutable": true,
+  "specs": [
+    {
+      "id": "W3C-REC-xhtml1-20000126",
+      "segment": "REC-xhtml1-20000126",
+      "file": "corpus/W3C-REC-xhtml1-20000126.md",
+      "url": "https://www.w3.org/TR/2000/REC-xhtml1-20000126/",
+      "source_sha256": "e46b38230f3da47b06df4c41f6fa60397a19957c2532a9f01892053edaa61234",
+      "status": "Recommendation",
+      "title": "XHTML 1.0: The Extensible HyperText Markup Language",
+      "previous_versions": [
+        "PR-xhtml1-19991210"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "W3C-REC-xhtml1-20020801",
+      "segment": "REC-xhtml1-20020801",
+      "file": "corpus/W3C-REC-xhtml1-20020801.md",
+      "url": "https://www.w3.org/TR/2002/REC-xhtml1-20020801/",
+      "source_sha256": "438f695d90dfdbed6f2f8ad71fa658ade3b3c6f1f9770f9d143ec131f5bb9d13",
+      "status": "Recommendation",
+      "title": "XHTML 1.0: The Extensible HyperText Markup Language (Second Edition)",
+      "previous_versions": [
+        "REC-xhtml1-20000126"
+      ],
+      "replaces": [
+        "W3C-REC-xhtml1-20000126"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "W3C-REC-xhtml1-20020801",
+      "type": "supersedes",
+      "target": "W3C-REC-xhtml1-20000126"
+    }
+  ]
+}

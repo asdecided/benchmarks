@@ -1,0 +1,42 @@
+{
+  "source": "w3.org/TR",
+  "immutable": true,
+  "specs": [
+    {
+      "id": "W3C-REC-xml-names-20060816",
+      "segment": "REC-xml-names-20060816",
+      "file": "corpus/W3C-REC-xml-names-20060816.md",
+      "url": "https://www.w3.org/TR/2006/REC-xml-names-20060816/",
+      "source_sha256": "04e87baeeddf35ae267b7a6954689dc37c3fca91730b78746ae3798da86a771c",
+      "status": "Recommendation",
+      "title": "Namespaces in XML 1.0 (Second Edition)",
+      "previous_versions": [
+        "PER-xml-names-20060614"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "W3C-REC-xml-names-20091208",
+      "segment": "REC-xml-names-20091208",
+      "file": "corpus/W3C-REC-xml-names-20091208.md",
+      "url": "https://www.w3.org/TR/2009/REC-xml-names-20091208/",
+      "source_sha256": "b4a649e5fdab9852d68eca21442481599164949bcdee5549f2ec7e38fb3cd3a8",
+      "status": "Recommendation",
+      "title": "Namespaces in XML 1.0 (Third Edition)",
+      "previous_versions": [
+        "REC-xml-names-20060816",
+        "PER-xml-names-20090806"
+      ],
+      "replaces": [
+        "W3C-REC-xml-names-20060816"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "W3C-REC-xml-names-20091208",
+      "type": "supersedes",
+      "target": "W3C-REC-xml-names-20060816"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "source": "w3.org/TR",
+  "immutable": true,
+  "specs": [
+    {
+      "id": "W3C-REC-xpath20-20070123",
+      "segment": "REC-xpath20-20070123",
+      "file": "corpus/W3C-REC-xpath20-20070123.md",
+      "url": "https://www.w3.org/TR/2007/REC-xpath20-20070123/",
+      "source_sha256": "1cca578e237f4f21efd0966a080520762d38667a161a0fd6d7c85fd69bfbf568",
+      "status": "Recommendation",
+      "title": "XML Path Language (XPath) 2.0",
+      "previous_versions": [
+        "PR-xpath20-20061121"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "W3C-REC-xpath20-20101214",
+      "segment": "REC-xpath20-20101214",
+      "file": "corpus/W3C-REC-xpath20-20101214.md",
+      "url": "https://www.w3.org/TR/2010/REC-xpath20-20101214/",
+      "source_sha256": "8f570fb5f09ee66b5a645a7d7e3f185d6314379eb2c4d80ac944dc66d2fe8e0a",
+      "status": "Recommendation",
+      "title": "XML Path Language (XPath) 2.0 (Second Edition)",
+      "previous_versions": [
+        "PER-xpath20-20090421",
+        "REC-xpath20-20070123"
+      ],
+      "replaces": [
+        "W3C-REC-xpath20-20070123"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "W3C-REC-xpath20-20101214",
+      "type": "supersedes",
+      "target": "W3C-REC-xpath20-20070123"
+    }
+  ]
+}

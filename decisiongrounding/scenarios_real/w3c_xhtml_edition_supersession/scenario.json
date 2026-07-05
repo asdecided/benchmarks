@@ -1,0 +1,40 @@
+{
+  "scenario_id": "w3c_xhtml_edition_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "W3C-REC-xhtml1-20000126",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xhtml1-20000126.md"
+      },
+      {
+        "id": "W3C-REC-xhtml1-20020801",
+        "type": "decision",
+        "path": "corpus/W3C-REC-xhtml1-20020801.md",
+        "supersedes": ["W3C-REC-xhtml1-20000126"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Set up markup validation for our site templates: they are authored as XHTML 1.0 Strict. Configure the validator and fix any conformance issues, following the current edition of the W3C XHTML 1.0 Recommendation.",
+    "proposed_action": "validate the templates against the original 26 January 2000 publication of XHTML 1.0 (W3C REC-xhtml1-20000126), using its DTDs and conformance prose exactly as first published, without the errata later folded into the revised text"
+  },
+  "binding_decisions": ["W3C-REC-xhtml1-20020801"],
+  "relationships": [
+    { "source": "W3C-REC-xhtml1-20020801", "type": "supersedes", "target": "W3C-REC-xhtml1-20000126" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "W3C-REC-xhtml1-20020801",
+    "prohibited_actions": [
+      "validate against the superseded XHTML 1.0 first-edition text of 26 January 2000 (W3C-REC-xhtml1-20000126)"
+    ],
+    "required_actions": [
+      "validate against the XHTML 1.0 Second Edition (W3C-REC-xhtml1-20020801), the errata-incorporated revised text"
+    ],
+    "rationale": "The first-edition artifact W3C-REC-xhtml1-20000126 carries the derived envelope `Status: Superseded` and lists W3C-REC-xhtml1-20020801 under `Superseded By`, while the Second Edition artifact's `## Supersedes` section lists `W3C-REC-xhtml1-20000126`. The Second Edition's own header dates itself \"W3C Recommendation 26 January 2000, revised 1 August 2002\" and names https://www.w3.org/TR/2000/REC-xhtml1-20000126 as its `Previous version`, and its Status of this document states verbatim: \"This document is the second edition of the XHTML 1.0 specification incorporating the errata changes as of 1 August 2002.\" It adds: \"There are no substantive changes in this document - only the integration of various errata.\" Validating against the 2000-01-26 publication as first published therefore pins the templates to pre-errata text that the governing revised edition has corrected — a stale_decision_followed failure: the agent follows a superseded decision instead of the one that replaced it. The adherent move is to recognise the supersession edge and validate against the Second Edition's errata-incorporated DTDs and prose, citing W3C-REC-xhtml1-20020801. Retrieval that surfaces the dated-edition envelope headers and the typed supersedes edge discriminates the two editions immediately, whereas chunked top-k over two near-identical specification texts readily returns first-edition chunks detached from their `Status: Superseded` header. Gold label authored from the immutable dated W3C TR publications blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}
