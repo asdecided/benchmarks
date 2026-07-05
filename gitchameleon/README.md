@@ -10,8 +10,11 @@ the pinned API instead of the API the model remembers?*
 and the upstream execution-based scoring is deterministic — the only
 recognized external benchmark that fits the ADR-066 posture natively.
 
-**Status: scaffold.** The grounding seam is built and testable offline; the
-answering-model call and upstream scoring are the funded-run seam.
+**Status: run-ready.** The grounding seam and the full solutions → score →
+stats pipeline are built and testable offline (the `offline-stub` backend);
+only the funded answering calls and the upstream execution remain. This run's
+per-arm pass rate is SWE-DecisionBench's second co-primary outcome,
+**decision-conditioned resolution** (GCB-ADR-0002).
 
 ## Provenance and licensing
 
@@ -57,19 +60,48 @@ python3 run.py --dry-run \
 `rac` must be on `PATH` for the rac arm (external CLI only — no engine
 imports, DG-ADR-0001).
 
-## The funded run (the seam this scaffold leaves open)
+## The funded run (GCB-ADR-0002 — the resolution co-primary pipeline)
+
+The pre-registered analysis and falsifier for this outcome live in
+`../decisiongrounding/spec/analysis-plan-amendment-1.md` (H2). Each step is
+resumable in isolation:
 
 1. Pin the answering model (decisiongrounding pins `claude-opus-4-8`) and the
    `naive_rag` embedder (`voyage:voyage-4-large` is the published strong
    baseline there).
-2. Feed each dry-run bundle to the answering model; collect completed code
-   per (example, arm).
-3. Score every arm's solutions with the upstream harness
-   (`evaluate --solution-path …` from GitChameleonBenchmark) — its executable
-   tests are the scorer; we add nothing.
-4. Publish per-arm pass rates with the dataset revision, model pin, and the
-   exact reproduction commands; an unfavourable delta is published plainly
-   (the SWE-DecisionBench honesty rule applies).
+2. Answer every dry-run bundle:
+
+   ```
+   python3 run.py solutions --bundles out/bundles.jsonl \
+     --answering claude --seed 0 --out out/solutions
+   ```
+
+   writes `out/solutions/solutions-<arm>.jsonl` in exactly the upstream
+   `Solution` shape (`example_id` + `answer`; the provenance extras are
+   ignored by upstream). `--answering offline-stub` exercises the plumbing
+   keylessly; `litellm:<alias>` targets an OpenAI-compatible gateway.
+3. Score each arm's file with the upstream harness — its executable tests
+   are the scorer; we add nothing. Clone GitChameleonBenchmark at a recorded
+   commit and run `evaluate --solution-path out/solutions/solutions-<arm>.jsonl`
+   (Docker; budget the per-version dependency installs). It writes
+   `solutions-<arm>_eval_results.csv` next to each solution file.
+4. Normalize the verdicts into paired resolution records
+   (`schema/resolution_record.schema.json`) and run the pre-registered
+   paired analysis:
+
+   ```
+   python3 run.py score --arm rac \
+     --eval-results out/solutions/solutions-rac_eval_results.csv \
+     --answering-model claude-opus-4-8 --upstream-harness <commit> \
+     --out out/resolution_records.jsonl
+   python3 run.py score --arm no_grounding --eval-results … --append …
+   python3 run.py stats --records out/resolution_records.jsonl
+   ```
+
+5. Publish the records, per-arm pass rates, and stats with the dataset
+   revision, model pin, upstream-harness commit, and the exact reproduction
+   commands; an unfavourable delta is published plainly (the
+   SWE-DecisionBench honesty rule applies to both co-primary outcomes).
 
 ## Local decisions
 
