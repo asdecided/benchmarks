@@ -101,7 +101,7 @@ async def bench_warm(corpus: str, size: int, calls: int, cache: bool, timeout: f
     from mcp.client.stdio import stdio_client
 
     args = ["mcp", "--root", corpus] + (["--cache"] if cache else [])
-    params = StdioServerParameters(command="rac", args=args)
+    params = StdioServerParameters(command="rac", args=args, env=dict(os.environ))
     samples: list[float] = []
     dnf = 0
     per_tool: dict[str, list[float]] = {}

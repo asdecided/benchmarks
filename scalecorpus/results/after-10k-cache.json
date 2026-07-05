@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "corpus": "c10k",
+    "size": 10000,
+    "seed": 7,
+    "rac_version": "rac 0.1.dev50+g44d48d40a",
+    "label": "",
+    "cpu_count": 4,
+    "timestamp": "2026-07-05T17:16:17Z"
+  },
+  "metrics": {
+    "warm_retrieval": {
+      "cache": true,
+      "calls": 80,
+      "dnf": 0,
+      "n": 80,
+      "p50_ms": 1895.87,
+      "p95_ms": 6190.4,
+      "p99_ms": 6344.04,
+      "mean_ms": 2046.96,
+      "max_ms": 6344.04,
+      "per_tool": {
+        "get_artifact": {
+          "n": 20,
+          "p50_ms": 43.0,
+          "p95_ms": 498.09,
+          "p99_ms": 498.09,
+          "mean_ms": 109.86,
+          "max_ms": 498.09
+        },
+        "get_related": {
+          "n": 20,
+          "p50_ms": 41.66,
+          "p95_ms": 526.28,
+          "p99_ms": 526.28,
+          "mean_ms": 109.54,
+          "max_ms": 526.28
+        },
+        "search_artifacts[mid]": {
+          "n": 20,
+          "p50_ms": 5983.03,
+          "p95_ms": 6344.04,
+          "p99_ms": 6344.04,
+          "mean_ms": 5832.05,
+          "max_ms": 6344.04
+        },
+        "search_artifacts[rare]": {
+          "n": 20,
+          "p50_ms": 1991.47,
+          "p95_ms": 2482.06,
+          "p99_ms": 2482.06,
+          "mean_ms": 2136.39,
+          "max_ms": 2482.06
+        }
+      },
+      "server_rss_mb": 338.4,
+      "server_peak_rss_mb": 349.4
+    }
+  }
+}

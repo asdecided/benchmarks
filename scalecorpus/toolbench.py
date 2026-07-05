@@ -22,7 +22,7 @@ async def run(rac: str, corpus: str, calls: int, cache: bool) -> dict:
     args = ["mcp", "--root", corpus] + (["--cache"] if cache else [])
     out: dict[str, dict] = {}
     errlog = open(os.devnull, "w")
-    async with stdio_client(StdioServerParameters(command=rac, args=args), errlog=errlog) as (r, w):
+    async with stdio_client(StdioServerParameters(command=rac, args=args, env=dict(os.environ)), errlog=errlog) as (r, w):
         async with ClientSession(r, w) as s:
             await s.initialize()
             for tool, targs in (

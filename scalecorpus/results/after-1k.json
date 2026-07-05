@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "corpus": "c1k",
+    "size": 1000,
+    "seed": 7,
+    "rac_version": "rac 0.1.dev50+g44d48d40a",
+    "label": "",
+    "cpu_count": 4,
+    "timestamp": "2026-07-05T17:43:00Z"
+  },
+  "metrics": {
+    "warm_retrieval": {
+      "cache": false,
+      "calls": 12,
+      "dnf": 0,
+      "n": 12,
+      "p50_ms": 1161.43,
+      "p95_ms": 1249.66,
+      "p99_ms": 1249.66,
+      "mean_ms": 1109.08,
+      "max_ms": 1249.66,
+      "per_tool": {
+        "get_artifact": {
+          "n": 3,
+          "p50_ms": 1025.45,
+          "p95_ms": 1039.61,
+          "p99_ms": 1039.61,
+          "mean_ms": 1013.9,
+          "max_ms": 1039.61
+        },
+        "get_related": {
+          "n": 3,
+          "p50_ms": 993.73,
+          "p95_ms": 1044.45,
+          "p99_ms": 1044.45,
+          "mean_ms": 1006.57,
+          "max_ms": 1044.45
+        },
+        "search_artifacts[mid]": {
+          "n": 3,
+          "p50_ms": 1223.24,
+          "p95_ms": 1249.66,
+          "p99_ms": 1249.66,
+          "mean_ms": 1225.74,
+          "max_ms": 1249.66
+        },
+        "search_artifacts[rare]": {
+          "n": 3,
+          "p50_ms": 1200.31,
+          "p95_ms": 1208.59,
+          "p99_ms": 1208.59,
+          "mean_ms": 1190.11,
+          "max_ms": 1208.59
+        }
+      },
+      "server_rss_mb": 77.9,
+      "server_peak_rss_mb": 77.9
+    },
+    "cold_cli": {
+      "resolve": {
+        "runs": [
+          {
+            "wall_s": 1.2,
+            "exit": 0,
+            "peak_rss_mb": 28.3
+          },
+          {
+            "wall_s": 1.19,
+            "exit": 0,
+            "peak_rss_mb": 28.4
+          },
+          {
+            "wall_s": 1.2,
+            "exit": 0,
+            "peak_rss_mb": 28.5
+          }
+        ],
+        "median_wall_s": 1.2,
+        "dnf": 0
+      },
+      "find_rare": {
+        "runs": [
+          {
+            "wall_s": 1.39,
+            "exit": 0,
+            "peak_rss_mb": 41.6
+          },
+          {
+            "wall_s": 1.42,
+            "exit": 0,
+            "peak_rss_mb": 41.6
+          },
+          {
+            "wall_s": 1.42,
+            "exit": 0,
+            "peak_rss_mb": 41.6
+          }
+        ],
+        "median_wall_s": 1.42,
+        "dnf": 0
+      }
+    },
+    "full_validate": {
+      "wall_s": 1.21,
+      "exit": 0,
+      "peak_rss_mb": 33.7
+    },
+    "incremental_validate": {
+      "wall_s": 1.21,
+      "exit": 0,
+      "peak_rss_mb": 33.7
+    }
+  }
+}
