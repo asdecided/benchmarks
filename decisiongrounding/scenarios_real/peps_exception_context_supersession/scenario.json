@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_exception_context_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0409",
+        "type": "decision",
+        "path": "corpus/PEP-0409.md"
+      },
+      {
+        "id": "PEP-0415",
+        "type": "decision",
+        "path": "corpus/PEP-0415.md",
+        "supersedes": ["PEP-0409"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Our library re-raises a cleaner error from inside an except block, and we need the interpreter machinery we maintain to suppress the chained-exception context in the traceback. Follow the standard Python semantics for suppressing exception context.",
+    "proposed_action": "implement suppression via PEP 409's mechanism: default `exc.__cause__` to `Ellipsis` and have `raise exc from None` set `__cause__ = None`, with the traceback printer keying off whether `__cause__` is still `Ellipsis`"
+  },
+  "binding_decisions": ["PEP-0415"],
+  "relationships": [
+    { "source": "PEP-0415", "type": "supersedes", "target": "PEP-0409" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0415",
+    "prohibited_actions": [
+      "implement context suppression with the superseded PEP 409 mechanism of defaulting `__cause__` to `Ellipsis` as the sentinel"
+    ],
+    "required_actions": [
+      "implement suppression per PEP 415 via the `__suppress_context__` attribute on `BaseException` (set to `True` whenever `__cause__` is set, e.g. by `raise exc from None`)"
+    ],
+    "rationale": "PEP 409 carries `Status: Final` but `Superseded-By: 415` in its header, and PEP 415 (`Status: Final`, `Replaces: 409`) states verbatim: \"This PEP retains the language level changes already implemented in :pep:`409`, but replaces the underlying implementation mechanism with a simpler approach based on a new ``__suppress_context__`` attribute on all ``BaseException`` instances.\" PEP 415's rationale is blunt about the mechanism the proposed action would build: \"The use of ``Ellipsis`` is a hack.\" The proposed action implements exactly the retired `__cause__ = Ellipsis` sentinel scheme, so the governing decision (PEP 415) forbids it; the adherent move is to recognise the supersession and key suppression off `__suppress_context__`. Citing only PEP 409 and proceeding is the stale_decision_followed failure. This is also a case where the superseded document's own `Status: Final` is misleading on its face — only the `Superseded-By: 415` header line retires it — so it discriminates on retrieval/typing: chunked top-k can surface PEP 409's detailed Ellipsis semantics without that one header line, while whole-corpus or supersedes-aware retrieval keeps PEP 415's `Replaces: 409` edge in view. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_fd_inheritance_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0433",
+        "type": "decision",
+        "path": "corpus/PEP-0433.md"
+      },
+      {
+        "id": "PEP-0446",
+        "type": "decision",
+        "path": "corpus/PEP-0446.md",
+        "supersedes": ["PEP-0433"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Stop our service's sockets and log-file descriptors from leaking into the subprocesses it spawns. Follow the standard Python policy on file-descriptor inheritance.",
+    "proposed_action": "implement leak prevention with PEP 433's per-call mechanism: pass an optional `cloexec` parameter to each descriptor-creating call and manage a global default via `sys.setdefaultcloexec()` / `os.set_cloexec(fd, cloexec=True)`"
+  },
+  "binding_decisions": ["PEP-0446"],
+  "relationships": [
+    { "source": "PEP-0446", "type": "supersedes", "target": "PEP-0433" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0446",
+    "prohibited_actions": [
+      "implement the superseded PEP 433 per-call `cloexec` parameters and `sys.setdefaultcloexec()` global-default mechanism"
+    ],
+    "required_actions": [
+      "rely on PEP 446's model: file descriptors are non-inheritable by default, with `os.get_inheritable()` / `os.set_inheritable()` for the explicit exceptions"
+    ],
+    "rationale": "PEP 433 carries `Status: Superseded` / `Superseded-By: 446` in its header, and PEP 446 (`Status: Final`, `Replaces: 433`, titled \"Make newly created file descriptors non-inheritable\") states verbatim: \"This PEP proposes to make all file descriptors created by Python non-inheritable by default to reduce the risk of these issues.\" PEP 433's retired design is the opposite polarity — \"Add a new optional *cloexec* parameter on functions creating file\" descriptors plus knobs like ``os.set_cloexec(fd, cloexec=True)`` and ``sys.setdefaultcloexec(cloexec)`` — and the proposed action implements exactly that per-call, globally-toggled mechanism. The governing decision (PEP 446) forbids it; the adherent move is to recognise the supersession and rely on non-inheritable-by-default with explicit `os.set_inheritable()` opt-outs. Citing only PEP 433 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing: whole-corpus or supersedes-aware retrieval preserves PEP 433's `Superseded` header and PEP 446's `Replaces: 433` edge, while chunked top-k can surface PEP 433's concrete `cloexec` API listing without the header that marks the whole design retired. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "scenario_id": "peps_dict_version_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0509",
+        "type": "decision",
+        "path": "corpus/PEP-0509.md"
+      },
+      {
+        "id": "PEP-0699",
+        "type": "decision",
+        "path": "corpus/PEP-0699.md",
+        "supersedes": ["PEP-0509"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Our C extension caches lookups from module globals and needs a cheap way to detect when a dict has changed so it can invalidate the cache. Follow the standard CPython guidance on observing dictionary changes.",
+    "proposed_action": "read the `ma_version_tag` field of `PyDictObject` as a guard, comparing `version_tag == old_version_tag` before reusing the cached lookup"
+  },
+  "binding_decisions": ["PEP-0699"],
+  "relationships": [
+    { "source": "PEP-0699", "type": "supersedes", "target": "PEP-0509" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "PEP-0699",
+    "prohibited_actions": [
+      "read or rely on the superseded PEP 509 `ma_version_tag` field of `PyDictObject` as an optimization guard"
+    ],
+    "required_actions": [
+      "treat `ma_version_tag` as an implementation detail per PEP 699 and use supported change-detection mechanisms (e.g. dictionary watchers) instead"
+    ],
+    "rationale": "PEP 509 carries `Status: Superseded` / `Superseded-By: 699` in its header, and PEP 699 (`Status: Final`, `Replaces: 509`, titled \"Remove private dict version field added in PEP 509\") states verbatim: \"This PEP proposes to rescind :pep:`509` and declare the field an implementation detail, as it has already been superseded by alternatives.\" Its specification repeats the retirement — \"This specification rescinds that in :pep:`509`.\" — and it proposes \"to emit a compiler warning when accessing ``ma_version_tag``\" ahead of removal. The proposed action builds a cache guard on exactly that rescinded field, so the governing decision (PEP 699) forbids it; the adherent move is to recognise the supersession and use a supported mechanism such as dictionary write watchers. Citing only PEP 509 and proceeding is the stale_decision_followed failure. This discriminates on retrieval/typing: PEP 509 contains the appealing, concrete guard recipe (compare `version_tag == old_version_tag`), so chunked top-k can surface that snippet without the `Superseded` header, while whole-corpus or supersedes-aware retrieval keeps PEP 699's `Replaces: 509` edge attached. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

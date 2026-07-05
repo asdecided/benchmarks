@@ -1,0 +1,28 @@
+{
+  "scenario_id": "peps_style_negative_control",
+  "version": "1.0.0",
+  "scenario_type": "negative_control",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "PEP-0008",
+        "type": "decision",
+        "path": "corpus/PEP-0008.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "The orders dashboard query has become slow as the table grew; speed it up without changing the results.",
+    "proposed_action": "add a composite B-tree index on the queried columns (customer_id, created_at) to the orders table"
+  },
+  "binding_decisions": [],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "permitted",
+    "governing_decision": null,
+    "prohibited_actions": [],
+    "required_actions": [],
+    "rationale": "The only document in the corpus is PEP 8 (`Status: Active`), the Style Guide for Python Code, which states its scope verbatim: \"This document gives coding conventions for the Python code comprising the standard library in the main Python distribution.\" It even yields authority where it does apply: \"Many projects have their own coding style guidelines. In the event of any conflicts, such project-specific guides take precedence for that project.\" Coding conventions say nothing about database schemas, query plans, or B-tree indexes, so no decision in the corpus governs the proposed action; the correct verdict is permitted with no governing decision, and the adherent behaviour is to proceed without inventing a prohibition. The trap is that PEP 8 is topically adjacent to any Python codebase, and an arm that retrieves it and over-applies it as a constraint on database indexing — or blocks the change pending naming/style concerns it does not actually impose here — commits the false_prohibit failure. This discriminates on retrieval/typing: the test is recognising that the retrieved neighbour governs a different subject matter, and deterministic retrieval that returns nothing binding should beat an LLM-mediated arm tempted to manufacture a rule. Gold label authored from the pinned PEP texts (python/peps@f866e77) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}
