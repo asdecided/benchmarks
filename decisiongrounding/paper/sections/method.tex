@@ -22,6 +22,41 @@ assembly strategy yields better decision adherence. It does \emph{not} test
 whether a pull-based grounding tool is invoked at the right moment in
 production---a separate deployment question, out of scope.
 
+\subsection{Co-primary outcomes}
+\benchname{} reports two co-primary, deterministic outcomes; each claim stands
+alone, and the conjunction is claimed only if both hold:
+\begin{itemize}
+  \item \textbf{Decision adherence} --- structural: did the proposed change
+        respect the governing decision? The novel construct, scored by this
+        benchmark's own deterministic scorer (below).
+  \item \textbf{Decision-conditioned resolution} --- executable: on
+        version-conditioned problems adapted from
+        GitChameleon~\citep{gitchameleon}, where the correct completion depends
+        on a recorded version-pin decision the prompt deliberately never
+        restates, does the solution pass the upstream harness's unit tests?
+        The upstream tests are the sole scorer; we add none.
+\end{itemize}
+The honesty rule covers both: a mixed result (adherence improves, resolution
+does not, or the reverse) is reported plainly as the finding.
+
+\subsection{Statistical analysis}
+The analysis is pre-registered (a frozen amendment to the benchmark's
+specification) and deterministic. Arms answer the same scenarios under common
+random numbers, so comparisons are paired: the unit is the scenario for
+base-$N$ runs, the scenario--seed pair for the corpus-size sweep, and the
+example for the executable outcome. Per arm pair we report the exact McNemar
+test (a two-sided binomial on the discordant pairs; no asymptotic
+approximation), the paired risk difference with a Wald 95\% interval, the
+conditional odds ratio with a Wilson-transformed interval, and Wilson intervals
+on the marginal rates; zero-cell tables are flagged degenerate rather than
+continuity-corrected. The confirmatory comparison is \texttt{rac} vs
+\texttt{naive\_rag} adherence at the largest corpus size ($N{=}300$,
+$\alpha{=}0.05$); intermediate $N$ are secondary with Holm correction, and
+$N{=}10$ is descriptive (a pre-registered expected tie). Seed-level $t$-based
+intervals on the paired difference are retained as supporting variance
+evidence. Every statistic regenerates from the committed run records; none of
+them gates anything.
+
 \subsection{Deterministic scoring}
 The answering model returns a structured proposed change, scored by structural
 inspection rather than a learned judge:
