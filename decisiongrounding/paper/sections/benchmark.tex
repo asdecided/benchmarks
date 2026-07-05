@@ -15,8 +15,11 @@ themselves and which a skeptic can regenerate byte-for-byte:
 Each source is fetched verbatim from a pinned upstream revision and recorded with
 a \texttt{provenance.json} (source URL, SHA-256, parsed headers, and the
 header-derived supersession edges), so the corpus can be rebuilt and verified
-rather than trusted. \todo{final scenario/repository counts and per-domain
-breakdown.}
+rather than trusted. The study-grade roster comprises \textbf{49 scenarios}: 24
+PEP (19 supersessions, 2 prohibitions, 3 negative controls), 21 RFC (12
+supersessions, 7 prohibitions, 2 negative controls), and 4 W3C dated-edition
+supersessions; the distractor pools hold 644 PEPs and 1{,}125 RFCs. The exact
+roster is frozen in the pre-registered analysis-plan amendment.
 
 \subsection{Scenarios and distractor scaling}
 A scenario pairs a task---an action the agent is on the verge of taking---with a
@@ -28,6 +31,18 @@ decision forbids the proposed action). To probe scale, each scenario's own
 artifacts are padded to a target corpus size $N$ with \emph{real} distractor
 decisions drawn from a pinned pool, so the governing decision is progressively
 buried among genuine, same-domain documents rather than synthetic filler.
+
+\subsection{The executable co-primary arm}
+The decision-conditioned resolution outcome adapts
+GitChameleon~\citep{gitchameleon}: each of its version-conditioned Python
+problems becomes a corpus whose governing artifact is a typed version-pin
+decision (the pin, its rationale, and companion pins --- never the solution,
+function name, or tests), placed among real distractor pins from other
+problems. The task prompt deliberately never restates the pinned version, so
+version awareness must arrive through the arm's grounding or not at all; the
+upstream harness's executable unit tests score every arm's solutions
+unchanged. Under this protocol the numbers are an arm comparison, not
+comparable to the upstream leaderboard.
 
 \subsection{Credibility discipline}
 The benchmark is pre-registered: the scenario taxonomy and scoring rubric are

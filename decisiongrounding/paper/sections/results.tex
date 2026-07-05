@@ -52,5 +52,31 @@ $N \geq 50$) was triggered. Report the verdict computed from the numbers.}
   \label{fig:h2h}
 \end{figure}
 
+\subsection{Paired significance}
+Table~\ref{tab:stats} reports the pre-registered paired analysis per arm pair
+and corpus size: exact McNemar on the discordant scenario--seed pairs, the
+paired risk difference, and the conditional odds ratio (Section~4). The
+confirmatory cell is \texttt{rac} vs \texttt{naive\_rag} at $N{=}300$.
+\todo{interpret the confirmatory cell against the falsifier.}
+
+\begin{table}[t]
+  \centering
+  \small
+  % Regenerated from the crossover dataset by `make paper-figs`; never hand-edited.
+  \input{figures/stats_table}
+  \caption{Pre-registered paired statistics per arm pair and corpus size
+  (b/c: discordant counts; degenerate cells flagged).}
+  \label{tab:stats}
+\end{table}
+
+\subsection{Decision-conditioned resolution}
+The executable co-primary outcome: per-arm pass rates on the version-conditioned
+problems under the no-version-in-prompt protocol, scored by the upstream
+harness's unit tests, with the same paired analysis over per-example pairs.
+\todo{populate from the GitChameleon evidence run's resolution records
+(\texttt{run.py score} / \texttt{stats}); report pass rates per arm, the
+\texttt{rac} vs \texttt{no\_grounding} and \texttt{rac} vs \texttt{naive\_rag}
+McNemar tests, and state the H2 falsifier verdict plainly.}
+
 \todo{Add the base-$N$ leaderboard table (adherence, stale, false-permit,
 false-prohibit, governing recall) and a per-arm cost table.}

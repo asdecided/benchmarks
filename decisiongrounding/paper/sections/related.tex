@@ -16,16 +16,33 @@ get right. Third, our scoring is deterministic and structural rather than
 end-to-end resolution accuracy, trading breadth for reproducibility and a sharp,
 single-variable comparison.
 
-\paragraph{Issue resolution benchmarks.}
+\paragraph{Issue resolution benchmarks and the SWE lineage.}
 SWE-bench~\citep{swebench} established realistic, execution-verified evaluation of
-coding agents on GitHub issues. \benchname{} is complementary: it does not ask
-whether a patch passes tests, but whether the agent's proposed change
-\emph{adheres} to the decision that governs it.
+coding agents on GitHub issues. \benchname{} positions itself explicitly in that
+lineage: SWE-bench evaluates issue \emph{resolution}; SWE-ContextBench
+\citep{swecontextbench2026} evaluates episodic \emph{context retrieval}; and
+\benchname{} evaluates durable governing-\emph{decision} adherence, together
+with decision-conditioned resolution as its executable co-primary outcome. We
+use the family name to state that position, not to claim any affiliation with or
+endorsement by the SWE-bench authors. \benchname{} is complementary to the
+resolution benchmarks: its novel construct does not ask whether a patch passes
+tests, but whether the agent's proposed change \emph{adheres} to the decision
+that governs it.
+
+\paragraph{Version-conditioned code generation.}
+GitChameleon~\citep{gitchameleon} evaluates code generation against pinned
+library versions with executable unit tests --- the version pin is exactly a
+recorded engineering decision an ungrounded model violates from memory. Our
+executable co-primary outcome adapts it: each problem's pin becomes a typed
+decision artifact among real distractor pins, the prompt never restates the
+pinned version, and the upstream harness's tests remain the sole scorer. Under
+that protocol our numbers are an arm comparison, not comparable to the
+GitChameleon leaderboard, whose prompts state the version explicitly.
 
 \paragraph{Retrieval and memory.}
 Retrieval-augmented generation~\citep{rag} is the \texttt{naive\_rag} baseline
 here---a fair, strong baseline using asymmetric query/document embeddings, not a
 strawman. Memory and experience-reuse benchmarks (e.g.\ MemoryBench
-\todo{add citation}) report retrieval hit-rate metrics analogous to our
+\citep{memorybench}) report retrieval hit-rate metrics analogous to our
 governing-decision recall, which we use to explain \emph{why} adherence moves
 rather than as an end in itself.

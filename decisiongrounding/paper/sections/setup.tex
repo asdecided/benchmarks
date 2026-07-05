@@ -9,9 +9,12 @@ final version strings from the run.}
 (\texttt{voyage-4-large}) with asymmetric query/document roles. \todo{record the
 embedder id and dimension actually used.}
 
-\paragraph{Corpus sizes.} The adherence-versus-$N$ sweep uses
-$N \in \{10, 50, 150, 300\}$, padding each scenario with real distractors from the
-pinned pool. \todo{state final $N$ grid and number of seeds for variance.}
+\paragraph{Corpus sizes and seeds.} The adherence-versus-$N$ sweep uses the
+frozen grid $N \in \{10, 50, 150, 300\}$, padding each scenario with real
+distractors from the pinned pool, and is pre-registered at five seeds with
+common random numbers across arms; the confirmatory analysis is the
+\texttt{rac} vs \texttt{naive\_rag} exact McNemar test at $N{=}300$.
+\todo{confirm the seed list actually run.}
 
 \paragraph{Execution.} Answering calls for the sweep are issued through the
 Message Batches API (approximately half the standard token price, executed
