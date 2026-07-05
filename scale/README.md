@@ -45,7 +45,7 @@ python scale/generate_corpus.py --count 100000 --out /tmp/scale-100k --seed 42 -
 
 ```
 python scale/measure.py --corpus /tmp/scale-100k --out results-100k-cache.json \
-    --queries 50 --runs 3 --mcp-cache
+    --queries 50 --runs 3 [--mcp-cache | --mcp-index]
 ```
 
 - **CLI one-shot** (median of `--runs`, default 3), with child peak RSS:
@@ -57,7 +57,26 @@ python scale/measure.py --corpus /tmp/scale-100k --out results-100k-cache.json \
   warm-up then `--queries` timed calls per tool, and records p50/p95/p99 ms
   for `search_artifacts` / `get_artifact` / `get_related` plus the server's
   peak RSS (`/proc/<pid>/status` `VmHWM`). `--mcp-cache` selects the `--cache`
-  path and records `mode: "cache"`; run once without and once with to compare.
+  path and records `mode: "cache"`; `--mcp-index` selects the persistent-index
+  path (`--index`, ADR-100/101) and records `mode: "index"` (the two are
+  mutually exclusive); run once without and once with to compare.
+- **Warm query classes**: each warm tool is measured under its *natural* query
+  classes and the per-class percentiles are reported additively under
+  `warm_retrieval.tools.<tool>.classes` (the top-level per-tool block is
+  unchanged — it stays the tool's historical primary class). `search_artifacts`
+  runs `broad` and `selective`; `get_artifact` and `get_related` run `lookup`. A
+  **broad** query is one common vocabulary term: it matches a fixed ~10% of the
+  corpus at every size, so its latency is dominated by serialising a
+  thousands-of-matches payload rather than by the index — it is reported for
+  continuity but is mode-independent and payload-serialisation-bound, so it is
+  **not** the flat-latency signal the gate should read. A **selective** query is
+  a three-term AND across the topic/subsystem/adjective pools whose terms rarely
+  co-occur, so it prunes to a small handful of candidates and measures the query
+  path (candidate generation + scoring), not payload serialisation — the
+  representative warm-search class. A **lookup** query is an exact artifact id,
+  the natural argument for the id-keyed tools (resolution and per-node edge /
+  neighbourhood shaping). All classes are derived deterministically from the
+  frozen `_common` vocabulary, so the harness reproduces them with no corpus read.
 - **Incremental**: appends a harmless line to ~1k files, then re-runs
   `validate` and one warm search — separating changeset-bound from
   corpus-bound cost.

@@ -40,7 +40,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from _common import QUERY_TERMS, artifact_id  # noqa: E402
+from _common import (  # noqa: E402
+    ADJECTIVES,
+    QUERY_TERMS,
+    SUBSYSTEMS,
+    TOPICS,
+    artifact_id,
+)
 
 SCHEMA_VERSION = 1
 DEFAULT_TIMEOUT = 1800
@@ -51,6 +57,77 @@ INCREMENTAL_FILES = 1000
 CLI_OPS = ("validate", "find", "resolve", "relationships", "export")
 WARM_TOOLS = ("search_artifacts", "get_artifact", "get_related")
 ALL_OPS = CLI_OPS + ("warm", "incremental")
+
+# Warm-query classes (ADR-100 measurement). A single query class made every warm
+# measurement a payload-serialisation benchmark, so each tool now runs its
+# *natural* classes and the per-class percentiles are reported separately:
+#
+#   broad     — one common vocabulary term (the historical vocabulary). It matches
+#               a fixed fraction (~10%) of the corpus at every size, so the response
+#               carries thousands of matches and the latency is dominated by
+#               serialising that payload, not by the index. Reported for continuity,
+#               but it is mode-independent and payload-bound — not a gate signal.
+#   selective — a three-term AND across the topic / subsystem / adjective pools.
+#               These rarely co-occur, so the match set is a small handful and the
+#               measurement reflects the query path (candidate generation + scoring
+#               of a few candidates), not payload serialisation.
+#   lookup    — an exact artifact id, the natural argument for get_artifact /
+#               get_related (resolution + edge/neighbourhood shaping for one node).
+#
+# search runs broad+selective; the id tools run lookup. Each tool's top-level
+# block stays its historical primary class (search->broad, id tools->lookup) so
+# existing fields are unchanged; the ``classes`` sub-object is purely additive.
+WARM_CLASSES: dict[str, tuple[str, ...]] = {
+    "search_artifacts": ("broad", "selective"),
+    "get_artifact": ("lookup",),
+    "get_related": ("lookup",),
+}
+
+
+def _selective_query(i: int) -> str:
+    """A deterministic multi-term AND query that matches a small handful.
+
+    One topic, one subsystem, one adjective — three independent vocabulary pools
+    whose terms co-occur in only a few artifacts, so the AND result set stays
+    small at any corpus size (the index prunes to those candidates and scores
+    only them). Pure function of ``i`` and the frozen ``_common`` vocabulary, so
+    the harness needs no corpus read to reproduce it.
+    """
+    return (
+        f"{TOPICS[i % len(TOPICS)]} "
+        f"{SUBSYSTEMS[i % len(SUBSYSTEMS)]} "
+        f"{ADJECTIVES[i % len(ADJECTIVES)]}"
+    )
+
+
+def _lookup_id(i: int, corpus_count: int) -> str:
+    """The exact id for warm call ``i``, spread across the whole corpus."""
+    step = max(1, corpus_count // max(1, DEFAULT_QUERIES))
+    idx = (i * step) % max(1, corpus_count) if corpus_count else 0
+    return artifact_id(idx)
+
+
+def _class_arguments(tool: str, cls: str, i: int, corpus_count: int) -> dict:
+    """Arguments for warm call ``i`` of ``tool`` under query class ``cls``."""
+    if cls == "broad":
+        return {"query": QUERY_TERMS[i % len(QUERY_TERMS)]}
+    if cls == "selective":
+        return {"query": _selective_query(i)}
+    if cls == "lookup":
+        return {"id": _lookup_id(i, corpus_count)}
+    raise ValueError(cls)
+
+
+def _warm_stats(latencies_ms: list[float]) -> dict:
+    """The per-tool / per-class latency summary (shape unchanged from v1)."""
+    return {
+        "count": len(latencies_ms),
+        "p50_ms": round(_percentile(latencies_ms, 50), 4),
+        "p95_ms": round(_percentile(latencies_ms, 95), 4),
+        "p99_ms": round(_percentile(latencies_ms, 99), 4),
+        "min_ms": round(min(latencies_ms), 4),
+        "max_ms": round(max(latencies_ms), 4),
+    }
 
 
 # --- process / memory primitives -----------------------------------------
@@ -210,9 +287,13 @@ class McpClient:
     readline per call is sufficient and keeps the client dependency-free.
     """
 
-    def __init__(self, corpus: str, cache: bool) -> None:
+    def __init__(self, corpus: str, cache: bool, index: bool = False) -> None:
         argv = ["rac", "mcp", "--root", corpus]
-        if cache:
+        if index:
+            # ADR-100/101 persistent-index serving mode; mutually exclusive with
+            # --cache upstream (the engine prefers --index when both are given).
+            argv.append("--index")
+        elif cache:
             argv.append("--cache")
         self._proc = subprocess.Popen(
             argv,
@@ -289,29 +370,29 @@ def _tool_arguments(tool: str, i: int, corpus_count: int) -> dict:
 
 
 def measure_warm(corpus: str, corpus_count: int, queries: int,
-                 cache: bool) -> dict:
-    client = McpClient(corpus, cache)
+                 cache: bool, index: bool = False) -> dict:
+    client = McpClient(corpus, cache, index)
     per_tool: dict[str, dict] = {}
     with _RssSampler(client.pid) as sampler:
         try:
             client.initialize()
             for tool in WARM_TOOLS:
-                # Warm-up call (untimed): pays any first-touch build cost.
-                client.call(tool, _tool_arguments(tool, 0, corpus_count))
-                latencies_ms: list[float] = []
-                for i in range(queries):
-                    args = _tool_arguments(tool, i, corpus_count)
-                    t0 = time.perf_counter()
-                    client.call(tool, args)
-                    latencies_ms.append((time.perf_counter() - t0) * 1000.0)
-                per_tool[tool] = {
-                    "count": len(latencies_ms),
-                    "p50_ms": round(_percentile(latencies_ms, 50), 4),
-                    "p95_ms": round(_percentile(latencies_ms, 95), 4),
-                    "p99_ms": round(_percentile(latencies_ms, 99), 4),
-                    "min_ms": round(min(latencies_ms), 4),
-                    "max_ms": round(max(latencies_ms), 4),
-                }
+                classes = WARM_CLASSES[tool]
+                per_class: dict[str, dict] = {}
+                for cls in classes:
+                    # Warm-up call (untimed): pays any first-touch build cost.
+                    client.call(tool, _class_arguments(tool, cls, 0, corpus_count))
+                    latencies_ms: list[float] = []
+                    for i in range(queries):
+                        args = _class_arguments(tool, cls, i, corpus_count)
+                        t0 = time.perf_counter()
+                        client.call(tool, args)
+                        latencies_ms.append((time.perf_counter() - t0) * 1000.0)
+                    per_class[cls] = _warm_stats(latencies_ms)
+                # Top-level block = the tool's historical primary class (search ->
+                # broad, id tools -> lookup), so existing fields are byte-unchanged;
+                # every class (including selective) is reported under ``classes``.
+                per_tool[tool] = {**per_class[classes[0]], "classes": per_class}
         finally:
             client.close()
     return {
@@ -337,11 +418,11 @@ def _touch_files(corpus: Path, limit: int) -> int:
 
 
 def measure_incremental(corpus: str, corpus_count: int, timeout: int,
-                        cache: bool) -> dict:
+                        cache: bool, index: bool = False) -> dict:
     touched = _touch_files(Path(corpus), INCREMENTAL_FILES)
     validate = run_timed(["rac", "validate", corpus], timeout)
 
-    client = McpClient(corpus, cache)
+    client = McpClient(corpus, cache, index)
     warm: dict = {}
     with _RssSampler(client.pid) as sampler:
         try:
@@ -424,8 +505,17 @@ def _corpus_count(corpus: Path) -> int:
 # --- driver ----------------------------------------------------------------
 
 
+def _serve_mode(cache: bool, index: bool) -> str:
+    """The recorded serving mode: index wins over cache wins over the fresh path."""
+    if index:
+        return "index"
+    if cache:
+        return "cache"
+    return "no-cache"
+
+
 def measure(corpus: Path, queries: int, runs: int, timeout: int,
-            cache: bool, skip: set[str]) -> dict:
+            cache: bool, skip: set[str], index: bool = False) -> dict:
     count = _corpus_count(corpus)
     corpus_str = str(corpus)
     # A term and id known to be present, for find/resolve one-shots.
@@ -439,12 +529,14 @@ def measure(corpus: Path, queries: int, runs: int, timeout: int,
     if "warm" in skip:
         measurements["warm_retrieval"] = {"skipped": True}
     else:
-        measurements["warm_retrieval"] = measure_warm(corpus_str, count, queries, cache)
+        measurements["warm_retrieval"] = measure_warm(
+            corpus_str, count, queries, cache, index
+        )
     if "incremental" in skip:
         measurements["incremental"] = {"skipped": True}
     else:
         measurements["incremental"] = measure_incremental(
-            corpus_str, count, timeout, cache
+            corpus_str, count, timeout, cache, index
         )
 
     return {
@@ -456,7 +548,7 @@ def measure(corpus: Path, queries: int, runs: int, timeout: int,
         },
         "node": _node_string(),
         "engine": {"version": _engine_version()},
-        "mode": "cache" if cache else "no-cache",
+        "mode": _serve_mode(cache, index),
         "measurements": measurements,
     }
 
@@ -475,6 +567,9 @@ def main(argv: list[str] | None = None) -> int:
                         help=f"Per-command timeout seconds (default: {DEFAULT_TIMEOUT}).")
     parser.add_argument("--mcp-cache", action="store_true",
                         help="Serve MCP with --cache (records mode='cache').")
+    parser.add_argument("--mcp-index", action="store_true",
+                        help="Serve MCP with --index, the persistent corpus "
+                             "index (records mode='index', ADR-100/101).")
     parser.add_argument("--skip", default="",
                         help="Comma-separated ops to skip: "
                              + ", ".join(ALL_OPS) + ".")
@@ -482,13 +577,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.corpus.is_dir():
         parser.error(f"corpus not found: {args.corpus}")
+    if args.mcp_cache and args.mcp_index:
+        parser.error("--mcp-cache and --mcp-index are mutually exclusive")
     skip = {s.strip() for s in args.skip.split(",") if s.strip()}
     unknown = skip - set(ALL_OPS)
     if unknown:
         parser.error(f"unknown --skip ops: {sorted(unknown)}")
 
     results = measure(args.corpus, args.queries, args.runs, args.timeout,
-                      args.mcp_cache, skip)
+                      args.mcp_cache, skip, args.mcp_index)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n",
                         encoding="utf-8")
@@ -498,8 +595,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"measured {results['corpus']['count']} artifacts "
           f"(mode={results['mode']}) -> {args.out}")
     if search:
-        print(f"  search_artifacts warm p50={search['p50_ms']}ms "
+        print(f"  search_artifacts warm (broad) p50={search['p50_ms']}ms "
               f"p99={search['p99_ms']}ms")
+        selective = search.get("classes", {}).get("selective")
+        if selective:
+            print(f"  search_artifacts warm (selective) p50={selective['p50_ms']}ms "
+                  f"p99={selective['p99_ms']}ms")
     return 0
 
 
