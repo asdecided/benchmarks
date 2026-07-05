@@ -1,0 +1,18 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-2119",
+      "number": 2119,
+      "file": "corpus/RFC-2119.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc2119.txt",
+      "source_sha256": "3c2ceb7bfc84cd34720f4a5271338ab9d8280d34bdd1eb250c64306202f2ed8b",
+      "category": "Best Current Practice",
+      "title": "Key words for use in RFCs to Indicate Requirement Levels",
+      "obsoletes": [],
+      "replaces": []
+    }
+  ],
+  "supersedes_edges": []
+}

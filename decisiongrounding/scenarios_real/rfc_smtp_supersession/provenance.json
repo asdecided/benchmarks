@@ -1,0 +1,43 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-2821",
+      "number": 2821,
+      "file": "corpus/RFC-2821.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc2821.txt",
+      "source_sha256": "93d6c12135ef648bc6cc1efd371047070505b1d92e7d6923472b12e8c54850fe",
+      "category": "Standards Track",
+      "title": "Simple Mail Transfer Protocol",
+      "obsoletes": [
+        "RFC-0821",
+        "RFC-0974",
+        "RFC-1869"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-5321",
+      "number": 5321,
+      "file": "corpus/RFC-5321.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc5321.txt",
+      "source_sha256": "7d560eddff1b213c17d4e1e5f95005728b2f05bc2b3947f0fcc91717c6707634",
+      "category": "Standards Track",
+      "title": "Simple Mail Transfer Protocol",
+      "obsoletes": [
+        "RFC-2821"
+      ],
+      "replaces": [
+        "RFC-2821"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-5321",
+      "type": "supersedes",
+      "target": "RFC-2821"
+    }
+  ]
+}

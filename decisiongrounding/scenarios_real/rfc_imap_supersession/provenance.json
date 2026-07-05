@@ -1,0 +1,41 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-3501",
+      "number": 3501,
+      "file": "corpus/RFC-3501.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc3501.txt",
+      "source_sha256": "4437974dde85859f2391f32215295e7b20ce157c3bd2adbe7e5b443e990f15cf",
+      "category": "Standards Track",
+      "title": "INTERNET MESSAGE ACCESS PROTOCOL - VERSION 4rev1",
+      "obsoletes": [
+        "RFC-2060"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-9051",
+      "number": 9051,
+      "file": "corpus/RFC-9051.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc9051.txt",
+      "source_sha256": "acf52a50eb748ea21b5ffdcb31c761d3fbba6242d53d4f53c2555de039c5c3cf",
+      "category": "Standards Track",
+      "title": "Internet Message Access Protocol (IMAP) - Version 4rev2",
+      "obsoletes": [
+        "RFC-3501"
+      ],
+      "replaces": [
+        "RFC-3501"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-9051",
+      "type": "supersedes",
+      "target": "RFC-3501"
+    }
+  ]
+}

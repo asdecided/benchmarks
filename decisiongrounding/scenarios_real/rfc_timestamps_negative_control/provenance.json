@@ -1,0 +1,18 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-3339",
+      "number": 3339,
+      "file": "corpus/RFC-3339.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc3339.txt",
+      "source_sha256": "9ab2b8864a85dca73a88f49b0927bc7bc85f596926e4fd1890905777924e700a",
+      "category": "Standards Track",
+      "title": "Sun Microsystems",
+      "obsoletes": [],
+      "replaces": []
+    }
+  ],
+  "supersedes_edges": []
+}

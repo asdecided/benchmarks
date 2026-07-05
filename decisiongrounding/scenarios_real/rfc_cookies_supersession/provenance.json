@@ -1,0 +1,41 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-2965",
+      "number": 2965,
+      "file": "corpus/RFC-2965.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc2965.txt",
+      "source_sha256": "b1101e499511205ddd5739df11e01cd0e85c1ef37a7c1cb3fddb5fb73928af18",
+      "category": "Standards Track",
+      "title": "October 2000",
+      "obsoletes": [
+        "RFC-2109"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-6265",
+      "number": 6265,
+      "file": "corpus/RFC-6265.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc6265.txt",
+      "source_sha256": "dc4177094813e85a44a7897b892b76bc09160b3a03aea44f0f511f3a98f91933",
+      "category": "Standards Track",
+      "title": "HTTP State Management Mechanism",
+      "obsoletes": [
+        "RFC-2965"
+      ],
+      "replaces": [
+        "RFC-2965"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-6265",
+      "type": "supersedes",
+      "target": "RFC-2965"
+    }
+  ]
+}

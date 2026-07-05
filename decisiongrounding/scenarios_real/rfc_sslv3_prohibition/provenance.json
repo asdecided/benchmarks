@@ -1,0 +1,18 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-7568",
+      "number": 7568,
+      "file": "corpus/RFC-7568.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc7568.txt",
+      "source_sha256": "84e8adcafd4cde891e258342f9d5c3381f746d0ff40b196a8b83bb0b6a43c7d1",
+      "category": "Standards Track",
+      "title": "A. Langley",
+      "obsoletes": [],
+      "replaces": []
+    }
+  ],
+  "supersedes_edges": []
+}

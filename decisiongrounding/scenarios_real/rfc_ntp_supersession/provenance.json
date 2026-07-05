@@ -1,0 +1,40 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-1305",
+      "number": 1305,
+      "file": "corpus/RFC-1305.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc1305.txt",
+      "source_sha256": "0a09fb581d3a9ce8c0f8eef1bf8174668899c985bcb8fa75d8771a85b4efed9f",
+      "category": "",
+      "title": "Network Time Protocol (Version 3)",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-5905",
+      "number": 5905,
+      "file": "corpus/RFC-5905.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc5905.txt",
+      "source_sha256": "8b7abd903c60202e2953ee012fefa6916666c3b0c71825c748cdd262024fb268",
+      "category": "Standards Track",
+      "title": "W. Kasch",
+      "obsoletes": [
+        "RFC-1305",
+        "RFC-4330"
+      ],
+      "replaces": [
+        "RFC-1305"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-5905",
+      "type": "supersedes",
+      "target": "RFC-1305"
+    }
+  ]
+}

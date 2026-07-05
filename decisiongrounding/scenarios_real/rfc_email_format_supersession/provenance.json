@@ -1,0 +1,41 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-2822",
+      "number": 2822,
+      "file": "corpus/RFC-2822.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc2822.txt",
+      "source_sha256": "ef3a43abe126d87e800f1bf8cfff25654df584498105a5384a7ab21febb69637",
+      "category": "Standards Track",
+      "title": "Internet Message Format",
+      "obsoletes": [
+        "RFC-0822"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-5322",
+      "number": 5322,
+      "file": "corpus/RFC-5322.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc5322.txt",
+      "source_sha256": "cb459acca15a2aa895863eaeff6f1d5b9c4ca15578ae3e3706f757787a385969",
+      "category": "Standards Track",
+      "title": "Internet Message Format",
+      "obsoletes": [
+        "RFC-2822"
+      ],
+      "replaces": [
+        "RFC-2822"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-5322",
+      "type": "supersedes",
+      "target": "RFC-2822"
+    }
+  ]
+}

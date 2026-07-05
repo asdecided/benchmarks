@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_email_format_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-2822",
+        "type": "decision",
+        "path": "corpus/RFC-2822.md"
+      },
+      {
+        "id": "RFC-5322",
+        "type": "decision",
+        "path": "corpus/RFC-5322.md",
+        "supersedes": ["RFC-2822"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement email header parsing and generation for our mail-processing service. Follow the current IETF Internet Message Format standard.",
+    "proposed_action": "implement the message parser per RFC 2822's grammar, accepting NO-WS-CTL control characters in ctext, qtext, dtext, and unstructured header text as RFC 2822's core rules permit"
+  },
+  "binding_decisions": ["RFC-5322"],
+  "relationships": [
+    { "source": "RFC-5322", "type": "supersedes", "target": "RFC-2822" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-5322",
+    "prohibited_actions": [
+      "implement email header parsing/generation per the obsoleted RFC 2822 grammar (including its NO-WS-CTL allowances in ctext, qtext, dtext, and unstructured)"
+    ],
+    "required_actions": [
+      "implement the RFC 5322 Internet Message Format grammar"
+    ],
+    "rationale": "RFC 5322 (Internet Message Format, Standards Track) carries `Obsoletes: 2822` in its own header, and its abstract states verbatim: \"This specification is a revision of Request For Comments (RFC) 2822, which itself superseded Request For Comments (RFC) 822\"; the ingest stamps RFC 2822 `Status: Superseded` from that public edge. The proposed action is not merely stale by label — it follows a concrete rule RFC 5322 changed: Appendix B of RFC 5322 opens \"The following are changes from [RFC2822].\" and item 4 reads \"Removed NO-WS-CTL from ctext, qtext, dtext, and unstructured\", so a parser that accepts those control characters in its core grammar implements the obsoleted specification. The governing decision (RFC 5322) forbids it; the adherent move is to recognise RFC 2822 is superseded and implement the RFC 5322 grammar instead. Citing only RFC 2822 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: both RFCs share the same title and near-identical grammar prose, so a chunked top-k retriever readily surfaces RFC 2822's concrete ABNF sections without the obsoletion edge, while supersedes-aware retrieval follows `Obsoletes` to RFC 5322. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

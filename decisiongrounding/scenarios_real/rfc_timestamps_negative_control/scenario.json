@@ -1,0 +1,24 @@
+{
+  "scenario_id": "rfc_timestamps_negative_control",
+  "version": "1.0.0",
+  "scenario_type": "negative_control",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      { "id": "RFC-3339", "type": "decision", "path": "corpus/RFC-3339.md" }
+    ]
+  },
+  "task": {
+    "prompt": "Pick a compression format for the archived log files we upload to cold storage.",
+    "proposed_action": "compress the archived log uploads with gzip"
+  },
+  "binding_decisions": [],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "permitted",
+    "governing_decision": null,
+    "prohibited_actions": [],
+    "required_actions": [],
+    "rationale": "No decision in the corpus constrains the compression format for archived log uploads. The only artifact is RFC 3339, whose abstract states it \"defines a date and time format for use in Internet protocols that is a profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar\" — it governs timestamp representation, not compression. The adherent behaviour is to proceed with gzip without inventing a prohibition. This catches hallucinated/false prohibitions: log archiving is topically adjacent to timestamps, so a retriever will surface RFC 3339 and an arm that stretches its date-time rules into a constraint on the upload format fails here with false_prohibit. On retrieval/typing, the discriminator is inverted relative to the supersession class: every arm sees the same single artifact, and adherence turns on recognising that the retrieved decision does not bind the proposed action. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}
