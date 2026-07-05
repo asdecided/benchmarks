@@ -59,18 +59,24 @@ def _percentiles(samples: list[float]) -> dict[str, float]:
     }
 
 
-def query_set(size: int, calls: int) -> list[tuple[str, dict]]:
+def query_set(size: int, calls: int, classes: tuple[str, ...] = ("point", "related", "mid", "rare")) -> list[tuple[str, dict]]:
     """Deterministic mixed workload: point lookups, selective and broad search,
-    and graph neighbourhood reads, spread across the corpus."""
+    and graph neighbourhood reads, spread across the corpus. ``classes`` narrows
+    the mix (e.g. drop the Theta(matches) broad class at sizes where each call
+    costs minutes and one attempt documents the wall as well as ten)."""
     queries: list[tuple[str, dict]] = []
-    for k in range(calls):
+    k = 0
+    while len(queries) < calls:
         idx = (k * 2654435761) % size  # golden-ratio stride: spread, deterministic
-        kind = k % 4
-        if kind == 0:
+        kind = ("point", "related", "mid", "rare")[k % 4]
+        k += 1
+        if kind not in classes:
+            continue
+        if kind == "point":
             queries.append(("get_artifact", {"id": generate.artifact_id(idx)}))
-        elif kind == 1:
+        elif kind == "related":
             queries.append(("get_related", {"id": generate.artifact_id(idx)}))
-        elif kind == 2:
+        elif kind == "mid":
             term = generate.MID[k % len(generate.MID)]
             queries.append(("search_artifacts[mid]", {"query": term}))
         else:
@@ -95,7 +101,7 @@ def _rss_of(pattern: str) -> dict[str, int]:
     return {}
 
 
-async def bench_warm(corpus: str, size: int, calls: int, cache: bool, timeout: float) -> dict:
+async def bench_warm(corpus: str, size: int, calls: int, cache: bool, timeout: float, classes: tuple[str, ...] = ("point", "related", "mid", "rare")) -> dict:
     """Warm retrieval over a long-lived MCP stdio session."""
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
@@ -106,7 +112,7 @@ async def bench_warm(corpus: str, size: int, calls: int, cache: bool, timeout: f
     dnf = 0
     per_tool: dict[str, list[float]] = {}
     rss: dict[str, int] = {}
-    queries = query_set(size, calls)
+    queries = query_set(size, calls, classes)
     warmups = min(5, max(1, calls // 20))
     errlog = open(os.devnull, "w")
     async with stdio_client(params, errlog=errlog) as (read, write):
@@ -220,6 +226,8 @@ def main() -> int:
     ap.add_argument("--reps", type=int, default=5, help="cold CLI repetitions")
     ap.add_argument("--timeout", type=float, default=600.0, help="per-call / per-run cap (s)")
     ap.add_argument("--skip", default="", help="comma list of: warm,cold,full,incr")
+    ap.add_argument("--classes", default="point,related,mid,rare",
+                    help="warm workload classes (comma list of point,related,mid,rare)")
     ap.add_argument("--label", default="", help="free-form label (e.g. engine build)")
     a = ap.parse_args()
     skip = set(filter(None, a.skip.split(",")))
@@ -242,7 +250,7 @@ def main() -> int:
         print(f"[warm] mcp stdio, cache={a.cache}, {a.calls} calls ...", flush=True)
         try:
             scorecard["metrics"]["warm_retrieval"] = asyncio.run(
-                bench_warm(a.corpus, a.size, a.calls, a.cache, a.timeout)
+                bench_warm(a.corpus, a.size, a.calls, a.cache, a.timeout, tuple(filter(None, a.classes.split(","))))
             )
         except Exception as e:  # a dead server (e.g. OOM-killed) is a result
             scorecard["metrics"]["warm_retrieval"] = {
