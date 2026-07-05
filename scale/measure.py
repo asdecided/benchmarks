@@ -370,7 +370,8 @@ def _tool_arguments(tool: str, i: int, corpus_count: int) -> dict:
 
 
 def measure_warm(corpus: str, corpus_count: int, queries: int,
-                 cache: bool, index: bool = False) -> dict:
+                 cache: bool, index: bool = False,
+                 only_classes: frozenset[str] | None = None) -> dict:
     client = McpClient(corpus, cache, index)
     per_tool: dict[str, dict] = {}
     with _RssSampler(client.pid) as sampler:
@@ -378,6 +379,14 @@ def measure_warm(corpus: str, corpus_count: int, queries: int,
             client.initialize()
             for tool in WARM_TOOLS:
                 classes = WARM_CLASSES[tool]
+                if only_classes is not None:
+                    # Additive filter: at large corpus sizes the broad class
+                    # costs tens of seconds per call (payload-bound), so deep
+                    # tail sampling of the gated classes needs to run without
+                    # it. Skipped classes are simply absent from ``classes``.
+                    classes = tuple(c for c in classes if c in only_classes)
+                    if not classes:
+                        continue
                 per_class: dict[str, dict] = {}
                 for cls in classes:
                     # Warm-up call (untimed): pays any first-touch build cost.
@@ -515,7 +524,7 @@ def _serve_mode(cache: bool, index: bool) -> str:
 
 
 def measure(corpus: Path, queries: int, runs: int, timeout: int,
-            cache: bool, skip: set[str], index: bool = False) -> dict:
+            cache: bool, skip: set[str], index: bool = False, only_classes: frozenset[str] | None = None) -> dict:
     count = _corpus_count(corpus)
     corpus_str = str(corpus)
     # A term and id known to be present, for find/resolve one-shots.
@@ -530,7 +539,7 @@ def measure(corpus: Path, queries: int, runs: int, timeout: int,
         measurements["warm_retrieval"] = {"skipped": True}
     else:
         measurements["warm_retrieval"] = measure_warm(
-            corpus_str, count, queries, cache, index
+            corpus_str, count, queries, cache, index, only_classes
         )
     if "incremental" in skip:
         measurements["incremental"] = {"skipped": True}
@@ -570,6 +579,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--mcp-index", action="store_true",
                         help="Serve MCP with --index, the persistent corpus "
                              "index (records mode='index', ADR-100/101).")
+    parser.add_argument("--classes", default="",
+                        help="Comma-separated warm query classes to measure "
+                             "(default: all). E.g. selective,lookup at large "
+                             "sizes where broad is payload-bound.")
     parser.add_argument("--skip", default="",
                         help="Comma-separated ops to skip: "
                              + ", ".join(ALL_OPS) + ".")
@@ -584,8 +597,10 @@ def main(argv: list[str] | None = None) -> int:
     if unknown:
         parser.error(f"unknown --skip ops: {sorted(unknown)}")
 
+    only_classes = (frozenset(c.strip() for c in args.classes.split(",") if c.strip())
+                    or None) if args.classes else None
     results = measure(args.corpus, args.queries, args.runs, args.timeout,
-                      args.mcp_cache, skip, args.mcp_index)
+                      args.mcp_cache, skip, args.mcp_index, only_classes)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n",
                         encoding="utf-8")
