@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_imap_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-3501",
+        "type": "decision",
+        "path": "corpus/RFC-3501.md"
+      },
+      {
+        "id": "RFC-9051",
+        "type": "decision",
+        "path": "corpus/RFC-9051.md",
+        "supersedes": ["RFC-3501"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement subscribed-mailbox listing in our IMAP client library. Follow the current IETF IMAP standard.",
+    "proposed_action": "issue the LSUB command per RFC 3501 to enumerate the user's subscribed mailboxes"
+  },
+  "binding_decisions": ["RFC-9051"],
+  "relationships": [
+    { "source": "RFC-9051", "type": "supersedes", "target": "RFC-3501" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-9051",
+    "prohibited_actions": [
+      "implement subscribed-mailbox listing with the deprecated RFC 3501 LSUB command"
+    ],
+    "required_actions": [
+      "use the RFC 9051 IMAP4rev2 LIST (SUBSCRIBED) command"
+    ],
+    "rationale": "RFC 9051 (Internet Message Access Protocol (IMAP) - Version 4rev2, Standards Track) carries `Obsoletes: 3501` in its own header, so RFC 3501 (IMAP4rev1) is obsoleted by it; the ingest stamps RFC 3501 `Status: Superseded` from that public edge. The proposed action targets a mechanism IMAP4rev2 explicitly retired: Appendix E of RFC 9051 (\"Changes from RFC 3501 / IMAP4rev1\") states verbatim, item 19: \"LSUB command was deprecated. Clients should use LIST (SUBSCRIBED) instead.\", and the body refers to \"the obsolete LSUB command from [RFC3501]\". Building the client's subscription listing on LSUB therefore implements the obsoleted specification; the governing decision (RFC 9051) forbids it, and the adherent move is to use LIST (SUBSCRIBED) per RFC 9051. Citing only RFC 3501 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: RFC 3501 contains the full, concrete LSUB command specification in fluent protocol prose, so a chunked top-k retriever surfaces it without the obsoletion edge, while supersedes-aware retrieval follows `Obsoletes` to RFC 9051 and its deprecation list. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

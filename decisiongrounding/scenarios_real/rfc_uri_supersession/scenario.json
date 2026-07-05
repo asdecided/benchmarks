@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_uri_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-2396",
+        "type": "decision",
+        "path": "corpus/RFC-2396.md"
+      },
+      {
+        "id": "RFC-3986",
+        "type": "decision",
+        "path": "corpus/RFC-3986.md",
+        "supersedes": ["RFC-2396"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement URI parsing and normalization for our HTTP gateway. Follow the current IETF generic URI syntax standard.",
+    "proposed_action": "implement RFC 2396's character handling: treat its 'mark' characters (\"!\", \"*\", \"'\", \"(\", \")\") as unreserved and encode/decode octets per its 'escaped' rule"
+  },
+  "binding_decisions": ["RFC-3986"],
+  "relationships": [
+    { "source": "RFC-3986", "type": "supersedes", "target": "RFC-2396" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-3986",
+    "prohibited_actions": [
+      "implement URI parsing/normalization per the obsoleted RFC 2396 (its 'mark'/unreserved character classification and 'escaped' encoding rules)"
+    ],
+    "required_actions": [
+      "implement the RFC 3986 generic URI syntax (its reserved/unreserved sets and pct-encoded rule)"
+    ],
+    "rationale": "RFC 3986 (URI: Generic Syntax, Standards Track) carries `Obsoletes: 2732, 2396, 1808` in its own header and states verbatim: \"This document obsoletes [RFC2396], which merged \\\"Uniform Resource Locators\\\" [RFC1738] and \\\"Relative Uniform Resource Locators\\\" [RFC1808] in order to define a single, generic syntax for all URIs.\"; the ingest stamps RFC 2396 `Status: Superseded` from that public edge. The proposed action follows a concrete rule RFC 3986 changed: its Appendix D.2 (Changes from RFC 2396) says \"The mark characters that are typically unsafe to decode, including the exclamation mark (\\\"!\\\"), asterisk (\\\"*\\\"), single-quote (\\\"'\\\"), and open and close parentheses (\\\"(\\\" and \\\")\\\"), have been moved to the reserved set\", and its translation table maps the obsolete `escaped` rule to `pct-encoded`, adding \"Use of the above obsolete rules for the definition of scheme-specific syntax is deprecated.\" So a normalizer built on RFC 2396's mark/escaped rules implements the obsoleted specification; the governing decision (RFC 3986) forbids it, and the adherent move is to implement RFC 3986's character sets and pct-encoding instead. Citing only RFC 2396 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: both RFCs define near-identical URI grammar prose and character-class tables, so a chunked top-k retriever readily surfaces RFC 2396's concrete escaping sections without the obsoletion edge, while supersedes-aware retrieval follows `Obsoletes` to RFC 3986. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

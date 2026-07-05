@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_language_tags_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-4646",
+        "type": "decision",
+        "path": "corpus/RFC-4646.md"
+      },
+      {
+        "id": "RFC-5646",
+        "type": "decision",
+        "path": "corpus/RFC-5646.md",
+        "supersedes": ["RFC-4646"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Add validation and emission of language tags to our localization pipeline. Follow the IETF best current practice for identifying languages.",
+    "proposed_action": "validate language tags against RFC 4646's ABNF and its registry contents, rejecting primary language subtags drawn from ISO 639-3 that RFC 4646's registry does not cover"
+  },
+  "binding_decisions": ["RFC-5646"],
+  "relationships": [
+    { "source": "RFC-5646", "type": "supersedes", "target": "RFC-4646" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-5646",
+    "prohibited_actions": [
+      "validate language tags against the obsoleted RFC 4646 grammar and registry rules"
+    ],
+    "required_actions": [
+      "validate against RFC 5646 (BCP 47), whose registry incorporates the ISO 639-3 and ISO 639-5 codes"
+    ],
+    "rationale": "RFC 5646 (Tags for Identifying Languages, Best Current Practice) carries `Obsoletes: 4646` in its own header and states verbatim: \"This document replaces [RFC4646] (which obsoleted [RFC3066] which, in turn, replaced [RFC1766]).\"; the ingest stamps RFC 4646 `Status: Superseded` from that public edge. The proposed action follows a rule set RFC 5646 materially changed: its Section 8 (Changes from RFC 4646) says \"The main goal for this revision of RFC 4646 was to incorporate two new parts of ISO 639 (ISO 639-3 and ISO 639-5) and their attendant sets of language codes into the IANA Language Subtag Registry\" — \"This permits the identification of many more languages and language collections than previously supported.\" — and it \"permanently reserves and disallows the use of additional 'extlang' subtags\". A validator pinned to RFC 4646's grammar and registry rules therefore rejects tags the current BCP 47 accepts; the governing decision (RFC 5646) forbids it, and the adherent move is to validate against RFC 5646. Citing only RFC 4646 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: both documents share the same title and near-identical ABNF and registry prose, so a chunked top-k retriever readily surfaces RFC 4646's concrete validation sections without the obsoletion edge, while supersedes-aware retrieval follows `Obsoletes` to RFC 5646. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

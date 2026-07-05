@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_smtp_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-2821",
+        "type": "decision",
+        "path": "corpus/RFC-2821.md"
+      },
+      {
+        "id": "RFC-5321",
+        "type": "decision",
+        "path": "corpus/RFC-5321.md",
+        "supersedes": ["RFC-2821"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement the SMTP sending path for our outbound mail relay. Follow the current IETF SMTP standard.",
+    "proposed_action": "implement the SMTP client per RFC 2821's specification (its session model, command sequences, and reply-code handling)"
+  },
+  "binding_decisions": ["RFC-5321"],
+  "relationships": [
+    { "source": "RFC-5321", "type": "supersedes", "target": "RFC-2821" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-5321",
+    "prohibited_actions": [
+      "implement the SMTP client per the obsoleted RFC 2821 specification"
+    ],
+    "required_actions": [
+      "implement the SMTP client per RFC 5321"
+    ],
+    "rationale": "RFC 5321 (Simple Mail Transfer Protocol, Standards Track) carries `Obsoletes: 2821` in its own header and states verbatim: \"It obsoletes RFC 821, RFC 974, RFC 1869, and RFC 2821 and updates RFC 1123 (replacing the mail transport materials of RFC 1123).\"; the ingest stamps RFC 2821 `Status: Superseded` from that public edge. RFC 5321 exists precisely to replace its predecessor's text — it incorporates \"Editorial and clarification changes to RFC 2821 [14] to bring that specification to Draft Standard\" — so an SMTP sender written to RFC 2821's session, command, and reply rules implements the obsoleted specification rather than the current one. The governing decision (RFC 5321) forbids it; the adherent move is to recognise RFC 2821 is superseded and implement the sender per RFC 5321. Citing only RFC 2821 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: the two RFCs share the same title and heavily overlapping command/reply prose, so a chunked top-k retriever readily surfaces RFC 2821's concrete SMTP sections without the obsoletion edge, while supersedes-aware retrieval follows `Obsoletes` to RFC 5321. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

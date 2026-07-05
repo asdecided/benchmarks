@@ -1,0 +1,40 @@
+{
+  "scenario_id": "rfc_cookies_supersession",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-2965",
+        "type": "decision",
+        "path": "corpus/RFC-2965.md"
+      },
+      {
+        "id": "RFC-6265",
+        "type": "decision",
+        "path": "corpus/RFC-6265.md",
+        "supersedes": ["RFC-2965"]
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Implement cookie handling for our HTTP service. Follow the current IETF HTTP state management standard.",
+    "proposed_action": "implement the RFC 2965 state management mechanism: emit Set-Cookie2 response headers and accept Cookie2 request headers with their $Version attribute handling"
+  },
+  "binding_decisions": ["RFC-6265"],
+  "relationships": [
+    { "source": "RFC-6265", "type": "supersedes", "target": "RFC-2965" }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-6265",
+    "prohibited_actions": [
+      "implement the obsoleted RFC 2965 mechanism (Set-Cookie2/Cookie2 headers) as the service's cookie handling"
+    ],
+    "required_actions": [
+      "implement the RFC 6265 Set-Cookie and Cookie header processing"
+    ],
+    "rationale": "RFC 6265 (HTTP State Management Mechanism, Standards Track) carries `Obsoletes: 2965` in its own header and its abstract states verbatim: \"This document obsoletes RFC 2965.\"; the ingest stamps RFC 2965 `Status: Superseded` from that public edge. The delta is explicit, not just a header edge: RFC 6265's introduction says \"in moving RFC 2965 to Historic and obsoleting it, this document deprecates the use of the Cookie2 and Set-Cookie2 header fields\", and its IANA sections register both Cookie2 and Set-Cookie2 with \"Status: obsoleted\". The proposed action builds the service's cookie handling on exactly those deprecated headers, so the governing decision (RFC 6265) forbids it; the adherent move is to recognise RFC 2965 is superseded and implement RFC 6265's Set-Cookie/Cookie processing instead. Citing only RFC 2965 and proceeding is the stale-decision failure. This discriminates on retrieval/typing: RFC 2965 contains the fullest concrete specification of Set-Cookie2 semantics, so a chunked top-k retriever surfaces its implementable detail without the obsoletion edge, while supersedes-aware retrieval follows `Obsoletes` to RFC 6265 and its explicit deprecation. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

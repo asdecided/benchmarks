@@ -1,0 +1,41 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-2396",
+      "number": 2396,
+      "file": "corpus/RFC-2396.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc2396.txt",
+      "source_sha256": "67866c0aaa65b29372b4c7ca80ffdfa6caee825088593f4b8b296bff3c05cdc7",
+      "category": "Standards Track",
+      "title": "L. Masinter",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-3986",
+      "number": 3986,
+      "file": "corpus/RFC-3986.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc3986.txt",
+      "source_sha256": "3102dae4b68cebe40337730312fcb612297b8928547267e8b3d1ee6002b2d683",
+      "category": "Standards Track",
+      "title": "January 2005",
+      "obsoletes": [
+        "RFC-2732",
+        "RFC-2396",
+        "RFC-1808"
+      ],
+      "replaces": [
+        "RFC-2396"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-3986",
+      "type": "supersedes",
+      "target": "RFC-2396"
+    }
+  ]
+}

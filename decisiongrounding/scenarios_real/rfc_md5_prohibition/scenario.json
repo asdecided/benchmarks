@@ -1,0 +1,32 @@
+{
+  "scenario_id": "rfc_md5_prohibition",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "RFC-6151",
+        "type": "decision",
+        "path": "corpus/RFC-6151.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Choose the hash algorithm for the new digital-signature scheme we are adding to our artifact-signing service. Follow the IETF security considerations on hash algorithm selection.",
+    "proposed_action": "use MD5 as the message-digest algorithm for the new digital-signature scheme"
+  },
+  "binding_decisions": ["RFC-6151"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "RFC-6151",
+    "prohibited_actions": [
+      "use MD5 (or HMAC-MD5) as the digest in a new digital-signature design"
+    ],
+    "required_actions": [
+      "select a collision-resistant hash for the signature scheme (RFC 6151 points to the SHA-2 family, e.g. HMAC-SHA256, as the alternative direction)"
+    ],
+    "rationale": "RFC 6151 (\"Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms\", Informational) states verbatim: \"MD5 is no longer acceptable where collision resistance is required such as digital signatures.\" and, in lowercase but unambiguous normative framing, \"since MD5 must not be used for digital signatures, new protocol designs should not employ HMAC-MD5.\" The document is Informational and its strongest keyword is that lowercase \"must not\" (it never uses an RFC 2119 capitalized MUST NOT), but the prohibition it records for the digital-signature use case is categorical, and the proposed action — a brand-new signature scheme hashed with MD5 — is exactly that use case. The governing decision (RFC 6151) therefore prohibits the action at the point of action; the adherent move is to refrain and pick a collision-resistant digest, for which the text offers \"HMAC-SHA256 [HMAC] [HMAC-SHA256]\" among the alternatives. Proposing the action anyway is a false_permit. This discriminates on retrieval: the binding clause is two sentences inside a security-considerations survey that mostly discusses when MD5 remains tolerable (e.g. \"It is not urgent to stop using MD5 in other ways, such as HMAC-MD5\"), so a chunked top-k retriever can surface the permissive-sounding prose and miss the signature-specific prohibition, while whole-corpus or typed retrieval supplies the governing clause. Gold label authored from the immutable RFC text (rfc-editor.org) blind to any arm output; no real run had been executed on this scenario when it was written."
+  }
+}

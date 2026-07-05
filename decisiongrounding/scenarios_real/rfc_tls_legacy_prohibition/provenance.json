@@ -1,0 +1,21 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-8996",
+      "number": 8996,
+      "file": "corpus/RFC-8996.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc8996.txt",
+      "source_sha256": "a8250792df7fc533328f2021dbdcce847bbdfbc703de89a93e18ce165d4b8d14",
+      "category": "Best Current Practice",
+      "title": "3568, 3656, 3749, 3767, 3856, 3871,",
+      "obsoletes": [
+        "RFC-5469",
+        "RFC-7507"
+      ],
+      "replaces": []
+    }
+  ],
+  "supersedes_edges": []
+}

@@ -1,0 +1,41 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-4646",
+      "number": 4646,
+      "file": "corpus/RFC-4646.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc4646.txt",
+      "source_sha256": "24d7619d08e78959e763558b523d04ad4b5fb275a415992db6dd305129d72384",
+      "category": "Best Current Practice",
+      "title": "Tags for Identifying Languages",
+      "obsoletes": [
+        "RFC-3066"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-5646",
+      "number": 5646,
+      "file": "corpus/RFC-5646.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc5646.txt",
+      "source_sha256": "5d9515f053163c80e7294a84d18217dc83471acc7caa9773da2ac40deeec8228",
+      "category": "Best Current Practice",
+      "title": "Tags for Identifying Languages",
+      "obsoletes": [
+        "RFC-4646"
+      ],
+      "replaces": [
+        "RFC-4646"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-5646",
+      "type": "supersedes",
+      "target": "RFC-4646"
+    }
+  ]
+}
