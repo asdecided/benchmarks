@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "corpus": "c100k",
+    "size": 100000,
+    "seed": 7,
+    "rac_version": "rac 0.1.dev50+g44d48d40a",
+    "label": "",
+    "cpu_count": 4,
+    "timestamp": "2026-07-05T07:32:51Z"
+  },
+  "metrics": {
+    "warm_retrieval": {
+      "cache": false,
+      "calls": 6,
+      "dnf": 0,
+      "n": 6,
+      "p50_ms": 79394.3,
+      "p95_ms": 421299.12,
+      "p99_ms": 421299.12,
+      "mean_ms": 140054.9,
+      "max_ms": 421299.12,
+      "per_tool": {
+        "get_artifact": {
+          "n": 2,
+          "p50_ms": 77864.84,
+          "p95_ms": 77864.84,
+          "p99_ms": 77864.84,
+          "mean_ms": 77751.89,
+          "max_ms": 77864.84
+        },
+        "get_related": {
+          "n": 2,
+          "p50_ms": 79394.3,
+          "p95_ms": 79394.3,
+          "p99_ms": 79394.3,
+          "mean_ms": 79259.21,
+          "max_ms": 79394.3
+        },
+        "search_artifacts": {
+          "n": 2,
+          "p50_ms": 421299.12,
+          "p95_ms": 421299.12,
+          "p99_ms": 421299.12,
+          "mean_ms": 263153.62,
+          "max_ms": 421299.12
+        }
+      },
+      "server_rss_mb": 211.5,
+      "server_peak_rss_mb": 1471.7
+    },
+    "cold_cli": {
+      "resolve": {
+        "runs": [
+          {
+            "wall_s": 77.85,
+            "exit": 0,
+            "peak_rss_mb": 732.9
+          },
+          {
+            "wall_s": 76.46,
+            "exit": 0,
+            "peak_rss_mb": 732.8
+          }
+        ],
+        "median_wall_s": 77.16,
+        "dnf": 0
+      },
+      "find_rare": {
+        "runs": [
+          {
+            "wall_s": 98.09,
+            "exit": 0,
+            "peak_rss_mb": 1428.8
+          },
+          {
+            "wall_s": 99.1,
+            "exit": 0,
+            "peak_rss_mb": 1428.6
+          }
+        ],
+        "median_wall_s": 98.59,
+        "dnf": 0
+      }
+    },
+    "full_validate": {
+      "wall_s": 77.26,
+      "exit": 0,
+      "peak_rss_mb": 657.3
+    },
+    "incremental_validate": {
+      "wall_s": 76.93,
+      "exit": 0,
+      "peak_rss_mb": 657.2
+    }
+  }
+}

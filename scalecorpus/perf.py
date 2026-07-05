@@ -239,9 +239,14 @@ def main() -> int:
 
     if "warm" not in skip:
         print(f"[warm] mcp stdio, cache={a.cache}, {a.calls} calls ...", flush=True)
-        scorecard["metrics"]["warm_retrieval"] = asyncio.run(
-            bench_warm(a.corpus, a.size, a.calls, a.cache, a.timeout)
-        )
+        try:
+            scorecard["metrics"]["warm_retrieval"] = asyncio.run(
+                bench_warm(a.corpus, a.size, a.calls, a.cache, a.timeout)
+            )
+        except Exception as e:  # a dead server (e.g. OOM-killed) is a result
+            scorecard["metrics"]["warm_retrieval"] = {
+                "cache": a.cache, "crashed": True, "error": f"{type(e).__name__}: {e}"[:500],
+            }
     if "cold" not in skip:
         print(f"[cold] cli one-shots, {a.reps} reps ...", flush=True)
         scorecard["metrics"]["cold_cli"] = bench_cold_cli(a.corpus, a.size, a.reps, a.timeout)
