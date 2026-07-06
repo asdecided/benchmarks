@@ -13,7 +13,7 @@ _ENGINE_IMPORT = re.compile(r"^\s*(?:import\s+rac\b|from\s+rac\b)", re.MULTILINE
 
 
 # Non-gated evidence-run subdirs are inside the engine boundary too.
-EVIDENCE_DIRS = ("gitchameleon", "scale", "granularity")
+EVIDENCE_DIRS = ("gitchameleon", "scale", "granularity", "durability")
 
 
 def _suite_python_files():
