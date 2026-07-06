@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 from abc import ABC, abstractmethod
 
 from .base import Action, GroundingContext, ProposedChange, Task
@@ -82,6 +83,10 @@ class AnsweringModel(ABC):
     # Real token usage from the most recent respond(), so the runner can record
     # per-cell cost. None for the offline stub (it makes no API call).
     last_usage: dict | None = None
+    # Schema-miss retry telemetry from the most recent respond(). 0 / False for
+    # backends that don't retry (offline stub, claude native).
+    last_schema_retries: int = 0
+    last_used_tool_call_fallback: bool = False
 
     @abstractmethod
     def respond(
@@ -168,6 +173,16 @@ class ScriptedAnsweringModel(AnsweringModel):
         )
 
 
+# How many times an OpenAI-compatible gateway's structured-output response gets
+# resent, identically, after it parses but fails the ProposedChange schema
+# (missing/extra field, non-JSON body). Some backends behind LiteLLM don't
+# honor `response_format` strictly on every call, and a schema-miss is usually
+# a one-off — retrying the identical request before giving up on the cell
+# recovers most of them cheaply. This is transport-level retry on the shared
+# answering model, applied identically regardless of arm, so it does not
+# violate the "no per-arm retry" rule in CONTRIBUTING.md.
+SCHEMA_MISS_MAX_RETRIES = 3
+
 # JSON Schema the answering model must return — mirrors providers.base.ProposedChange.
 _PROPOSED_CHANGE_SCHEMA = {
     "type": "object",
@@ -220,19 +235,31 @@ def _task_user_prompt(grounding: GroundingContext, task: Task) -> str:
     )
 
 
+class SchemaMissError(RuntimeError):
+    """A structured-output response that parsed but did not satisfy the
+    ProposedChange schema (or wasn't JSON at all) — the retryable failure mode
+    an OpenAI-compatible gateway hits when the underlying model doesn't honor
+    `response_format`/`json_schema` strictly on every call. Subclasses
+    RuntimeError so existing `except RuntimeError` / `pytest.raises(RuntimeError)`
+    call sites keep working unchanged.
+    """
+
+
 def _proposed_change_from_json_text(text: str, backend: str) -> ProposedChange:
     """Decode the structured-output JSON text into a ProposedChange.
 
     Shared by every real backend's parse path. Fails loudly on non-JSON or a
     missing field — a silent fallback would turn a transport problem into a
-    scored answer, which the determinism rules forbid.
+    scored answer, which the determinism rules forbid. Callers that want to
+    retry a schema-miss (see `OpenAICompatAnsweringModel.respond`) catch
+    `SchemaMissError`.
     """
     import json
 
     try:
         data = json.loads(text)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(
+        raise SchemaMissError(
             f"{backend} returned non-JSON despite the structured-output schema: {exc}"
         ) from exc
     try:
@@ -246,7 +273,7 @@ def _proposed_change_from_json_text(text: str, backend: str) -> ProposedChange:
             asserts_permission=bool(data["asserts_permission"]),
         )
     except (KeyError, TypeError) as exc:
-        raise RuntimeError(
+        raise SchemaMissError(
             f"{backend} JSON missing an expected ProposedChange field: {exc}"
         ) from exc
 
@@ -353,18 +380,38 @@ class OpenAICompatAnsweringModel(AnsweringModel):
     pin, answered — pin the alias to a fixed model on the gateway, or the
     recorded identity is misleading. The Batch API is not part of the OpenAI
     surface: this backend is synchronous only.
+
+    Schema-miss handling: some backends behind a gateway don't honor
+    ``response_format`` strictly on every call and occasionally return JSON
+    missing a required ``ProposedChange`` field (or no JSON at all). On that
+    failure, `respond()` re-sends the IDENTICAL request up to
+    `max_schema_retries` times (default `SCHEMA_MISS_MAX_RETRIES`); if every
+    attempt still misses, it falls back once to tool/function-calling for the
+    structured output (`use_tool_call_fallback`, on by default) before raising
+    — a stronger structured-output mechanism some backends honor even when
+    they ignore ``response_format``. Only after both are exhausted is the
+    cell recorded as an error.
     """
 
     name = "litellm"
     temperature = None
 
-    def __init__(self, model: str, seed: int = 0, timeout: float = 300.0) -> None:
+    def __init__(
+        self,
+        model: str,
+        seed: int = 0,
+        timeout: float = 300.0,
+        max_schema_retries: int = SCHEMA_MISS_MAX_RETRIES,
+        use_tool_call_fallback: bool = True,
+    ) -> None:
         if not model:
             raise ValueError("litellm answering model needs an alias: litellm:<model>")
         self.model = model
         self.version = f"litellm:{model}"
         self.seed = seed  # bookkeeping only, like the claude backend
         self.timeout = timeout
+        self.max_schema_retries = max_schema_retries
+        self.use_tool_call_fallback = use_tool_call_fallback
 
     @staticmethod
     def _base_url() -> str:
@@ -416,18 +463,68 @@ class OpenAICompatAnsweringModel(AnsweringModel):
         """Decode a `/chat/completions` JSON payload into a ProposedChange."""
         choices = payload.get("choices") or []
         if not choices:
-            raise RuntimeError(f"litellm returned no choices: {payload!r}")
+            raise SchemaMissError(f"litellm returned no choices: {payload!r}")
         choice = choices[0]
         if choice.get("finish_reason") == "content_filter":
             # The OpenAI-surface analogue of an Anthropic refusal stop.
             return ProposedChange(summary="model refused", actions=[])
         text = (choice.get("message") or {}).get("content")
         if not text:
-            raise RuntimeError(
+            raise SchemaMissError(
                 f"litellm returned no message content "
                 f"(finish_reason={choice.get('finish_reason')!r})."
             )
         return _proposed_change_from_json_text(text, "litellm")
+
+    def build_tool_call_request(
+        self, scaffold: str, grounding: GroundingContext, task: Task
+    ) -> dict:
+        """A fallback request shape: ask for the ProposedChange via a forced
+        tool/function call instead of `response_format` json_schema. Same
+        scaffold/prompt/schema as `build_request` — only the structured-output
+        mechanism differs. Some gateway-routed backends honor a forced tool
+        call even when they silently ignore `response_format`.
+        """
+        return {
+            "model": self.model,
+            "max_tokens": 2048,
+            "messages": [
+                {"role": "system", "content": scaffold},
+                {"role": "user", "content": _task_user_prompt(grounding, task)},
+            ],
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "propose_change",
+                        "description": "Submit the ProposedChange for this task.",
+                        "parameters": _PROPOSED_CHANGE_SCHEMA,
+                    },
+                }
+            ],
+            "tool_choice": {"type": "function", "function": {"name": "propose_change"}},
+        }
+
+    def parse_tool_call_response(self, payload: dict) -> ProposedChange:
+        """Decode a `/chat/completions` JSON payload from the tool-call fallback."""
+        choices = payload.get("choices") or []
+        if not choices:
+            raise SchemaMissError(f"litellm returned no choices: {payload!r}")
+        choice = choices[0]
+        if choice.get("finish_reason") == "content_filter":
+            return ProposedChange(summary="model refused", actions=[])
+        tool_calls = (choice.get("message") or {}).get("tool_calls") or []
+        if not tool_calls:
+            raise SchemaMissError(
+                f"litellm tool-call fallback returned no tool_calls "
+                f"(finish_reason={choice.get('finish_reason')!r})."
+            )
+        arguments = (tool_calls[0].get("function") or {}).get("arguments")
+        if not arguments:
+            raise SchemaMissError(
+                "litellm tool-call fallback returned a tool call with no arguments."
+            )
+        return _proposed_change_from_json_text(arguments, "litellm (tool-call fallback)")
 
     @staticmethod
     def parse_usage(payload: dict) -> dict | None:
@@ -441,14 +538,15 @@ class OpenAICompatAnsweringModel(AnsweringModel):
             return None
         return {"input_tokens": int(inp or 0), "output_tokens": int(out or 0)}
 
-    def respond(
-        self, scaffold: str, grounding: GroundingContext, task: Task
-    ) -> ProposedChange:
+    def _post(self, request_kwargs: dict) -> dict:
+        """POST one `/chat/completions` request and return the decoded JSON
+        payload. Raises on transport/HTTP failure; never on a schema miss —
+        that is the caller's decision to retry."""
         import json
         import urllib.error
         import urllib.request
 
-        body = json.dumps(self.build_request(scaffold, grounding, task)).encode("utf-8")
+        body = json.dumps(request_kwargs).encode("utf-8")
         request = urllib.request.Request(
             f"{self._base_url()}/chat/completions",
             data=body,
@@ -460,11 +558,54 @@ class OpenAICompatAnsweringModel(AnsweringModel):
         )
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                payload = json.loads(response.read().decode("utf-8"))
+                return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")[:500]
             raise RuntimeError(
                 f"litellm gateway returned HTTP {exc.code}: {detail}"
             ) from None
+
+    def respond(
+        self, scaffold: str, grounding: GroundingContext, task: Task
+    ) -> ProposedChange:
+        self.last_schema_retries = 0
+        self.last_used_tool_call_fallback = False
+        request_kwargs = self.build_request(scaffold, grounding, task)
+        attempts = self.max_schema_retries + 1
+        last_exc: SchemaMissError | None = None
+        for attempt in range(1, attempts + 1):
+            payload = self._post(request_kwargs)
+            try:
+                pc = self.parse_response(payload)
+            except SchemaMissError as exc:
+                last_exc = exc
+                self.last_schema_retries = attempt
+                if attempt < attempts:
+                    print(
+                        f"litellm: schema-miss on attempt {attempt}/{attempts} "
+                        f"({exc}); re-sending the identical request",
+                        file=sys.stderr,
+                    )
+                continue
+            self.last_usage = self.parse_usage(payload)
+            return pc
+
+        assert last_exc is not None  # attempts >= 1, so the loop ran at least once
+        if not self.use_tool_call_fallback:
+            raise last_exc
+
+        print(
+            f"litellm: exhausted {attempts} schema-miss attempt(s) via "
+            "response_format; falling back to tool/function-calling for "
+            "structured output",
+            file=sys.stderr,
+        )
+        tool_request = self.build_tool_call_request(scaffold, grounding, task)
+        try:
+            payload = self._post(tool_request)
+            pc = self.parse_tool_call_response(payload)
+        except SchemaMissError as exc:
+            raise exc from last_exc
+        self.last_used_tool_call_fallback = True
         self.last_usage = self.parse_usage(payload)
-        return self.parse_response(payload)
+        return pc

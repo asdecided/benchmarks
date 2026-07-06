@@ -24,11 +24,27 @@ class ArmMetrics:
     false_permit_rate: float
     false_prohibit_rate: float
     governing_recall_rate: float | None
+    # Cells that errored out for this arm (a schema-miss that exhausted every
+    # retry, an HTTP failure, ...) and the total attempted (n_runs + n_errors).
+    # A rate above is averaged over `n_runs` completed cells ONLY — when
+    # n_errors > 0 that is partial coverage, not the full scenario set, and
+    # must not be reported/quoted as a full result.
+    n_errors: int = 0
+
+    @property
+    def n_total(self) -> int:
+        return self.n_runs + self.n_errors
+
+    @property
+    def coverage(self) -> str:
+        return f"{self.n_runs}/{self.n_total}"
 
     def as_dict(self) -> dict:
         return {
             "arm": self.arm,
             "n_runs": self.n_runs,
+            "n_errors": self.n_errors,
+            "n_total": self.n_total,
             "adherence_rate": self.adherence_rate,
             "stale_decision_rate": self.stale_decision_rate,
             "false_permit_rate": self.false_permit_rate,
@@ -47,8 +63,15 @@ def recall_rate(retrieved_flags: list) -> float | None:
     return _rate(governed) if governed else None
 
 
-def aggregate(arm: str, scores: list, retrieved_flags: list | None = None) -> ArmMetrics:
-    """Aggregate Score objects (and optional retrieval flags) for one arm."""
+def aggregate(
+    arm: str, scores: list, retrieved_flags: list | None = None, n_errors: int = 0
+) -> ArmMetrics:
+    """Aggregate Score objects (and optional retrieval flags) for one arm.
+
+    `n_errors`: cells for this arm that errored rather than scored — surfaced
+    on the result so a partial-coverage rate is never indistinguishable from a
+    full one (see `ArmMetrics.n_errors` / `.coverage`).
+    """
     return ArmMetrics(
         arm=arm,
         n_runs=len(scores),
@@ -57,6 +80,7 @@ def aggregate(arm: str, scores: list, retrieved_flags: list | None = None) -> Ar
         false_permit_rate=_rate([s.false_permit for s in scores]),
         false_prohibit_rate=_rate([s.false_prohibit for s in scores]),
         governing_recall_rate=recall_rate(retrieved_flags) if retrieved_flags is not None else None,
+        n_errors=n_errors,
     )
 
 

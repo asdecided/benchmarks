@@ -11,6 +11,7 @@ from .answering import (
     AnsweringModel,
     ClaudeAnsweringModel,
     OpenAICompatAnsweringModel,
+    SchemaMissError,
     ScriptedAnsweringModel,
 )
 from .base import (
@@ -24,6 +25,7 @@ from .base import (
 from .context_dump import ContextDumpProvider
 from .embedding import (
     Embedder,
+    LiteLLMEmbedder,
     LocalDeterministicEmbedder,
     SentenceTransformerEmbedder,
     VoyageEmbedder,
@@ -89,12 +91,14 @@ __all__ = [
     "ScriptedAnsweringModel",
     "ClaudeAnsweringModel",
     "OpenAICompatAnsweringModel",
+    "SchemaMissError",
     "make_answering_model",
     "build_provider",
     "Embedder",
     "LocalDeterministicEmbedder",
     "VoyageEmbedder",
     "SentenceTransformerEmbedder",
+    "LiteLLMEmbedder",
     "make_embedder",
     "ContextDumpProvider",
     "NaiveRagProvider",

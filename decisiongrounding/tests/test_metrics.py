@@ -3,7 +3,50 @@ Deterministic, dependency-free (no SciPy)."""
 
 import statistics
 
-from scoring.metrics import mean_ci, summarize, t_critical_95
+from scoring.metrics import aggregate, mean_ci, summarize, t_critical_95
+from scoring.scorer import Score
+
+
+def _score(adherent: bool) -> Score:
+    return Score(
+        adherent=adherent, stale_decision_followed=False,
+        false_permit=not adherent, false_prohibit=False,
+        governing_decision_matched=True,
+    )
+
+
+# --- partial coverage: a rate must never look like a full one ---------------
+
+
+def test_aggregate_defaults_to_zero_errors_and_full_coverage():
+    m = aggregate("rac", [_score(True), _score(True)])
+    assert m.n_runs == 2 and m.n_errors == 0 and m.n_total == 2
+    assert m.coverage == "2/2"
+
+
+def test_aggregate_records_errors_against_the_full_attempted_total():
+    # 3 of 5 cells completed (both adherent); 2 errored out. The rate is
+    # still computed over the 3 that scored, but n_total/coverage expose the
+    # partial coverage the rate doesn't capture on its own.
+    m = aggregate("rac", [_score(True), _score(True), _score(True)], n_errors=2)
+    assert m.n_runs == 3
+    assert m.n_errors == 2
+    assert m.n_total == 5
+    assert m.coverage == "3/5"
+    assert m.adherence_rate == 1.0  # averaged over completed cells only
+
+
+def test_aggregate_as_dict_carries_coverage_fields():
+    d = aggregate("rac", [_score(True)], n_errors=1).as_dict()
+    assert d["n_runs"] == 1 and d["n_errors"] == 1 and d["n_total"] == 2
+
+
+def test_aggregate_arm_with_zero_completed_cells():
+    # Every cell for this arm errored: no scores at all, but the error count
+    # must still surface rather than the arm silently vanishing.
+    m = aggregate("rac", [], n_errors=4)
+    assert m.n_runs == 0 and m.n_errors == 4 and m.n_total == 4
+    assert m.adherence_rate == 0.0
 
 
 def test_t_critical_95_table_and_normal_fallback():

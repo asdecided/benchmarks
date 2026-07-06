@@ -71,20 +71,38 @@ def _f(x, nd=2):
     return "n/a" if x is None else f"{x:.{nd}f}"
 
 
+def _coverage_cell(d):
+    """`n_runs/n_total` with an asterisk when the arm has error cells — a
+    partial-coverage rate must never read identically to a full one."""
+    n_errors = d.get("n_errors", 0)
+    n_total = d.get("n_total", d.get("n_runs", 0))
+    mark = "*" if n_errors else ""
+    return f"{d.get('n_runs', 0)}/{n_total}{mark}"
+
+
 def _metric_table(run):
     m = run["metrics_by_arm"]
+    any_errors = any(d.get("n_errors", 0) for d in m.values())
     rows = ['<table id=leaderboard class=sortable><thead><tr>'
             '<th class=sort>arm</th><th class=sort>adherence</th><th class=sort>stale</th>'
             '<th class=sort>false-permit</th><th class=sort>false-prohibit</th>'
-            '<th class=sort>gov-recall</th></tr></thead><tbody>']
+            '<th class=sort>gov-recall</th><th class=sort>coverage</th></tr></thead><tbody>']
     for a in sorted(m, key=lambda a: m[a]["adherence_rate"], reverse=True):
         d = m[a]
         rows.append(
             f'<tr data-arm="{_esc(a)}"><td><code>{_esc(a)}</code></td><td>{_f(d["adherence_rate"])}</td>'
             f"<td>{_f(d['stale_decision_rate'])}</td><td>{_f(d['false_permit_rate'])}</td>"
-            f"<td>{_f(d['false_prohibit_rate'])}</td><td>{_f(d.get('governing_recall_rate'))}</td></tr>"
+            f"<td>{_f(d['false_prohibit_rate'])}</td><td>{_f(d.get('governing_recall_rate'))}</td>"
+            f"<td>{_esc(_coverage_cell(d))}</td></tr>"
         )
-    return "".join(rows) + "</tbody></table>"
+    table = "".join(rows) + "</tbody></table>"
+    if any_errors:
+        table += (
+            '<p class=note>* partial coverage — this arm has error cells; its '
+            "rate is averaged over completed cells only, not the full "
+            "scenario set.</p>"
+        )
+    return table
 
 
 def _curve_cell(p, field):

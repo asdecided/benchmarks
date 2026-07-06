@@ -108,6 +108,11 @@ def run_one(arm: str, scenario: Scenario, model, seed: int, embedder: str = "loc
         # Real per-cell token usage when the answering model reports it (the
         # claude arm); None for the offline stub. Drives the cost report.
         "usage": getattr(model, "last_usage", None),
+        # Schema-miss retry telemetry (litellm backend only; 0/False elsewhere).
+        "schema_retries": {
+            "attempts": getattr(model, "last_schema_retries", 0),
+            "tool_call_fallback": getattr(model, "last_used_tool_call_fallback", False),
+        },
         "proposed_change": _pc_to_dict(pc),
         "score": sc.as_dict(),
         "retrieval": {"governing_decision_retrieved": governing_retrieved},
@@ -135,6 +140,15 @@ def _preflight(arms: tuple[str, ...], answering: str, embedder: str) -> None:
                 problems.append("--embedder voyage needs VOYAGE_API_KEY in the environment")
         elif embedder.startswith("st") and importlib.util.find_spec("sentence_transformers") is None:
             problems.append("--embedder st needs `sentence-transformers` (pip install -e '.[local-embeddings]')")
+        elif embedder.startswith("litellm"):
+            if not (os.environ.get("LITELLM_BASE_URL") or os.environ.get("OPENAI_BASE_URL")):
+                problems.append(
+                    "--embedder litellm needs LITELLM_BASE_URL (or OPENAI_BASE_URL) in the environment"
+                )
+            if not (os.environ.get("LITELLM_API_KEY") or os.environ.get("OPENAI_API_KEY")):
+                problems.append(
+                    "--embedder litellm needs LITELLM_API_KEY (or OPENAI_API_KEY) in the environment"
+                )
 
     if "rac" in arms and shutil.which(os.environ.get("RAC_BIN", "rac")) is None:
         problems.append(
@@ -205,6 +219,7 @@ def _write_report(
     by_arm: dict[str, list] = {}
     for r in results:
         by_arm.setdefault(r["arm"], []).append(r)
+    err_counts = _errors_by_arm(errors or [])
     from scoring.scorer import Score
 
     metrics = {
@@ -212,9 +227,16 @@ def _write_report(
             arm,
             [Score(**r["score"]) for r in rs],
             [r["retrieval"]["governing_decision_retrieved"] for r in rs],
+            n_errors=err_counts.get(arm, 0),
         ).as_dict()
         for arm, rs in by_arm.items()
     }
+    # An arm can error on every cell, leaving it out of `results` entirely —
+    # still surface its coverage rather than silently dropping it from the report.
+    for arm, n in err_counts.items():
+        metrics.setdefault(
+            arm, aggregate(arm, [], None, n_errors=n).as_dict()
+        )
     report = {
         "harness_version": HARNESS_VERSION,
         "generated": datetime.now(timezone.utc).isoformat(),
@@ -228,23 +250,55 @@ def _write_report(
     return path
 
 
-def _print_metrics(results: list[dict]) -> None:
+def _errors_by_arm(errors: list[dict]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for e in errors:
+        counts[e["arm"]] = counts.get(e["arm"], 0) + 1
+    return counts
+
+
+def _print_metrics(results: list[dict], errors: list[dict] | None = None) -> None:
     by_arm: dict[str, list] = {}
     for r in results:
         by_arm.setdefault(r["arm"], []).append(r)
+    err_counts = _errors_by_arm(errors or [])
     from scoring.scorer import Score
 
-    print(f"{'arm':<16}{'adhere':>8}{'stale':>8}{'f-permit':>10}{'f-prohibit':>12}{'gov-recall':>12}")
-    for arm, rs in by_arm.items():
+    arms = sorted(set(by_arm) | set(err_counts))
+    print(
+        f"{'arm':<16}{'adhere':>8}{'stale':>8}{'f-permit':>10}"
+        f"{'f-prohibit':>12}{'gov-recall':>12}{'coverage':>10}"
+    )
+    any_errors = False
+    for arm in arms:
+        rs = by_arm.get(arm, [])
+        n_err = err_counts.get(arm, 0)
         m = aggregate(
             arm,
             [Score(**r["score"]) for r in rs],
             [r["retrieval"]["governing_decision_retrieved"] for r in rs],
+            n_errors=n_err,
         )
         recall = "  n/a" if m.governing_recall_rate is None else f"{m.governing_recall_rate:.2f}"
+        # An arm with zero completed cells has no rate to average — say so
+        # instead of printing a misleading 0.00.
+        adhere = "   n/a" if not rs else f"{m.adherence_rate:.2f}"
+        if n_err:
+            any_errors = True
+            adhere += "*"
         print(
-            f"{arm:<16}{m.adherence_rate:>8.2f}{m.stale_decision_rate:>8.2f}"
-            f"{m.false_permit_rate:>10.2f}{m.false_prohibit_rate:>12.2f}{recall:>12}"
+            f"{arm:<16}{adhere:>8}{m.stale_decision_rate:>8.2f}"
+            f"{m.false_permit_rate:>10.2f}{m.false_prohibit_rate:>12.2f}"
+            f"{recall:>12}{m.coverage:>10}"
+        )
+    if any_errors:
+        print(
+            "\n! partial coverage: arm(s) marked '*' above have error cells "
+            "(coverage column = completed/total). Their rate is averaged over "
+            "completed cells ONLY — it is not the full scenario set and must "
+            "not be reported/quoted as a full result. See 'errors' in the "
+            "written report.",
+            file=sys.stderr,
         )
 
 
@@ -257,7 +311,7 @@ def cmd_run(args) -> int:
     partial = out_dir / f"run-{stamp}-{args.arm}.partial.jsonl"
     pairs = [(args.arm, sc) for sc in scenarios]
     results, errors = _execute_runs(pairs, model, args.seed, args.embedder, partial)
-    _print_metrics(results)
+    _print_metrics(results, errors)
     path = _write_report(results, out_dir, args.arm, errors, stamp)
     print(f"\nwrote {path}")
     return 1 if errors else 0
@@ -274,7 +328,7 @@ def cmd_compare(args) -> int:
     partial = out_dir / f"run-{stamp}-{label}.partial.jsonl"
     pairs = [(arm, sc) for arm in arms for sc in scenarios]
     results, errors = _execute_runs(pairs, model, args.seed, args.embedder, partial)
-    _print_metrics(results)
+    _print_metrics(results, errors)
     path = _write_report(results, out_dir, label, errors, stamp)
     print(f"\nwrote {path}")
     return 1 if errors else 0
@@ -378,7 +432,7 @@ def cmd_batch(args) -> int:
         run["score"] = score(cell["scenario"], pc).as_dict()
         results.append(run)
 
-    _print_metrics(results)
+    _print_metrics(results, errors)
     path = _write_report(results, out_dir, label, errors, stamp)
     print(f"\nwrote {path}")
     return 1 if errors else 0
@@ -441,7 +495,7 @@ def cmd_demo(args) -> int:
     partial = out_dir / f"run-{stamp}-demo.partial.jsonl"
     pairs = [(arm, sc) for arm in arms for sc in scenarios]
     results, errors = _execute_runs(pairs, model, args.seed, args.embedder, partial)
-    _print_metrics(results)
+    _print_metrics(results, errors)
     report = _write_report(results, out_dir, "demo", errors, stamp)
 
     pool = None
@@ -557,7 +611,16 @@ def cmd_demo(args) -> int:
             "\nNOTE: real-model run on the tiny SYNTHETIC scenarios — a real-model "
             "crossover, not yet the real-CORPUS evidence run. See README and ADR-0001."
         )
-    return 0
+    sweep_errors = dataset.get("errors") or []
+    if errors or sweep_errors:
+        print(
+            f"\n! {len(errors) + len(sweep_errors)} cell(s) errored across the "
+            "base-N table and/or the crossover sweep — the adherence numbers "
+            "above are averaged over completed cells only. See 'errors' in "
+            f"{report} and the crossover dataset.",
+            file=sys.stderr,
+        )
+    return 1 if (errors or sweep_errors) else 0
 
 
 def cmd_ui(args) -> int:
@@ -591,7 +654,9 @@ def main(argv: list[str] | None = None) -> int:
         sp.add_argument(
             "--embedder",
             default="local-hash",
-            help="naive_rag embedder: local-hash (offline) | voyage[:model] | st[:model]",
+            help="naive_rag embedder: local-hash (offline) | voyage[:model] | st[:model] | "
+            "litellm[:model] (OpenAI-compatible gateway /embeddings; needs "
+            "LITELLM_BASE_URL + LITELLM_API_KEY)",
         )
         if name == "run":
             sp.add_argument("--arm", required=True, choices=sorted(ARMS))

@@ -17,7 +17,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import pytest
 
 from providers import OpenAICompatAnsweringModel, make_answering_model
-from providers.answering import ClaudeAnsweringModel, _PROPOSED_CHANGE_SCHEMA
+from providers.answering import (
+    SCHEMA_MISS_MAX_RETRIES,
+    ClaudeAnsweringModel,
+    SchemaMissError,
+    _PROPOSED_CHANGE_SCHEMA,
+)
 from providers.base import SCAFFOLD, GroundingContext, ProposedChange, Task
 
 GROUNDING = GroundingContext(
@@ -37,6 +42,25 @@ GOOD_ANSWER = {
 def _payload(content: str | None, finish_reason: str = "stop", usage: dict | None = None):
     message = {"role": "assistant", "content": content}
     payload = {"choices": [{"message": message, "finish_reason": finish_reason}]}
+    if usage is not None:
+        payload["usage"] = usage
+    return payload
+
+
+def _tool_call_payload(answer: dict, usage: dict | None = None):
+    """The tool/function-calling analogue of `_payload`, for the fallback path."""
+    message = {
+        "role": "assistant",
+        "content": None,
+        "tool_calls": [
+            {
+                "id": "call_1",
+                "type": "function",
+                "function": {"name": "propose_change", "arguments": json.dumps(answer)},
+            }
+        ],
+    }
+    payload = {"choices": [{"message": message, "finish_reason": "tool_calls"}]}
     if usage is not None:
         payload["usage"] = usage
     return payload
@@ -118,6 +142,56 @@ def test_parse_response_fails_loudly_on_missing_field():
     model = OpenAICompatAnsweringModel(model="alias")
     with pytest.raises(RuntimeError, match="missing an expected"):
         model.parse_response(_payload(json.dumps(incomplete)))
+
+
+def test_parse_response_missing_field_is_a_schema_miss():
+    # SchemaMissError is a RuntimeError subclass (existing callers/tests that
+    # catch RuntimeError keep working), but retry logic can catch it specifically.
+    incomplete = dict(GOOD_ANSWER)
+    del incomplete["cites_decisions"]
+    model = OpenAICompatAnsweringModel(model="alias")
+    with pytest.raises(SchemaMissError):
+        model.parse_response(_payload(json.dumps(incomplete)))
+
+
+def test_parse_response_no_choices_is_a_schema_miss():
+    model = OpenAICompatAnsweringModel(model="alias")
+    with pytest.raises(SchemaMissError, match="no choices"):
+        model.parse_response({"choices": []})
+
+
+# --- tool/function-calling fallback request shape + parsing -----------------
+
+
+def test_build_tool_call_request_shares_prompt_and_schema():
+    model = OpenAICompatAnsweringModel(model="alias")
+    req = model.build_request(SCAFFOLD, GROUNDING, TASK)
+    tool_req = model.build_tool_call_request(SCAFFOLD, GROUNDING, TASK)
+    assert tool_req["messages"] == req["messages"]
+    assert "response_format" not in tool_req
+    fn = tool_req["tools"][0]["function"]
+    assert fn["name"] == "propose_change"
+    assert fn["parameters"] == _PROPOSED_CHANGE_SCHEMA
+    assert tool_req["tool_choice"] == {"type": "function", "function": {"name": "propose_change"}}
+
+
+def test_parse_tool_call_response_decodes_proposed_change():
+    model = OpenAICompatAnsweringModel(model="alias")
+    pc = model.parse_tool_call_response(_tool_call_payload(GOOD_ANSWER))
+    assert pc.asserts_permission is True
+    assert pc.cites_decisions == ["DG-ADR-TEST-001"]
+
+
+def test_parse_tool_call_response_fails_loudly_on_no_tool_calls():
+    model = OpenAICompatAnsweringModel(model="alias")
+    with pytest.raises(SchemaMissError, match="no tool_calls"):
+        model.parse_tool_call_response(_payload("not used", finish_reason="stop"))
+
+
+def test_parse_tool_call_response_maps_content_filter_to_refusal():
+    model = OpenAICompatAnsweringModel(model="alias")
+    pc = model.parse_tool_call_response(_payload(None, finish_reason="content_filter"))
+    assert pc.summary == "model refused"
 
 
 def test_parse_usage_normalises_openai_shape():
@@ -213,3 +287,122 @@ def test_respond_requires_gateway_configuration(monkeypatch):
     model = OpenAICompatAnsweringModel(model="alias")
     with pytest.raises(RuntimeError, match="LITELLM_BASE_URL"):
         model.respond(SCAFFOLD, GROUNDING, TASK)
+
+
+# --- schema-miss retry + tool-call fallback, end-to-end ----------------------
+
+
+class _ScriptedGateway(BaseHTTPRequestHandler):
+    """Replays one scripted `/chat/completions` response per request (in
+    order), recording every request body it saw — lets a test exercise
+    retry/fallback behaviour across a sequence of gateway responses."""
+
+    responses: list = []
+    seen_requests: list = []
+
+    def do_POST(self):  # noqa: N802 (http.server naming)
+        length = int(self.headers.get("Content-Length", 0))
+        body = json.loads(self.rfile.read(length))
+        idx = len(_ScriptedGateway.seen_requests)
+        _ScriptedGateway.seen_requests.append(body)
+        payload = _ScriptedGateway.responses[idx]
+        response = json.dumps(payload).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(response)))
+        self.end_headers()
+        self.wfile.write(response)
+
+    def log_message(self, *args):  # silence request logging in test output
+        pass
+
+
+def _run_scripted(monkeypatch, responses, **model_kwargs):
+    """Serve `responses` in order from a fresh mock gateway and return
+    (model, proposed_change, seen_requests)."""
+    _ScriptedGateway.responses = responses
+    _ScriptedGateway.seen_requests = []
+    server = ThreadingHTTPServer(("127.0.0.1", 0), _ScriptedGateway)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address
+        monkeypatch.setenv("LITELLM_BASE_URL", f"http://{host}:{port}")
+        monkeypatch.setenv("LITELLM_API_KEY", "sk-test-virtual-key")
+        model = OpenAICompatAnsweringModel(model="alias", **model_kwargs)
+        pc = model.respond(SCAFFOLD, GROUNDING, TASK)
+        return model, pc, list(_ScriptedGateway.seen_requests)
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+_INCOMPLETE_ANSWER = {k: v for k, v in GOOD_ANSWER.items() if k != "cites_decisions"}
+
+
+def test_respond_retries_identical_request_on_schema_miss(monkeypatch):
+    model, pc, seen = _run_scripted(
+        monkeypatch,
+        [
+            _payload(json.dumps(_INCOMPLETE_ANSWER)),
+            _payload(json.dumps(_INCOMPLETE_ANSWER)),
+            _payload(json.dumps(GOOD_ANSWER), usage={"prompt_tokens": 5, "completion_tokens": 2}),
+        ],
+    )
+    assert pc.asserts_permission is True
+    assert model.last_usage == {"input_tokens": 5, "output_tokens": 2}
+    assert len(seen) == 3
+    assert seen[0] == seen[1] == seen[2]  # every resend is the IDENTICAL request
+    assert model.last_schema_retries == 2  # 2 misses before the 3rd attempt succeeded
+    assert model.last_used_tool_call_fallback is False
+
+
+def test_respond_default_max_retries_matches_module_constant():
+    assert OpenAICompatAnsweringModel(model="alias").max_schema_retries == SCHEMA_MISS_MAX_RETRIES == 3
+
+
+def test_respond_falls_back_to_tool_calls_after_exhausting_retries(monkeypatch):
+    # 1 initial attempt + 3 retries (max_schema_retries default) all schema-miss,
+    # then the tool-call fallback succeeds.
+    model, pc, seen = _run_scripted(
+        monkeypatch,
+        [_payload(json.dumps(_INCOMPLETE_ANSWER))] * 4 + [_tool_call_payload(GOOD_ANSWER)],
+    )
+    assert pc.asserts_permission is True
+    assert len(seen) == 5
+    assert model.last_schema_retries == 4
+    assert model.last_used_tool_call_fallback is True
+    # the fallback request asks via tool/function-calling, not response_format
+    assert "tools" in seen[-1] and "response_format" not in seen[-1]
+    assert seen[-1]["tool_choice"]["function"]["name"] == "propose_change"
+
+
+def test_respond_raises_after_exhausting_retries_and_fallback(monkeypatch):
+    with pytest.raises(SchemaMissError):
+        _run_scripted(
+            monkeypatch,
+            [_payload(json.dumps(_INCOMPLETE_ANSWER))] * 4 + [_payload(None, finish_reason="stop")],
+        )
+
+
+def test_respond_skips_fallback_when_disabled(monkeypatch):
+    with pytest.raises(SchemaMissError, match="missing an expected"):
+        _run_scripted(
+            monkeypatch,
+            [_payload(json.dumps(_INCOMPLETE_ANSWER))] * 4,
+            use_tool_call_fallback=False,
+        )
+    # no 5th request: the fallback never fires when disabled
+    assert len(_ScriptedGateway.seen_requests) == 4
+
+
+def test_max_schema_retries_zero_means_a_single_response_format_attempt(monkeypatch):
+    model, pc, seen = _run_scripted(
+        monkeypatch,
+        [_payload(json.dumps(_INCOMPLETE_ANSWER)), _tool_call_payload(GOOD_ANSWER)],
+        max_schema_retries=0,
+    )
+    assert pc.asserts_permission is True
+    assert len(seen) == 2  # 1 attempt (no retries) + 1 fallback
+    assert model.last_schema_retries == 1
+    assert model.last_used_tool_call_fallback is True

@@ -146,11 +146,86 @@ class SentenceTransformerEmbedder(Embedder):
         return [float(x) for x in vec]
 
 
+class LiteLLMEmbedder(Embedder):
+    """Embeddings via an OpenAI-compatible gateway's `/embeddings` surface
+    (e.g. LiteLLM), so `naive_rag` can run behind any corporate LiteLLM proxy
+    with zero HuggingFace/Voyage dependency — e.g. `text-embedding-3-large`
+    routed through the same gateway as the `litellm:<alias>` answering
+    backend. Transport is stdlib `urllib`; no extra dependency. Configuration
+    mirrors the answering backend: base URL from `LITELLM_BASE_URL` (fallback
+    `OPENAI_BASE_URL`), key from `LITELLM_API_KEY` (fallback `OPENAI_API_KEY`).
+    """
+
+    def __init__(self, model: str = "text-embedding-3-large", timeout: float = 60.0) -> None:
+        self.model = model
+        self.name = f"litellm:{model}"
+        self.timeout = timeout
+        self.dim = 0  # probed from the first response (OpenAI-shape has no role)
+
+    @staticmethod
+    def _base_url() -> str:
+        base = os.environ.get("LITELLM_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
+        if not base:
+            raise RuntimeError(
+                "the litellm embedder needs LITELLM_BASE_URL (or OPENAI_BASE_URL) "
+                "pointing at the gateway's OpenAI-compatible root."
+            )
+        return base.rstrip("/")
+
+    @staticmethod
+    def _api_key() -> str:
+        key = os.environ.get("LITELLM_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        if not key:
+            raise RuntimeError(
+                "the litellm embedder needs LITELLM_API_KEY (or OPENAI_API_KEY) "
+                "set to the gateway's virtual key."
+            )
+        return key
+
+    def embed(self, text: str, input_type: str | None = None) -> list[float]:
+        # The OpenAI /embeddings surface has no query/document role; ignore it,
+        # same as the other role-blind backends.
+        import json
+        import urllib.error
+        import urllib.request
+
+        body = json.dumps({"model": self.model, "input": text}).encode("utf-8")
+        request = urllib.request.Request(
+            f"{self._base_url()}/embeddings",
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self._api_key()}",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:500]
+            raise RuntimeError(
+                f"litellm embeddings gateway returned HTTP {exc.code}: {detail}"
+            ) from None
+        data = payload.get("data") or []
+        if not data:
+            raise RuntimeError(f"litellm embeddings gateway returned no data: {payload!r}")
+        vector = data[0].get("embedding")
+        if not vector:
+            raise RuntimeError(
+                f"litellm embeddings gateway returned no embedding vector: {payload!r}"
+            )
+        self.dim = len(vector)
+        return _l2_normalize([float(x) for x in vector])
+
+
 def make_embedder(spec: str) -> Embedder:
     """Build an embedder from a spec string.
 
-    `local-hash` (offline default) | `voyage[:model]` | `st[:model]`.
-    Real benchmark runs pin a real backend; the offline demo uses `local-hash`.
+    `local-hash` (offline default) | `voyage[:model]` | `st[:model]` |
+    `litellm[:model]` (an OpenAI-compatible gateway's `/embeddings`, e.g.
+    `litellm:text-embedding-3-large`). Real benchmark runs pin a real backend;
+    the offline demo uses `local-hash`.
     """
     if spec in ("", "local-hash"):
         return LocalDeterministicEmbedder()
@@ -160,4 +235,7 @@ def make_embedder(spec: str) -> Embedder:
     if spec.startswith("st"):
         _, _, model = spec.partition(":")
         return SentenceTransformerEmbedder(model or "all-MiniLM-L6-v2")
+    if spec.startswith("litellm"):
+        _, _, model = spec.partition(":")
+        return LiteLLMEmbedder(model or "text-embedding-3-large")
     raise ValueError(f"unknown embedder spec: {spec!r}")
