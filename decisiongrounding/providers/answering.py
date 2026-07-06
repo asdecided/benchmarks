@@ -37,6 +37,11 @@ from .base import (
 )
 from .grounding_format import parse_blocks
 
+# Sentinel distinguishing "caller passed no explicit value" from "caller
+# explicitly passed None" (meaning "no known limit, don't check"). Used by
+# OpenAICompatAnsweringModel.context_window_tokens's lazy-probe/cache.
+_UNSET = object()
+
 _TOKEN = re.compile(r"[a-z0-9]+")
 _STOP = {
     "the", "a", "an", "to", "of", "and", "or", "for", "in", "on", "with", "without",
@@ -446,10 +451,11 @@ class OpenAICompatAnsweringModel(AnsweringModel):
     name = "litellm"
     temperature = None
 
-    # A gateway alias's real backend model (and its true context window) is not
-    # knowable from the alias string alone, so this is a conservative documented
-    # default rather than a measured pin — override via `context_window_tokens`
-    # when the alias is known to support more (or less).
+    # Fallback ONLY — used when the gateway's own /v1/model/info can't be
+    # reached, isn't LiteLLM, or doesn't name this alias. A gateway alias's
+    # real backend model (and its true context window) is not knowable from
+    # the alias string alone; `context_window_tokens` probes the gateway for
+    # the actual figure instead of trusting a hardcoded guess.
     DEFAULT_CONTEXT_WINDOW_TOKENS = 128_000
 
     def __init__(
@@ -459,7 +465,7 @@ class OpenAICompatAnsweringModel(AnsweringModel):
         timeout: float = 300.0,
         max_schema_retries: int = SCHEMA_MISS_MAX_RETRIES,
         use_tool_call_fallback: bool = True,
-        context_window_tokens: int | None = DEFAULT_CONTEXT_WINDOW_TOKENS,
+        context_window_tokens: int | None = _UNSET,
     ) -> None:
         if not model:
             raise ValueError("litellm answering model needs an alias: litellm:<model>")
@@ -469,7 +475,54 @@ class OpenAICompatAnsweringModel(AnsweringModel):
         self.timeout = timeout
         self.max_schema_retries = max_schema_retries
         self.use_tool_call_fallback = use_tool_call_fallback
-        self.context_window_tokens = context_window_tokens
+        # An explicit caller-supplied value always wins and is never probed.
+        # Left unset (the default), the real limit is probed lazily on first
+        # use and cached — see `context_window_tokens`.
+        self._context_window_override = context_window_tokens
+        self._context_window_probed = _UNSET
+
+    @property
+    def context_window_tokens(self) -> int | None:
+        if self._context_window_override is not _UNSET:
+            return self._context_window_override
+        if self._context_window_probed is _UNSET:
+            probed = self._probe_context_window()
+            self._context_window_probed = (
+                probed if probed is not None else self.DEFAULT_CONTEXT_WINDOW_TOKENS
+            )
+        return self._context_window_probed
+
+    def _probe_context_window(self) -> int | None:
+        """Best-effort: ask the gateway's LiteLLM `/v1/model/info` endpoint for
+        this alias's real `max_input_tokens`, instead of assuming a fixed
+        number — an alias can front any underlying model, so a hardcoded guess
+        is exactly the imprecision this preflight should not need. Returns
+        None (falls back to `DEFAULT_CONTEXT_WINDOW_TOKENS`) on ANY failure:
+        not every OpenAI-compatible gateway is LiteLLM / exposes this route,
+        and a probe failure must make the preflight less precise, not break it.
+        """
+        import json
+        import urllib.error
+        import urllib.request
+
+        request = urllib.request.Request(
+            f"{self._base_url()}/v1/model/info",
+            headers={"Authorization": f"Bearer {self._api_key()}"},
+            method="GET",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except Exception:  # noqa: BLE001 - best-effort probe; any failure falls back
+            return None
+        for entry in payload.get("data") or []:
+            if not isinstance(entry, dict) or entry.get("model_name") != self.model:
+                continue
+            info = entry.get("model_info") or {}
+            limit = info.get("max_input_tokens") or info.get("max_tokens")
+            if isinstance(limit, (int, float)) and limit > 0:
+                return int(limit)
+        return None
 
     @staticmethod
     def _base_url() -> str:

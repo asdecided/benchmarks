@@ -406,3 +406,123 @@ def test_max_schema_retries_zero_means_a_single_response_format_attempt(monkeypa
     assert len(seen) == 2  # 1 attempt (no retries) + 1 fallback
     assert model.last_schema_retries == 1
     assert model.last_used_tool_call_fallback is True
+
+
+# --- context_window_tokens: probed from the gateway, not hardcoded ----------
+
+
+class _ModelInfoGateway(BaseHTTPRequestHandler):
+    """A mock gateway serving GET /v1/model/info (LiteLLM's model-info route)
+    alongside the usual POST /chat/completions."""
+
+    model_info_response: dict = {}
+    model_info_status: int = 200
+    get_requests: list = []
+
+    def do_GET(self):  # noqa: N802
+        _ModelInfoGateway.get_requests.append(
+            {"path": self.path, "authorization": self.headers.get("Authorization")}
+        )
+        body = json.dumps(_ModelInfoGateway.model_info_response).encode("utf-8")
+        self.send_response(_ModelInfoGateway.model_info_status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_POST(self):  # noqa: N802
+        length = int(self.headers.get("Content-Length", 0))
+        self.rfile.read(length)
+        response = json.dumps(_payload(json.dumps(GOOD_ANSWER))).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(response)))
+        self.end_headers()
+        self.wfile.write(response)
+
+    def log_message(self, *args):
+        pass
+
+
+def _serve_model_info(monkeypatch, response, status=200):
+    _ModelInfoGateway.model_info_response = response
+    _ModelInfoGateway.model_info_status = status
+    _ModelInfoGateway.get_requests = []
+    server = ThreadingHTTPServer(("127.0.0.1", 0), _ModelInfoGateway)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    host, port = server.server_address
+    monkeypatch.setenv("LITELLM_BASE_URL", f"http://{host}:{port}")
+    monkeypatch.setenv("LITELLM_API_KEY", "sk-test-virtual-key")
+    return server
+
+
+def test_context_window_tokens_probes_the_gateways_model_info(monkeypatch):
+    server = _serve_model_info(monkeypatch, {
+        "data": [
+            {"model_name": "other-alias", "model_info": {"max_input_tokens": 999}},
+            {"model_name": "my-alias", "model_info": {"max_input_tokens": 65536}},
+        ]
+    })
+    try:
+        model = OpenAICompatAnsweringModel(model="my-alias")
+        assert model.context_window_tokens == 65536
+        assert _ModelInfoGateway.get_requests[0]["path"] == "/v1/model/info"
+        assert _ModelInfoGateway.get_requests[0]["authorization"] == "Bearer sk-test-virtual-key"
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_context_window_tokens_caches_the_probe():
+    calls = []
+
+    class _Counting(OpenAICompatAnsweringModel):
+        def _probe_context_window(self):
+            calls.append(1)
+            return 42
+
+    model = _Counting(model="my-alias")
+    assert model.context_window_tokens == 42
+    assert model.context_window_tokens == 42
+    assert len(calls) == 1  # probed once, then cached
+
+
+def test_context_window_tokens_falls_back_when_the_gateway_lacks_model_info(monkeypatch):
+    server = _serve_model_info(monkeypatch, {}, status=404)
+    try:
+        model = OpenAICompatAnsweringModel(model="my-alias")
+        assert model.context_window_tokens == OpenAICompatAnsweringModel.DEFAULT_CONTEXT_WINDOW_TOKENS
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_context_window_tokens_falls_back_when_the_alias_is_not_listed(monkeypatch):
+    server = _serve_model_info(monkeypatch, {
+        "data": [{"model_name": "some-other-alias", "model_info": {"max_input_tokens": 123}}]
+    })
+    try:
+        model = OpenAICompatAnsweringModel(model="my-alias")
+        assert model.context_window_tokens == OpenAICompatAnsweringModel.DEFAULT_CONTEXT_WINDOW_TOKENS
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_context_window_tokens_explicit_override_skips_the_probe(monkeypatch):
+    calls = []
+
+    class _Counting(OpenAICompatAnsweringModel):
+        def _probe_context_window(self):
+            calls.append(1)
+            return 999999
+
+    model = _Counting(model="my-alias", context_window_tokens=7)
+    assert model.context_window_tokens == 7
+    assert calls == []  # never probed — the explicit value always wins
+
+
+def test_context_window_tokens_explicit_none_disables_the_check(monkeypatch):
+    model = OpenAICompatAnsweringModel(model="my-alias", context_window_tokens=None)
+    assert model.context_window_tokens is None
