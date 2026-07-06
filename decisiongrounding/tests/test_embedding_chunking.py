@@ -178,3 +178,110 @@ def test_naive_rag_prepare_chunks_oversized_sections(monkeypatch):
     ]
     provider.prepare(corpus)
     assert len(embedder.calls) > 1  # the section was sub-chunked, not truncated
+
+
+# --- layer 1: chunk sizing uses a conservative ~3 chars/token safety margin -
+
+
+def test_safe_token_estimate_is_more_conservative_than_the_general_estimate():
+    from providers.embedding import _safe_token_estimate
+
+    text = "x" * 300
+    assert _safe_token_estimate(text) > estimate_tokens(text)
+    assert _safe_token_estimate(text) == 100  # 300 chars / 3
+    assert estimate_tokens(text) == 75  # 300 chars / 4, for comparison
+
+
+def test_chunk_by_tokens_sizes_chunks_at_3_chars_per_token_not_4():
+    text = "y" * 300  # a single whitespace-free run
+    chunks = chunk_by_tokens(text, max_tokens=100)
+    assert all(len(c) <= 300 for c in chunks)  # 100 * 3, not 100 * 4 = 400
+    assert "".join(chunks) == text
+
+
+def test_embed_chunked_treats_borderline_text_as_needing_chunking():
+    # 4 chars/token would call this "exactly at the limit" and skip chunking;
+    # the 3 chars/token safety margin must treat it as over budget instead.
+    e = _FixedLimitEmbedder(max_input_tokens=75)  # 300 chars at 4/token
+    text = "z " * 150  # 300 chars
+    embed_chunked(e, text, input_type="document")
+    assert len(e.calls) > 1
+
+
+# --- layer 2: halve-and-retry on the backend's own "too long" rejection ----
+
+
+class _FlakyTooLongEmbedder(LocalDeterministicEmbedder):
+    """Simulates a real backend whose actual limit is stricter than what our
+    own chunk sizing assumed: `.embed()` raises a "too long"-shaped error for
+    any text over `hard_limit_chars`, succeeds otherwise."""
+
+    def __init__(self, hard_limit_chars: int, max_input_tokens: int | None = None, dim: int = 32) -> None:
+        super().__init__(dim=dim)
+        self.hard_limit_chars = hard_limit_chars
+        self.max_input_tokens = max_input_tokens
+        self.calls: list[str] = []
+
+    def embed(self, text, input_type=None):
+        self.calls.append(text)
+        if len(text) > self.hard_limit_chars:
+            raise RuntimeError("litellm embeddings gateway returned HTTP 400: "
+                                "too many tokens for this model")
+        return super().embed(text, input_type=input_type)
+
+
+def test_embed_with_retry_halves_on_a_too_long_rejection_and_recovers():
+    from providers.embedding import _embed_with_retry
+
+    # hard_limit_chars must clear _MIN_RETRY_CHARS (64) or halving gives up
+    # before ever reaching a size the flaky embedder would actually accept.
+    e = _FlakyTooLongEmbedder(hard_limit_chars=100)
+    text = "word " * 60  # 300 chars, well over the flaky embedder's real limit
+    vec = _embed_with_retry(e, text, input_type="document")
+    assert len(vec) == e.dim
+    assert abs(_norm(vec) - 1.0) < 1e-9
+    # It actually had to retry smaller, not just fail once, and eventually
+    # landed on pieces the flaky embedder's real limit actually accepts.
+    assert len(e.calls) > 1
+    assert any(len(c) <= 100 for c in e.calls)
+
+
+def test_embed_chunked_recovers_when_the_real_backend_rejects_a_chunk_our_sizing_missed():
+    # The declared max_input_tokens (so chunk_by_tokens thinks each chunk is
+    # fine) is looser than the embedder's actual enforced limit — modeling a
+    # real tokenizer being denser than our char-based estimate assumed.
+    e = _FlakyTooLongEmbedder(hard_limit_chars=100, max_input_tokens=1000)
+    long_section = "\n\n".join(f"Paragraph {i} has some padding words here." for i in range(40))
+    vec = embed_chunked(e, long_section, input_type="document")
+    assert len(vec) == e.dim
+    assert abs(_norm(vec) - 1.0) < 1e-9
+
+
+def test_embed_with_retry_does_not_retry_an_unrelated_error():
+    class _AuthFailEmbedder(LocalDeterministicEmbedder):
+        def embed(self, text, input_type=None):
+            raise RuntimeError("litellm embeddings gateway returned HTTP 401: invalid API key")
+
+    from providers.embedding import _embed_with_retry
+    import pytest as _pytest
+
+    with _pytest.raises(RuntimeError, match="401"):
+        _embed_with_retry(_AuthFailEmbedder(), "word " * 60, input_type="document")
+
+
+def test_embed_with_retry_gives_up_below_the_minimum_and_reraises():
+    e = _FlakyTooLongEmbedder(hard_limit_chars=1)  # nothing but a single char ever fits
+    from providers.embedding import _embed_with_retry
+    import pytest as _pytest
+
+    with _pytest.raises(RuntimeError, match="too many tokens"):
+        _embed_with_retry(e, "word " * 60, input_type="document")
+
+
+def test_is_too_long_error_matches_known_shapes_and_not_unrelated_ones():
+    from providers.embedding import _is_too_long_error
+
+    assert _is_too_long_error(RuntimeError("litellm embeddings gateway returned HTTP 400: too many tokens"))
+    assert _is_too_long_error(RuntimeError("maximum context length is 8191 tokens"))
+    assert not _is_too_long_error(RuntimeError("litellm embeddings gateway returned HTTP 401: invalid API key"))
+    assert not _is_too_long_error(RuntimeError("connection reset by peer"))

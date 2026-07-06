@@ -80,16 +80,33 @@ def _l2_normalize(vec: list[float]) -> list[float]:
     return vec if norm == 0.0 else [v / norm for v in vec]
 
 
+# Chunk sizing assumes ~3 chars/token rather than providers.base.estimate_tokens's
+# ~4 — a safety margin. Real tokenizers vary (code, CJK, punctuation-heavy text
+# pack more densely than plain English prose), so a chunk our own char-based
+# estimate calls "within budget" can still come back too long for the real
+# embedder. Erring conservative here costs a few extra embedding calls; erring
+# permissive costs a 400 the proactive layer was supposed to prevent. See also
+# `_embed_with_retry`, the reactive layer beneath this one.
+_CHARS_PER_TOKEN_SAFETY_MARGIN = 3
+
+
+def _safe_token_estimate(text: str) -> int:
+    """Conservative token estimate for SIZING embedding chunks (not the
+    general-purpose estimate in providers.base, which stays at ~4 chars/token
+    for cost/context-window reporting elsewhere)."""
+    return (len(text) + _CHARS_PER_TOKEN_SAFETY_MARGIN - 1) // _CHARS_PER_TOKEN_SAFETY_MARGIN
+
+
 def chunk_by_tokens(text: str, max_tokens: int) -> list[str]:
-    """Split `text` into pieces that each fit within `max_tokens` (by the same
-    ~4-chars/token estimate used elsewhere), breaking on paragraph, then
+    """Split `text` into pieces that each fit within `max_tokens` (by the
+    conservative ~3-chars/token estimate above), breaking on paragraph, then
     sentence, then whitespace boundaries so a chunk never severs a word.
 
     Used to sub-chunk a document that is too long for an embedder's input
     limit — see `embed_chunked`, which averages the sub-chunk vectors rather
     than truncating the text and discarding whatever fell past the limit.
     """
-    max_chars = max(1, max_tokens) * 4
+    max_chars = max(1, max_tokens) * _CHARS_PER_TOKEN_SAFETY_MARGIN
     if len(text) <= max_chars:
         return [text] if text else []
 
@@ -140,6 +157,77 @@ def chunk_by_tokens(text: str, max_tokens: int) -> list[str]:
     return out
 
 
+def _weighted_average(pairs: list[tuple[list[float], float]]) -> list[float]:
+    """L2-normalised, length-weighted combination of embedding vectors.
+    Falls back to an unweighted mean if every weight is 0 (e.g. all-blank
+    pieces), so this never divides by zero."""
+    weight = sum(w for _, w in pairs)
+    if weight <= 0:
+        weight = float(len(pairs))
+        pairs = [(vec, 1.0) for vec, _ in pairs]
+    acc = [0.0] * len(pairs[0][0])
+    for vec, w in pairs:
+        for i, v in enumerate(vec):
+            acc[i] += v * w
+    return _l2_normalize([v / weight for v in acc])
+
+
+# Real backends' own rejection of an over-length input — the reactive layer
+# beneath chunk_by_tokens' proactive, safety-margined sizing (see
+# _CHARS_PER_TOKEN_SAFETY_MARGIN). Deliberately broad: a false positive here
+# just costs a retry at half the size, which is cheap; a false negative means
+# a chunk our own estimate got wrong is never recovered.
+_TOO_LONG_SIGNAL = re.compile(
+    r"(too long|too many tokens|maximum context length|context_length_exceeded|"
+    r"exceeds the (?:model|maximum)|invalid_request|http 400|\bstatus 400\b)",
+    re.IGNORECASE,
+)
+
+
+def _is_too_long_error(exc: Exception) -> bool:
+    return bool(_TOO_LONG_SIGNAL.search(str(exc)))
+
+
+# Stop halving once a piece is this small and re-raise instead — a genuine
+# outage/misconfiguration must not spin down to nothing before failing loudly.
+_MIN_RETRY_CHARS = 64
+
+
+def _embed_with_retry(embedder: Embedder, text: str, input_type: str | None) -> list[float]:
+    """Embed `text`, halving and retrying on the backend's own "too long"
+    (400-class) rejection — the reactive safety net beneath `chunk_by_tokens`'
+    proactive sizing. Never truncates: on a real rejection the piece is split
+    in two (at a whitespace boundary near the midpoint, else a hard split) and
+    each half is embedded (recursing through this same retry) and combined by
+    length-weighted average, so nothing is dropped, only re-chunked smaller.
+    Gives up and re-raises once a piece is at or below `_MIN_RETRY_CHARS`, or
+    the error doesn't look length-related — that is a real failure, not an
+    oversized chunk.
+    """
+    try:
+        return embedder.embed(text, input_type=input_type)
+    except Exception as exc:  # noqa: BLE001 - only retried for a "too long" signal
+        if len(text) <= _MIN_RETRY_CHARS or not _is_too_long_error(exc):
+            raise
+
+    mid = len(text) // 2
+    split_at = text.rfind(" ", 0, mid)
+    if split_at <= 0:
+        split_at = text.find(" ", mid)
+    if split_at <= 0:
+        split_at = mid  # no whitespace at all — hard split
+    left, right = text[:split_at].strip(), text[split_at:].strip()
+    if not left or not right:
+        left, right = text[:mid], text[mid:]
+
+    pairs = [
+        (_embed_with_retry(embedder, half, input_type), float(estimate_tokens(half)))
+        for half in (left, right)
+        if half
+    ]
+    return _weighted_average(pairs)
+
+
 def embed_chunked(embedder: Embedder, text: str, input_type: str | None = None) -> list[float]:
     """Embed `text`, sub-chunking and mean-pooling when it exceeds the
     embedder's `max_input_tokens` instead of truncating it.
@@ -150,30 +238,24 @@ def embed_chunked(embedder: Embedder, text: str, input_type: str | None = None) 
     document represented in the resulting vector (weighted by chunk length),
     at the cost of one extra embedding call per sub-chunk. Short text (the
     common case, and every offline/hash-embedder call) takes the single-call
-    path unchanged.
+    path unchanged. Every embed() call — including this one — goes through
+    `_embed_with_retry`, which halves and retries on the backend's own
+    "too long" rejection, in case the proactive chunk sizing still guessed
+    wrong for unusually token-dense text.
     """
     limit = embedder.max_input_tokens
-    if limit is None or estimate_tokens(text) <= limit:
-        return embedder.embed(text, input_type=input_type)
+    if limit is None or _safe_token_estimate(text) <= limit:
+        return _embed_with_retry(embedder, text, input_type)
 
     pieces = chunk_by_tokens(text, limit)
     if len(pieces) <= 1:
-        return embedder.embed(text, input_type=input_type)
+        return _embed_with_retry(embedder, text, input_type)
 
-    weight = 0.0
-    acc: list[float] | None = None
-    for piece in pieces:
-        vec = embedder.embed(piece, input_type=input_type)
-        w = float(estimate_tokens(piece))
-        if acc is None:
-            acc = [v * w for v in vec]
-        else:
-            for i, v in enumerate(vec):
-                acc[i] += v * w
-        weight += w
-    if acc is None or weight == 0.0:
-        return embedder.embed(text, input_type=input_type)
-    return _l2_normalize([v / weight for v in acc])
+    pairs = [
+        (_embed_with_retry(embedder, piece, input_type), float(estimate_tokens(piece)))
+        for piece in pieces
+    ]
+    return _weighted_average(pairs)
 
 
 class VoyageEmbedder(Embedder):
