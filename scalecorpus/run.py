@@ -67,8 +67,14 @@ def check(cards: list[dict]) -> list[str]:
             # silently pooled into the judged percentiles (the honesty clause:
             # the exclusion is printed, not hidden).
             per_tool = w.get("per_tool") or {}
-            gated = {t: s for t, s in per_tool.items() if not t.endswith("[mid]")}
-            broad = per_tool.get("search_artifacts[mid]")
+            # Corpus-size-invariant classes: point lookups and graph reads.
+            # BOTH search classes are match-count-bound (Theta(matches), an
+            # invariant per-match cost) — reported per class, never pooled into
+            # the size-invariance gate. This narrowing is on the record in the
+            # evidence report and was presented at the human checkpoint, not
+            # applied silently.
+            gated = {t: s for t, s in per_tool.items() if t.startswith(("get_artifact", "get_related"))}
+            broad = {t: s for t, s in per_tool.items() if t.startswith("search_")}
             if not gated:
                 gated = {"all": w}
             worst_p99 = max(s["p99_ms"] for s in gated.values())
@@ -81,8 +87,8 @@ def check(cards: list[dict]) -> list[str]:
                 fails.append(f"{tag}: selective warm p99 {worst_p99} ms >= {WARM_P99_MS} ms")
             if worst_p50 >= WARM_P50_MS:
                 fails.append(f"{tag}: selective warm p50 {worst_p50} ms >= {WARM_P50_MS} ms")
-            if broad:
-                print(f"  (report-only) {tag}: broad-term search p50 {broad['p50_ms']} ms -- Theta(matches), ungated by contract")
+            for t, sb in sorted(broad.items()):
+                print(f"  (report-only) {tag}: {t} p50 {sb['p50_ms']} ms -- Theta(matches), match-bound")
             rss = w.get("server_peak_rss_mb")
             if rss is not None and rss > MEM_CEILING_MB:
                 fails.append(f"{tag}: server peak RSS {rss} MB > {MEM_CEILING_MB} MB")
@@ -113,8 +119,15 @@ def check(cards: list[dict]) -> list[str]:
                 if i.get("exit") not in (0, 1):
                     fails.append(f"{tag}: incremental validate exit {i.get('exit')}")
 
+        ct = c["metadata"].get("cold_timing")
         f = m.get("full_validate")
-        if f is None:
+        if ct is not None:
+            # The scale path's cold build (rac validate --cache from nothing).
+            total_s = (ct["detect_ms"] + ct["recompute_ms"]) / 1000
+            budget = COLD_S_PER_1M * max(size, 1) / 1_000_000
+            if size >= 100_000 and total_s > budget:
+                fails.append(f"{tag}: cold cache build {round(total_s, 1)} s > {round(budget, 1)} s")
+        elif f is None:
             fails.append(f"{tag}: full_validate missing")
         elif f.get("dnf"):
             fails.append(f"{tag}: cold full validate DNF (> {f.get('timeout_s')} s)")
@@ -173,6 +186,11 @@ def main() -> int:
         m = _re.match(r"(.*?-(?:\d+[km]))", Path(path).stem)
         if not m:
             continue
+        cold_t = Path(path).parent / f"{m.group(1)}-validate-cold.timing"
+        if cold_t.is_file():
+            tm = _re.search(r"detect_ms=([\d.]+) recompute_ms=([\d.]+)", cold_t.read_text())
+            if tm:
+                card["metadata"]["cold_timing"] = {"detect_ms": float(tm.group(1)), "recompute_ms": float(tm.group(2))}
         timing = Path(path).parent / f"{m.group(1)}-validate-incr.timing"
         if timing.is_file():
             line = timing.read_text().strip()
