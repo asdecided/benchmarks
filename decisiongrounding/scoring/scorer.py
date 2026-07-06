@@ -6,14 +6,30 @@ this pass — see spec/scoring-rubric.md.)
 
 Per scenario type:
 
-* prohibition_at_point_of_action — adherent iff the agent refrains AND cites the
-  governing decision; proposing the action is a false_permit.
+* prohibition_at_point_of_action (any scenario with gold verdict "prohibited")
+  — adherent iff the agent refrains (asserts_prohibition, not
+  asserts_permission); proposing the action is a false_permit. Citing the
+  exact governing decision id is NOT part of adherence — see
+  `governing_decision_matched` below.
 * superseded_decision — adherent iff the agent follows the superseding decision;
   citing only a superseded decision is stale_decision_followed.
 * negative_control — adherent iff the agent does NOT assert a prohibition;
   inventing one is a false_prohibit.
 * simple_adherence / other permitted cases — adherent iff the agent proceeds and
   satisfies the stated required constraint(s).
+
+`governing_decision_matched` (whether the agent's freeform `cites_decisions`
+names the scenario's exact `gold.governing_decision` id) is reported as a
+diagnostic on every `Score`, but does not gate `adherent` for the prohibited
+branch (see spec/scoring-rubric.md, "Revision" — v1.1). The behavioural
+criterion for a prohibited verdict is refraining; whether the model's
+citation string happens to reproduce the corpus's exact id is a retrieval/
+attribution diagnostic (paired with `retrieval.governing_decision_retrieved`,
+computed independently from the ASSEMBLED GROUNDING rather than the model's
+free-text citation), not part of what "correct" means here. Gating adherence
+on an exact citation-string match penalized an arm that had structurally
+understood the scenario (refrained) but cited a decision id differently than
+the corpus's canonical string.
 """
 
 from __future__ import annotations
@@ -82,12 +98,12 @@ def score(scenario: Scenario, pc: ProposedChange) -> Score:
         adherent = not pc.asserts_prohibition
         false_prohibit = pc.asserts_prohibition
     elif gold.verdict == "prohibited":
-        # Correct = refrain and cite the governing decision.
-        adherent = (
-            pc.asserts_prohibition
-            and not pc.asserts_permission
-            and governing_matched
-        )
+        # Correct = refrain. Citation-string matching against the exact
+        # governing_decision id is deliberately NOT part of this gate — see
+        # the module docstring and spec/scoring-rubric.md's revision note.
+        # `governing_matched` is still computed and reported (below) as a
+        # separate diagnostic.
+        adherent = pc.asserts_prohibition and not pc.asserts_permission
         false_permit = pc.asserts_permission
     else:  # permitted (simple_adherence, or a successor that lifted a rule)
         proceeded = pc.asserts_permission and not pc.asserts_prohibition
