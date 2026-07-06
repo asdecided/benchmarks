@@ -24,7 +24,7 @@ from typing import Callable
 
 from providers import build_provider, make_answering_model
 from providers.answering import usage_dict
-from providers.base import SCAFFOLD, CorpusArtifact
+from providers.base import SCAFFOLD, ContextWindowExceededError, CorpusArtifact, check_context_window
 from scenarios.loader import Scenario
 from scoring.metrics import summarize
 from scoring.scorer import score
@@ -132,15 +132,34 @@ def _corpus_for(n, sc, ns, seed, pool, use_real):
     return list(sc.corpus) + distractors
 
 
-def _point(n, adhered, total, retrieved_flags, token_estimates, usages):
+def _point(n, adhered, total, retrieved_flags, token_estimates, usages, cwe_count=0):
     """One (arm, N) curve point — shared by the sync and batched builders so the
-    two produce byte-identical shapes."""
-    rate = adhered / total if total else 0.0
+    two produce byte-identical shapes.
+
+    `cwe_count`: of `total` cells, how many hit the answering model's context
+    window (see `ContextWindowExceededError`) and so were never answered.
+    Those cells are excluded from BOTH the numerator and denominator of
+    `adherence_rate` — folding them in as "non-adherent" would misreport a
+    structural ceiling (the arm literally cannot fit at this N) as the arm
+    answering and getting it wrong, corrupting exactly the comparison this
+    curve exists to make. When every cell at this N hit the ceiling,
+    `adherence_rate` is None (no rate to report) rather than a misleading 0.0.
+    """
+    attempted = total - cwe_count
+    rate = (adhered / attempted) if attempted else None
     governed = [f for f in retrieved_flags if f is not None]
     recall = (sum(1 for f in governed if f) / len(governed)) if governed else None
     tok_mean = sum(token_estimates) / len(token_estimates) if token_estimates else 0
-    point = {"N": n, "adherence_rate": rate, "governing_recall": recall,
-             "token_estimate_mean": tok_mean}
+    point = {
+        "N": n, "adherence_rate": rate, "governing_recall": recall,
+        "token_estimate_mean": tok_mean,
+        # Always present (0 when nothing hit the ceiling), not conditional —
+        # so multi-seed aggregation (_AGG_FIELDS) sees a real 0 for a seed
+        # with no context-window-exceeded cells, rather than silently
+        # skipping that seed as if it had no opinion (see _columns_from_datasets).
+        "context_window_exceeded_count": cwe_count,
+        "context_window_exceeded_rate": (cwe_count / total) if total else 0.0,
+    }
     if usages:
         point["input_tokens_mean"] = sum(u["input_tokens"] for u in usages) / len(usages)
         point["output_tokens_mean"] = sum(u["output_tokens"] for u in usages) / len(usages)
@@ -228,6 +247,7 @@ def build_dataset(
     for n in ns:
         for arm in arms:
             adhered = 0
+            cwe_count = 0
             retrieved_flags: list = []
             token_estimates: list[int] = []
             usages: list[dict] = []
@@ -235,12 +255,25 @@ def build_dataset(
                 idx += 1
                 corpus = _corpus_for(n, sc, ns, seed, pool, use_real)
                 cell_error = None
+                cell_kind = None
                 try:
                     sc_score, gov_retrieved, tok_est, usage = _run_arm_on_corpus(
                         arm, corpus, sc, answering_model, embedder_spec
                     )
                     adherent = sc_score.adherent
                     stale = sc_score.stale_decision_followed
+                except ContextWindowExceededError as exc:
+                    cell_error = repr(exc)
+                    cell_kind = "context_window_exceeded"
+                    cwe_count += 1
+                    errors.append({
+                        "arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                        "error": cell_error, "kind": cell_kind,
+                    })
+                    adherent = stale = False
+                    gov_retrieved = None
+                    tok_est = exc.token_estimate
+                    usage = None
                 except Exception as exc:  # noqa: BLE001 - one cell must not lose the curve
                     cell_error = repr(exc)
                     errors.append(
@@ -250,7 +283,8 @@ def build_dataset(
                     gov_retrieved = None
                     tok_est = 0
                     usage = None
-                adhered += 1 if adherent else 0
+                if cell_kind != "context_window_exceeded":
+                    adhered += 1 if adherent else 0
                 retrieved_flags.append(gov_retrieved)
                 token_estimates.append(tok_est)
                 if usage:
@@ -264,9 +298,10 @@ def build_dataset(
                               "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
                               "stale_decision_followed": stale,
                               "governing_decision_retrieved": gov_retrieved,
-                              "token_estimate": tok_est, "usage": usage, "error": cell_error})
+                              "token_estimate": tok_est, "usage": usage, "error": cell_error,
+                              "kind": cell_kind})
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
-                                      token_estimates, usages))
+                                      token_estimates, usages, cwe_count=cwe_count))
     return _envelope(discriminating, use_real, pool, seed, ns, answering_model.version,
                      embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors)
 
@@ -302,15 +337,23 @@ def build_dataset_batched(
         for arm in arms:
             for sc in discriminating:
                 cell = {"cid": f"c{len(cells)}", "n": n, "arm": arm, "sc": sc,
-                        "tok": 0, "gov": None, "req": None, "error": None}
+                        "tok": 0, "gov": None, "req": None, "error": None, "kind": None}
                 try:
                     provider = build_provider(arm, model, embedder_spec)
                     provider.prepare(_corpus_for(n, sc, ns, seed, pool, use_real))
                     grounding = provider.assemble(sc.task)
+                    # Same symmetric preflight as the synchronous path
+                    # (Provider.respond) — batching bypasses respond(), so it is
+                    # checked here instead, before the cell is ever submitted.
+                    check_context_window(grounding, sc.task, model)
                     gov = sc.gold_label.governing_decision
                     cell["gov"] = None if gov is None else (gov in grounding.artifacts_supplied)
                     cell["tok"] = grounding.token_estimate
                     cell["req"] = model.build_request(SCAFFOLD, grounding, sc.task)
+                except ContextWindowExceededError as exc:
+                    cell["error"] = repr(exc)
+                    cell["kind"] = "context_window_exceeded"
+                    cell["tok"] = exc.token_estimate
                 except Exception as exc:  # noqa: BLE001 - one cell must not lose the run
                     cell["error"] = repr(exc)
                 cells.append(cell)
@@ -345,15 +388,25 @@ def build_dataset_batched(
     for n in ns:
         for arm in arms:
             adhered = 0
+            cwe_count = 0
             retrieved_flags: list = []
             token_estimates: list[int] = []
             usages: list[dict] = []
             for sc in discriminating:
                 cell = next(it)
                 idx += 1
+                is_cwe = cell.get("kind") == "context_window_exceeded"
                 pc, usage, err = answers.get(cell["cid"], (None, None, cell["error"]))
                 cell_error = err or cell["error"]
-                if pc is None:
+                if is_cwe:
+                    cwe_count += 1
+                    errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                                   "error": cell_error, "kind": "context_window_exceeded"})
+                    adherent = stale = False
+                    gov_retrieved = None
+                    tok_est = cell["tok"]
+                    usage = None
+                elif pc is None:
                     errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
                                    "error": cell_error or "no batch result"})
                     adherent = stale = False
@@ -366,7 +419,8 @@ def build_dataset_batched(
                     stale = sc_score.stale_decision_followed
                     gov_retrieved = cell["gov"]
                     tok_est = cell["tok"]
-                adhered += 1 if adherent else 0
+                if not is_cwe:
+                    adhered += 1 if adherent else 0
                 retrieved_flags.append(gov_retrieved)
                 token_estimates.append(tok_est)
                 if usage:
@@ -380,9 +434,10 @@ def build_dataset_batched(
                               "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
                               "stale_decision_followed": stale,
                               "governing_decision_retrieved": gov_retrieved,
-                              "token_estimate": tok_est, "usage": usage, "error": cell_error})
+                              "token_estimate": tok_est, "usage": usage, "error": cell_error,
+                              "kind": cell.get("kind")})
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
-                                      token_estimates, usages))
+                                      token_estimates, usages, cwe_count=cwe_count))
     return _envelope(discriminating, use_real, pool, seed, ns, model.version,
                      embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors)
 
@@ -391,7 +446,8 @@ def build_dataset_batched(
 # Fields aggregated across seeds. The plain key stays the MEAN (back-compat);
 # `<field>_ci` / `_std` / `_values` are added alongside.
 _AGG_FIELDS = ("adherence_rate", "governing_recall", "token_estimate_mean",
-               "input_tokens_mean")
+               "input_tokens_mean", "context_window_exceeded_count",
+               "context_window_exceeded_rate")
 
 
 def _seed_points(ds: dict, arm: str) -> dict:
@@ -471,7 +527,9 @@ def run_seeds(
 
 
 def _columns_from_datasets(per_seed, arms, ns) -> dict:
-    """cols[arm][N][field] = [per-seed values] (governing_recall Nones dropped)."""
+    """cols[arm][N][field] = [per-seed values] (None dropped — governing_recall
+    when nothing is governed, or adherence_rate when every cell at this
+    (arm, N) hit the context window in that seed — see `_point`)."""
     cols = {arm: {n: {} for n in ns} for arm in arms}
     for arm in arms:
         for _, ds in per_seed:
@@ -482,7 +540,7 @@ def _columns_from_datasets(per_seed, arms, ns) -> dict:
                     if field not in p:
                         continue
                     v = p[field]
-                    if field == "governing_recall" and v is None:
+                    if v is None:
                         continue
                     cols[arm][n].setdefault(field, []).append(v)
     return cols
@@ -497,8 +555,12 @@ def _aggregate_arm_points(arms, ns, cols, n_seeds) -> dict:
             for field in _AGG_FIELDS:
                 vals = cols[arm][n].get(field)
                 if not vals:
-                    if field == "governing_recall":
-                        point["governing_recall"] = None
+                    # No seed produced a value at all (nothing governed here for
+                    # governing_recall; every seed hit the context window for
+                    # adherence_rate) — an explicit None, not a missing key or a
+                    # misleading 0.0.
+                    if field in ("governing_recall", "adherence_rate"):
+                        point[field] = None
                     continue
                 s = summarize(vals)
                 point[field] = s["mean"]
@@ -657,6 +719,13 @@ def _merge_per_scenario(old_ps, add, arms, n_old) -> dict:
     return out
 
 
+def _finite_adherence_points(pts: list[dict]) -> list[dict]:
+    """Drop points with no adherence rate to plot — every cell at that (arm, N)
+    hit the answering model's context window (see `_point`); there is no
+    fake 0.0 to draw, and a gap in the line is the honest rendering."""
+    return [p for p in pts if p.get("adherence_rate") is not None]
+
+
 def render_chart(dataset: dict, out_path: str | Path) -> Path:
     """Render ONE crossover chart. matplotlib if present, else pure-Python SVG."""
     out_path = Path(out_path)
@@ -668,6 +737,7 @@ def render_chart(dataset: dict, out_path: str | Path) -> Path:
 
         fig, ax = plt.subplots(figsize=(7, 4.5))
         for arm, pts in dataset["arms"].items():
+            pts = _finite_adherence_points(pts)
             ax.plot([p["N"] for p in pts], [p["adherence_rate"] for p in pts], marker="o", label=arm)
         ax.set_xscale("log")
         ax.set_xlabel("Corpus size N (log scale)")
@@ -717,6 +787,7 @@ def _render_svg(dataset: dict) -> str:
     legend_y = 44
     for arm, pts in dataset["arms"].items():
         color = colors.get(arm, "#555")
+        pts = _finite_adherence_points(pts)
         poly = " ".join(f"{px(math.log10(p['N']))},{py(p['adherence_rate'])}" for p in pts)
         parts.append(f'<polyline points="{poly}" fill="none" stroke="{color}" stroke-width="2.5"/>')
         for p in pts:

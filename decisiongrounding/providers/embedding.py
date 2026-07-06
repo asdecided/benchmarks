@@ -19,6 +19,8 @@ import os
 import re
 from abc import ABC, abstractmethod
 
+from .base import estimate_tokens
+
 _TOKEN = re.compile(r"[a-z0-9]+")
 
 
@@ -36,6 +38,10 @@ class Embedder(ABC):
 
     name: str = "base"
     dim: int = 0
+    # The backend's max input length in tokens, or None when there is no limit
+    # to enforce (e.g. the offline hashing embedder). `embed_chunked` uses this
+    # to decide whether a document needs sub-chunking before it is embedded.
+    max_input_tokens: int | None = None
 
     @abstractmethod
     def embed(self, text: str, input_type: str | None = None) -> list[float]:
@@ -74,6 +80,102 @@ def _l2_normalize(vec: list[float]) -> list[float]:
     return vec if norm == 0.0 else [v / norm for v in vec]
 
 
+def chunk_by_tokens(text: str, max_tokens: int) -> list[str]:
+    """Split `text` into pieces that each fit within `max_tokens` (by the same
+    ~4-chars/token estimate used elsewhere), breaking on paragraph, then
+    sentence, then whitespace boundaries so a chunk never severs a word.
+
+    Used to sub-chunk a document that is too long for an embedder's input
+    limit — see `embed_chunked`, which averages the sub-chunk vectors rather
+    than truncating the text and discarding whatever fell past the limit.
+    """
+    max_chars = max(1, max_tokens) * 4
+    if len(text) <= max_chars:
+        return [text] if text else []
+
+    def _split(units: list[str], sep: str) -> list[str]:
+        chunks: list[str] = []
+        current = ""
+        for unit in units:
+            piece = unit if not current else sep + unit
+            if current and len(current) + len(piece) > max_chars:
+                chunks.append(current)
+                current = unit
+            else:
+                current += piece
+        if current:
+            chunks.append(current)
+        return chunks
+
+    paragraphs = [p for p in text.split("\n\n") if p]
+    chunks = _split(paragraphs, "\n\n")
+    # A single paragraph can still exceed max_chars (e.g. one long RFC section
+    # with no blank lines) — recursively split those on sentence, then
+    # whitespace, boundaries until every piece fits.
+    out: list[str] = []
+    for chunk in chunks:
+        if len(chunk) <= max_chars:
+            out.append(chunk)
+            continue
+        sentences = [s for s in re.split(r"(?<=[.!?])\s+", chunk) if s]
+        for sub in _split(sentences, " "):
+            if len(sub) <= max_chars:
+                out.append(sub)
+            else:
+                words = sub.split()
+                for piece in _split(words, " "):
+                    if len(piece) <= max_chars:
+                        out.append(piece)
+                    else:
+                        # A single whitespace-free "word" (a URL, hash, or
+                        # base64 blob) longer than max_chars on its own — no
+                        # boundary left to split on, so hard-slice by
+                        # character count as the last resort. Rare, but
+                        # without this an oversized token would slip through
+                        # over the embedder's own limit, exactly the failure
+                        # chunk-and-average exists to avoid.
+                        out.extend(
+                            piece[i : i + max_chars] for i in range(0, len(piece), max_chars)
+                        )
+    return out
+
+
+def embed_chunked(embedder: Embedder, text: str, input_type: str | None = None) -> list[float]:
+    """Embed `text`, sub-chunking and mean-pooling when it exceeds the
+    embedder's `max_input_tokens` instead of truncating it.
+
+    Truncation silently discards whatever text falls past the limit — for a
+    long RFC/ADR section, that is exactly where a supersession or prohibition
+    clause is likely to live. Chunk-and-average keeps every part of the
+    document represented in the resulting vector (weighted by chunk length),
+    at the cost of one extra embedding call per sub-chunk. Short text (the
+    common case, and every offline/hash-embedder call) takes the single-call
+    path unchanged.
+    """
+    limit = embedder.max_input_tokens
+    if limit is None or estimate_tokens(text) <= limit:
+        return embedder.embed(text, input_type=input_type)
+
+    pieces = chunk_by_tokens(text, limit)
+    if len(pieces) <= 1:
+        return embedder.embed(text, input_type=input_type)
+
+    weight = 0.0
+    acc: list[float] | None = None
+    for piece in pieces:
+        vec = embedder.embed(piece, input_type=input_type)
+        w = float(estimate_tokens(piece))
+        if acc is None:
+            acc = [v * w for v in vec]
+        else:
+            for i, v in enumerate(vec):
+                acc[i] += v * w
+        weight += w
+    if acc is None or weight == 0.0:
+        return embedder.embed(text, input_type=input_type)
+    return _l2_normalize([v / weight for v in acc])
+
+
 class VoyageEmbedder(Embedder):
     """Pinned Voyage AI embeddings (Anthropic's recommended embedding provider).
 
@@ -82,6 +184,12 @@ class VoyageEmbedder(Embedder):
     (`voyageai`) and a VOYAGE_API_KEY. Lazily imported so the offline spine
     keeps importing without the dependency.
     """
+
+    # Voyage's documented context length for the current model family
+    # (voyage-3/voyage-4 large + lite): 32,000 tokens. Conservative on purpose —
+    # `embed_chunked` sub-chunks and averages rather than truncating, so erring
+    # low costs an extra embedding call, not lost content.
+    max_input_tokens = 32_000
 
     def __init__(self, model: str = "voyage-4-large") -> None:
         self.model = model
@@ -126,10 +234,16 @@ class SentenceTransformerEmbedder(Embedder):
     `[local-embeddings]` extra (`sentence-transformers`). Lazily imported.
     """
 
+    # Pinned models' documented max sequence length (tokens); a conservative
+    # fallback covers any other model passed via `st:<model>`.
+    _MAX_TOKENS = {"all-MiniLM-L6-v2": 256}
+    _DEFAULT_MAX_TOKENS = 256
+
     def __init__(self, model: str = "all-MiniLM-L6-v2") -> None:
         self.model = model
         self.name = f"st:{model}"
         self._model = None
+        self.max_input_tokens = self._MAX_TOKENS.get(model, self._DEFAULT_MAX_TOKENS)
 
     def _ensure_model(self):
         if self._model is None:
@@ -156,11 +270,22 @@ class LiteLLMEmbedder(Embedder):
     `OPENAI_BASE_URL`), key from `LITELLM_API_KEY` (fallback `OPENAI_API_KEY`).
     """
 
-    def __init__(self, model: str = "text-embedding-3-large", timeout: float = 60.0) -> None:
+    # text-embedding-3-large's documented input limit (tokens); the honest
+    # default for an unspecified gateway alias — override via `max_input_tokens`
+    # for a different model.
+    _DEFAULT_MAX_TOKENS = 8191
+
+    def __init__(
+        self,
+        model: str = "text-embedding-3-large",
+        timeout: float = 60.0,
+        max_input_tokens: int | None = _DEFAULT_MAX_TOKENS,
+    ) -> None:
         self.model = model
         self.name = f"litellm:{model}"
         self.timeout = timeout
         self.dim = 0  # probed from the first response (OpenAI-shape has no role)
+        self.max_input_tokens = max_input_tokens
 
     @staticmethod
     def _base_url() -> str:

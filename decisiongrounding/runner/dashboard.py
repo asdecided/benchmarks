@@ -71,18 +71,24 @@ def _f(x, nd=2):
     return "n/a" if x is None else f"{x:.{nd}f}"
 
 
+def _has_partial_coverage(d):
+    """An arm has partial coverage if any cell didn't score — a generic error
+    OR a context-window-exceeded cell both leave n_runs short of n_total."""
+    return bool(d.get("n_errors", 0) or d.get("n_context_exceeded", 0))
+
+
 def _coverage_cell(d):
-    """`n_runs/n_total` with an asterisk when the arm has error cells — a
-    partial-coverage rate must never read identically to a full one."""
-    n_errors = d.get("n_errors", 0)
+    """`n_runs/n_total` with an asterisk when the arm has error or context-
+    window-exceeded cells — a partial-coverage rate must never read
+    identically to a full one."""
     n_total = d.get("n_total", d.get("n_runs", 0))
-    mark = "*" if n_errors else ""
+    mark = "*" if _has_partial_coverage(d) else ""
     return f"{d.get('n_runs', 0)}/{n_total}{mark}"
 
 
 def _metric_table(run):
     m = run["metrics_by_arm"]
-    any_errors = any(d.get("n_errors", 0) for d in m.values())
+    any_errors = any(_has_partial_coverage(d) for d in m.values())
     rows = ['<table id=leaderboard class=sortable><thead><tr>'
             '<th class=sort>arm</th><th class=sort>adherence</th><th class=sort>stale</th>'
             '<th class=sort>false-permit</th><th class=sort>false-prohibit</th>'
@@ -98,9 +104,9 @@ def _metric_table(run):
     table = "".join(rows) + "</tbody></table>"
     if any_errors:
         table += (
-            '<p class=note>* partial coverage — this arm has error cells; its '
-            "rate is averaged over completed cells only, not the full "
-            "scenario set.</p>"
+            '<p class=note>* partial coverage — this arm has error and/or '
+            "context-window-exceeded cells; its rate is averaged over "
+            "completed cells only, not the full scenario set.</p>"
         )
     return table
 
@@ -315,7 +321,8 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
     # 2 Curves
     if dataset:
         a_svg = line_chart("Decision adherence vs corpus size",
-                           {a: [(p["N"], p["adherence_rate"]) for p in dataset["arms"][a]] for a in dataset["arms"]},
+                           {a: [(p["N"], p["adherence_rate"]) for p in dataset["arms"][a]
+                                if p.get("adherence_rate") is not None] for a in dataset["arms"]},
                            x_label="Corpus size N (log)", y_label="adherence", x_log=True, y_max=1.05,
                            bands=_bands(dataset, "adherence_rate"))
         r_svg = line_chart("Governing-decision recall vs corpus size",
@@ -334,7 +341,8 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
     # 4 rac vs naive_rag
     if dataset and "rac" in dataset["arms"] and "naive_rag" in dataset["arms"]:
         hh = line_chart("rac vs naive RAG — adherence vs N",
-                        {a: [(p["N"], p["adherence_rate"]) for p in dataset["arms"][a]] for a in ("rac", "naive_rag")},
+                        {a: [(p["N"], p["adherence_rate"]) for p in dataset["arms"][a]
+                             if p.get("adherence_rate") is not None] for a in ("rac", "naive_rag")},
                         x_label="Corpus size N (log)", y_label="adherence", x_log=True, y_max=1.05,
                         bands=_bands(dataset, "adherence_rate", arms=("rac", "naive_rag")))
         ns = dataset["ns"]; base, top = ns[0], ns[-1]
@@ -356,12 +364,17 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
         else:
             ra = {p["N"]: p["adherence_rate"] for p in dataset["arms"]["rac"]}
             na = {p["N"]: p["adherence_rate"] for p in dataset["arms"]["naive_rag"]}
-            if na.get(top, 1) < ra.get(top, 0) - 1e-9:
-                v = f"rac holds adherence as the corpus grows where naive_rag decays (N={top}: rac {_f(ra.get(top))} vs naive_rag {_f(na.get(top))})."
-            elif abs(na.get(top, 0) - ra.get(top, 0)) <= 1e-9:
-                v = f"At N={top} the two tie ({_f(ra.get(top))}); naive RAG does not measurably degrade here — thesis not supported by this run."
+            ra_top, na_top = ra.get(top), na.get(top)
+            if ra_top is None or na_top is None:
+                v = (f"At N={top}, no adherence rate is available for at least one arm — "
+                     "every cell hit the answering model's context window (see "
+                     "context_window_exceeded_count); the thesis is not evaluable at this N.")
+            elif na_top < ra_top - 1e-9:
+                v = f"rac holds adherence as the corpus grows where naive_rag decays (N={top}: rac {_f(ra_top)} vs naive_rag {_f(na_top)})."
+            elif abs(na_top - ra_top) <= 1e-9:
+                v = f"At N={top} the two tie ({_f(ra_top)}); naive RAG does not measurably degrade here — thesis not supported by this run."
             else:
-                v = f"naive_rag leads rac at N={top} ({_f(na.get(top))} vs {_f(ra.get(top))}) — thesis not supported by this run."
+                v = f"naive_rag leads rac at N={top} ({_f(na_top)} vs {_f(ra_top)}) — thesis not supported by this run."
         secs.append(f'<section class=tab id=s4><h2>rac vs naive RAG</h2><div class=chart>{hh}</div>'
                     f'<div class=verdict>{_esc(v)}</div></section>')
     else:

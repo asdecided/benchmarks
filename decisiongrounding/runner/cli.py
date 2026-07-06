@@ -35,7 +35,12 @@ from providers import (  # noqa: E402
     make_answering_model,
 )
 from providers.answering import usage_dict  # noqa: E402
-from providers.base import SCAFFOLD, ProposedChange  # noqa: E402
+from providers.base import (  # noqa: E402
+    SCAFFOLD,
+    ContextWindowExceededError,
+    ProposedChange,
+    check_context_window,
+)
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
 from scoring.crossover import (  # noqa: E402
@@ -169,7 +174,13 @@ def _execute_runs(
     """Run each (arm, scenario) cell, streaming every completed RunResult to a
     durable `.partial.jsonl` sidecar as it lands. A crash or API error on one
     cell is recorded and skipped — it never discards the cells already done, so a
-    long paid run preserves every result it managed to produce."""
+    long paid run preserves every result it managed to produce.
+
+    A cell that exceeds the answering model's context window is recorded with
+    `"kind": "context_window_exceeded"` (see `ContextWindowExceededError`) so it
+    is distinguishable, downstream, from a generic transport/schema error — see
+    `_errors_by_arm` / `_context_exceeded_by_arm`.
+    """
     results: list[dict] = []
     errors: list[dict] = []
     partial_path.parent.mkdir(parents=True, exist_ok=True)
@@ -177,6 +188,19 @@ def _execute_runs(
         for arm, sc in pairs:
             try:
                 r = run_one(arm, sc, model, seed, embedder)
+            except ContextWindowExceededError as exc:
+                err = {
+                    "arm": arm, "scenario_id": sc.scenario_id, "error": repr(exc),
+                    "kind": "context_window_exceeded",
+                }
+                errors.append(err)
+                fp.write(json.dumps({"record": "context_window_exceeded", **err}) + "\n")
+                fp.flush()
+                print(
+                    f"  ! {arm}/{sc.scenario_id} exceeded the answering model's "
+                    f"context window, continuing: {exc}", file=sys.stderr,
+                )
+                continue
             except Exception as exc:  # noqa: BLE001 - one cell must not kill the batch
                 err = {"arm": arm, "scenario_id": sc.scenario_id, "error": repr(exc)}
                 errors.append(err)
@@ -220,6 +244,7 @@ def _write_report(
     for r in results:
         by_arm.setdefault(r["arm"], []).append(r)
     err_counts = _errors_by_arm(errors or [])
+    cwe_counts = _context_exceeded_by_arm(errors or [])
     from scoring.scorer import Score
 
     metrics = {
@@ -228,14 +253,21 @@ def _write_report(
             [Score(**r["score"]) for r in rs],
             [r["retrieval"]["governing_decision_retrieved"] for r in rs],
             n_errors=err_counts.get(arm, 0),
+            n_context_exceeded=cwe_counts.get(arm, 0),
         ).as_dict()
         for arm, rs in by_arm.items()
     }
-    # An arm can error on every cell, leaving it out of `results` entirely —
-    # still surface its coverage rather than silently dropping it from the report.
-    for arm, n in err_counts.items():
+    # An arm can error/exceed-context on every cell, leaving it out of
+    # `results` entirely — still surface its coverage rather than silently
+    # dropping it from the report.
+    for arm in set(err_counts) | set(cwe_counts):
         metrics.setdefault(
-            arm, aggregate(arm, [], None, n_errors=n).as_dict()
+            arm,
+            aggregate(
+                arm, [], None,
+                n_errors=err_counts.get(arm, 0),
+                n_context_exceeded=cwe_counts.get(arm, 0),
+            ).as_dict(),
         )
     report = {
         "harness_version": HARNESS_VERSION,
@@ -250,11 +282,29 @@ def _write_report(
     return path
 
 
-def _errors_by_arm(errors: list[dict]) -> dict[str, int]:
+def _is_context_exceeded(e: dict) -> bool:
+    return e.get("kind") == "context_window_exceeded"
+
+
+def _count_by_arm(errors: list[dict], *, is_context_exceeded: bool) -> dict[str, int]:
+    """Counts of errors per arm, split by outcome kind: generic errors
+    (`is_context_exceeded=False`) vs. context-window-exceeded cells
+    (`is_context_exceeded=True`) — kept apart so a reader can tell a
+    structural ceiling from a transient transport/schema failure."""
     counts: dict[str, int] = {}
     for e in errors:
+        if _is_context_exceeded(e) != is_context_exceeded:
+            continue
         counts[e["arm"]] = counts.get(e["arm"], 0) + 1
     return counts
+
+
+def _errors_by_arm(errors: list[dict]) -> dict[str, int]:
+    return _count_by_arm(errors, is_context_exceeded=False)
+
+
+def _context_exceeded_by_arm(errors: list[dict]) -> dict[str, int]:
+    return _count_by_arm(errors, is_context_exceeded=True)
 
 
 def _print_metrics(results: list[dict], errors: list[dict] | None = None) -> None:
@@ -262,22 +312,26 @@ def _print_metrics(results: list[dict], errors: list[dict] | None = None) -> Non
     for r in results:
         by_arm.setdefault(r["arm"], []).append(r)
     err_counts = _errors_by_arm(errors or [])
+    cwe_counts = _context_exceeded_by_arm(errors or [])
     from scoring.scorer import Score
 
-    arms = sorted(set(by_arm) | set(err_counts))
+    arms = sorted(set(by_arm) | set(err_counts) | set(cwe_counts))
     print(
         f"{'arm':<16}{'adhere':>8}{'stale':>8}{'f-permit':>10}"
         f"{'f-prohibit':>12}{'gov-recall':>12}{'coverage':>10}"
     )
     any_errors = False
+    any_cwe = False
     for arm in arms:
         rs = by_arm.get(arm, [])
         n_err = err_counts.get(arm, 0)
+        n_cwe = cwe_counts.get(arm, 0)
         m = aggregate(
             arm,
             [Score(**r["score"]) for r in rs],
             [r["retrieval"]["governing_decision_retrieved"] for r in rs],
             n_errors=n_err,
+            n_context_exceeded=n_cwe,
         )
         recall = "  n/a" if m.governing_recall_rate is None else f"{m.governing_recall_rate:.2f}"
         # An arm with zero completed cells has no rate to average — say so
@@ -286,6 +340,9 @@ def _print_metrics(results: list[dict], errors: list[dict] | None = None) -> Non
         if n_err:
             any_errors = True
             adhere += "*"
+        if n_cwe:
+            any_cwe = True
+            adhere += "^"
         print(
             f"{arm:<16}{adhere:>8}{m.stale_decision_rate:>8.2f}"
             f"{m.false_permit_rate:>10.2f}{m.false_prohibit_rate:>12.2f}"
@@ -298,6 +355,15 @@ def _print_metrics(results: list[dict], errors: list[dict] | None = None) -> Non
             "completed cells ONLY — it is not the full scenario set and must "
             "not be reported/quoted as a full result. See 'errors' in the "
             "written report.",
+            file=sys.stderr,
+        )
+    if any_cwe:
+        print(
+            "\n! context window exceeded: arm(s) marked '^' above could not fit "
+            "their grounding (+ scaffold + task) into the answering model's "
+            "context window on some cells — those cells were never answered, so "
+            "they are a structural ceiling, not a wrong answer. See "
+            "'n_context_exceeded' in the written report.",
             file=sys.stderr,
         )
 
@@ -353,13 +419,26 @@ def cmd_batch(args) -> int:
     label = "batch-" + "-".join(arms)
 
     # 1. Assemble every cell's grounding + request locally (rac CLI / embeddings
-    #    happen here). The answering calls are submitted together below.
+    #    happen here). The answering calls are submitted together below. A cell
+    #    that would exceed the answering model's context window is skipped
+    #    here — the same symmetric preflight as Provider.respond() and
+    #    build_dataset_batched, since this path never calls respond() and so
+    #    would otherwise submit (and pay for) a request no arm could answer.
     cells: list[dict] = []
+    preflight_errors: list[dict] = []
     for arm in arms:
         for sc in scenarios:
             provider = _provider(arm, model, args.embedder)
             provider.prepare(list(sc.corpus))
             grounding = provider.assemble(sc.task)
+            try:
+                check_context_window(grounding, sc.task, model)
+            except ContextWindowExceededError as exc:
+                preflight_errors.append({
+                    "arm": arm, "scenario_id": sc.scenario_id, "error": repr(exc),
+                    "kind": "context_window_exceeded",
+                })
+                continue
             gov = sc.gold_label.governing_decision
             emb = getattr(provider, "embedder", None)
             skel = {
@@ -391,29 +470,35 @@ def cmd_batch(args) -> int:
                 "skel": skel,
             })
 
-    # 2. Submit one batch (50% of standard token price).
+    # 2. Submit one batch (50% of standard token price) — skip entirely if
+    #    every cell was preflight-skipped for exceeding the context window.
     client = model._ensure_client()
     requests = [{"custom_id": c["custom_id"], "params": c["params"]} for c in cells]
-    batch = client.messages.batches.create(requests=requests)
-    print(f"submitted batch {batch.id}: {len(requests)} requests "
-          f"({len(arms)} arms x {len(scenarios)} scenarios) at Batch-API pricing (~50% off)")
-
-    # 3. Poll until the batch ends (usually < 1h; max 24h).
-    while True:
-        b = client.messages.batches.retrieve(batch.id)
-        if b.processing_status == "ended":
-            break
-        rc = getattr(b, "request_counts", None)
-        if rc is not None:
-            print(f"  {b.processing_status}: processing={rc.processing} "
-                  f"succeeded={rc.succeeded} errored={rc.errored}")
-        time.sleep(max(5, args.poll))
-
-    # 4. Collect results by custom_id, parse + score. Results arrive in any order.
     by_cid = {c["custom_id"]: c for c in cells}
     results: list[dict] = []
-    errors: list[dict] = []
-    for r in client.messages.batches.results(batch.id):
+    errors: list[dict] = list(preflight_errors)
+    if requests:
+        batch = client.messages.batches.create(requests=requests)
+        print(f"submitted batch {batch.id}: {len(requests)} requests "
+              f"({len(arms)} arms x {len(scenarios)} scenarios) at Batch-API pricing (~50% off)")
+
+        # 3. Poll until the batch ends (usually < 1h; max 24h).
+        while True:
+            b = client.messages.batches.retrieve(batch.id)
+            if b.processing_status == "ended":
+                break
+            rc = getattr(b, "request_counts", None)
+            if rc is not None:
+                print(f"  {b.processing_status}: processing={rc.processing} "
+                      f"succeeded={rc.succeeded} errored={rc.errored}")
+            time.sleep(max(5, args.poll))
+    else:
+        print("all cells exceeded the answering model's context window; "
+              "nothing to submit", file=sys.stderr)
+
+    # 4. Collect results by custom_id, parse + score. Results arrive in any order.
+    batch_results = client.messages.batches.results(batch.id) if requests else []
+    for r in batch_results:
         cell = by_cid.get(r.custom_id)
         if cell is None:
             continue
@@ -612,15 +697,29 @@ def cmd_demo(args) -> int:
             "crossover, not yet the real-CORPUS evidence run. See README and ADR-0001."
         )
     sweep_errors = dataset.get("errors") or []
-    if errors or sweep_errors:
+    all_errors = list(errors) + list(sweep_errors)
+    n_cwe = sum(1 for e in all_errors if _is_context_exceeded(e))
+    n_other = len(all_errors) - n_cwe
+    if n_other:
         print(
-            f"\n! {len(errors) + len(sweep_errors)} cell(s) errored across the "
-            "base-N table and/or the crossover sweep — the adherence numbers "
-            "above are averaged over completed cells only. See 'errors' in "
-            f"{report} and the crossover dataset.",
+            f"\n! {n_other} cell(s) errored across the base-N table and/or the "
+            "crossover sweep — the adherence numbers above are averaged over "
+            f"completed cells only. See 'errors' in {report} and the crossover "
+            "dataset.",
             file=sys.stderr,
         )
-    return 1 if (errors or sweep_errors) else 0
+    if n_cwe:
+        print(
+            f"\n! {n_cwe} cell(s) exceeded the answering model's context window "
+            "across the base-N table and/or the crossover sweep — those cells "
+            "were never answered, so they are excluded from adherence_rate "
+            "entirely (not scored as non-adherent); a curve point where every "
+            "cell hit the ceiling reports adherence_rate=None rather than a "
+            "misleading 0.0. See 'context_window_exceeded_count' in the "
+            "crossover dataset.",
+            file=sys.stderr,
+        )
+    return 1 if all_errors else 0
 
 
 def cmd_ui(args) -> int:
