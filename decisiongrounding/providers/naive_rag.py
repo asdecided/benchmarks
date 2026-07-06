@@ -27,7 +27,7 @@ from .base import (
     Task,
     estimate_tokens,
 )
-from .embedding import Embedder, LocalDeterministicEmbedder, cosine
+from .embedding import Embedder, LocalDeterministicEmbedder, cosine, embed_chunked
 from .grounding_format import format_block
 
 
@@ -72,15 +72,20 @@ class NaiveRagProvider(Provider):
                         a.id,
                         a.type,
                         section,
-                        self.embedder.embed(section, input_type="document"),
+                        # Sections can exceed a real embedder's input limit (a
+                        # full RFC section, say) — chunk-and-average instead of
+                        # truncating so the far side of a long section (where a
+                        # supersession/prohibition clause often lives) is not
+                        # silently dropped from the vector.
+                        embed_chunked(self.embedder, section, input_type="document"),
                     )
                 )
         # Grounding is task-dependent for RAG; assembled lazily in respond().
         self._grounding = GroundingContext(text="", artifacts_supplied=(), token_estimate=0)
 
     def assemble(self, task: Task) -> GroundingContext:
-        query = self.embedder.embed(
-            f"{task.prompt}\n{task.proposed_action}", input_type="query"
+        query = embed_chunked(
+            self.embedder, f"{task.prompt}\n{task.proposed_action}", input_type="query"
         )
         ranked = sorted(
             self._chunks, key=lambda c: cosine(query, c.vector), reverse=True

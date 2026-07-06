@@ -86,6 +86,67 @@ def estimate_tokens(text: str) -> int:
     return (len(text) + 3) // 4
 
 
+class ContextWindowExceededError(RuntimeError):
+    """The assembled prompt (scaffold + grounding + task) would not fit the
+    answering model's context window, even before an output-token reserve.
+
+    Raised BEFORE the answering model is called (see `check_context_window`),
+    so it costs nothing and is distinguishable from a transport/schema error —
+    the runner records it as its own outcome rather than folding it into
+    generic `errors`, so an arm that structurally cannot fit a large corpus
+    (typically `context_dump` at high N) is not misread as one that fit the
+    corpus and then answered wrong. `token_estimate` carries the prompt size
+    that tripped the check, for cost-curve bookkeeping on a cell that never
+    made an API call.
+    """
+
+    def __init__(self, message: str, token_estimate: int = 0) -> None:
+        super().__init__(message)
+        self.token_estimate = token_estimate
+
+
+# Headroom reserved for the answering model's response (max_tokens=2048 across
+# every real backend, see providers/answering.py) plus a small safety margin —
+# subtracted from the context window before comparing against the prompt.
+RESPONSE_RESERVE_TOKENS = 4096
+
+
+def context_window_needed(grounding: GroundingContext, task: Task) -> int:
+    """Estimated total prompt size: the held-constant scaffold + this arm's
+    grounding + the task text — the same three pieces every real backend
+    renders into one prompt (see `answering._task_user_prompt`)."""
+    return (
+        estimate_tokens(SCAFFOLD)
+        + grounding.token_estimate
+        + estimate_tokens(task.prompt)
+        + estimate_tokens(task.proposed_action)
+    )
+
+
+def check_context_window(grounding: GroundingContext, task: Task, answering_model) -> None:
+    """Raise `ContextWindowExceededError` when this grounding would not fit the
+    answering model's context window, reserving headroom for its response.
+
+    Every arm's `respond()` calls this identically (see `Provider.respond`),
+    so hitting the ceiling is an arm-symmetric, first-class outcome rather
+    than something one arm discovers via a raw API error and another doesn't.
+    `answering_model.context_window_tokens` is `None` for backends with no
+    known/enforced limit (the offline stub, an unpinned gateway alias), in
+    which case this is a no-op and the real API call is the only check.
+    """
+    limit = getattr(answering_model, "context_window_tokens", None)
+    if limit is None:
+        return
+    needed = context_window_needed(grounding, task)
+    if needed + RESPONSE_RESERVE_TOKENS > limit:
+        raise ContextWindowExceededError(
+            f"prompt (~{needed} tokens, including {grounding.token_estimate} of "
+            f"grounding) plus a {RESPONSE_RESERVE_TOKENS}-token response reserve "
+            f"exceeds the answering model's {limit}-token context window",
+            token_estimate=needed,
+        )
+
+
 class Provider(ABC):
     """Base arm. Subclasses implement `prepare`; `respond` is shared."""
 
@@ -110,8 +171,15 @@ class Provider(ABC):
         return self._grounding
 
     def respond(self, task: Task) -> ProposedChange:
-        """Answer the task using the held-constant scaffold + answering model."""
-        return self.answering_model.respond(SCAFFOLD, self.assemble(task), task)
+        """Answer the task using the held-constant scaffold + answering model.
+
+        Checks the context window BEFORE calling the answering model (see
+        `check_context_window`) so a grounding that cannot fit is a first-class
+        `ContextWindowExceededError`, not a raw transport failure.
+        """
+        grounding = self.assemble(task)
+        check_context_window(grounding, task, self.answering_model)
+        return self.answering_model.respond(SCAFFOLD, grounding, task)
 
     @property
     def grounding(self) -> GroundingContext:

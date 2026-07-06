@@ -27,7 +27,14 @@ import re
 import sys
 from abc import ABC, abstractmethod
 
-from .base import Action, GroundingContext, ProposedChange, Task
+from .base import (
+    Action,
+    ContextWindowExceededError,
+    GroundingContext,
+    ProposedChange,
+    Task,
+    context_window_needed,
+)
 from .grounding_format import parse_blocks
 
 _TOKEN = re.compile(r"[a-z0-9]+")
@@ -87,6 +94,12 @@ class AnsweringModel(ABC):
     # backends that don't retry (offline stub, claude native).
     last_schema_retries: int = 0
     last_used_tool_call_fallback: bool = False
+    # This model's context window in tokens, or None when there is no known
+    # limit to preflight against (the offline stub makes no API call, so
+    # nothing to check). `Provider.respond()` uses this to raise
+    # `ContextWindowExceededError` before spending a real call — see
+    # `base.check_context_window`.
+    context_window_tokens: int | None = None
 
     @abstractmethod
     def respond(
@@ -235,6 +248,38 @@ def _task_user_prompt(grounding: GroundingContext, task: Task) -> str:
     )
 
 
+_CONTEXT_LENGTH_SIGNAL = re.compile(
+    r"(prompt is too long|maximum context length|context_length_exceeded|"
+    r"exceeds the model.?s (?:maximum )?context|exceeds context window|"
+    r"reduce the length of the messages)",
+    re.IGNORECASE,
+)
+# Deliberately narrow: "input length" / "too many tokens" alone also appear in
+# unrelated rate-limit ("reduce your input length") and tool-count ("too many
+# tokens in the tools array") errors, which must NOT be reclassified as
+# ContextWindowExceededError — that would hide a genuine failure behind the
+# benign "structural ceiling, excluded from adherence_rate" outcome. A false
+# negative here just falls through to a generic error, which is the safe
+# direction; the proactive check in `check_context_window` already catches
+# the common case before any API call is made, so this reactive layer only
+# needs to catch what that estimate missed.
+
+
+def _reraise_if_context_length(exc: Exception, prompt_tokens: int) -> None:
+    """Reclassify a real backend's own "prompt too long" rejection as
+    `ContextWindowExceededError`, in addition to the proactive estimate check
+    in `base.check_context_window`. The proactive check uses our own ~4
+    chars/token estimate and a guessed context window (a gateway alias's real
+    backend/limit isn't always known) — this reactive layer catches the cases
+    the estimate misses, from the one source that is always authoritative:
+    the API's own rejection."""
+    if _CONTEXT_LENGTH_SIGNAL.search(str(exc)):
+        raise ContextWindowExceededError(
+            f"answering backend rejected the prompt as too long: {exc}",
+            token_estimate=prompt_tokens,
+        ) from exc
+
+
 class SchemaMissError(RuntimeError):
     """A structured-output response that parsed but did not satisfy the
     ProposedChange schema (or wasn't JSON at all) — the retryable failure mode
@@ -291,6 +336,7 @@ class ClaudeAnsweringModel(AnsweringModel):
     name = "claude"
     version = "claude-opus-4-8"  # pinned model id
     temperature = None
+    context_window_tokens = 200_000  # Opus 4.8's documented context window
 
     def __init__(self, seed: int = 0, effort: str = "low") -> None:
         self.seed = seed
@@ -354,7 +400,11 @@ class ClaudeAnsweringModel(AnsweringModel):
         self, scaffold: str, grounding: GroundingContext, task: Task
     ) -> ProposedChange:
         client = self._ensure_client()
-        resp = client.messages.create(**self.build_request(scaffold, grounding, task))
+        try:
+            resp = client.messages.create(**self.build_request(scaffold, grounding, task))
+        except Exception as exc:  # noqa: BLE001 - reclassify, else re-raise as-is
+            _reraise_if_context_length(exc, context_window_needed(grounding, task))
+            raise
         self.last_usage = usage_dict(getattr(resp, "usage", None))
         return self.parse_message(resp)
 
@@ -396,6 +446,12 @@ class OpenAICompatAnsweringModel(AnsweringModel):
     name = "litellm"
     temperature = None
 
+    # A gateway alias's real backend model (and its true context window) is not
+    # knowable from the alias string alone, so this is a conservative documented
+    # default rather than a measured pin — override via `context_window_tokens`
+    # when the alias is known to support more (or less).
+    DEFAULT_CONTEXT_WINDOW_TOKENS = 128_000
+
     def __init__(
         self,
         model: str,
@@ -403,6 +459,7 @@ class OpenAICompatAnsweringModel(AnsweringModel):
         timeout: float = 300.0,
         max_schema_retries: int = SCHEMA_MISS_MAX_RETRIES,
         use_tool_call_fallback: bool = True,
+        context_window_tokens: int | None = DEFAULT_CONTEXT_WINDOW_TOKENS,
     ) -> None:
         if not model:
             raise ValueError("litellm answering model needs an alias: litellm:<model>")
@@ -412,6 +469,7 @@ class OpenAICompatAnsweringModel(AnsweringModel):
         self.timeout = timeout
         self.max_schema_retries = max_schema_retries
         self.use_tool_call_fallback = use_tool_call_fallback
+        self.context_window_tokens = context_window_tokens
 
     @staticmethod
     def _base_url() -> str:
@@ -571,10 +629,15 @@ class OpenAICompatAnsweringModel(AnsweringModel):
         self.last_schema_retries = 0
         self.last_used_tool_call_fallback = False
         request_kwargs = self.build_request(scaffold, grounding, task)
+        prompt_tokens = context_window_needed(grounding, task)
         attempts = self.max_schema_retries + 1
         last_exc: SchemaMissError | None = None
         for attempt in range(1, attempts + 1):
-            payload = self._post(request_kwargs)
+            try:
+                payload = self._post(request_kwargs)
+            except Exception as exc:  # noqa: BLE001 - reclassify, else re-raise as-is
+                _reraise_if_context_length(exc, prompt_tokens)
+                raise
             try:
                 pc = self.parse_response(payload)
             except SchemaMissError as exc:
@@ -606,6 +669,9 @@ class OpenAICompatAnsweringModel(AnsweringModel):
             pc = self.parse_tool_call_response(payload)
         except SchemaMissError as exc:
             raise exc from last_exc
+        except Exception as exc:  # noqa: BLE001 - reclassify, else re-raise as-is
+            _reraise_if_context_length(exc, prompt_tokens)
+            raise
         self.last_used_tool_call_fallback = True
         self.last_usage = self.parse_usage(payload)
         return pc

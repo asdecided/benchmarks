@@ -25,15 +25,22 @@ class ArmMetrics:
     false_prohibit_rate: float
     governing_recall_rate: float | None
     # Cells that errored out for this arm (a schema-miss that exhausted every
-    # retry, an HTTP failure, ...) and the total attempted (n_runs + n_errors).
-    # A rate above is averaged over `n_runs` completed cells ONLY — when
-    # n_errors > 0 that is partial coverage, not the full scenario set, and
-    # must not be reported/quoted as a full result.
+    # retry, an HTTP failure, ...) and the total attempted (n_runs + n_errors
+    # + n_context_exceeded). A rate above is averaged over `n_runs` completed
+    # cells ONLY — when n_errors or n_context_exceeded > 0 that is partial
+    # coverage, not the full scenario set, and must not be reported/quoted as
+    # a full result.
     n_errors: int = 0
+    # Cells that hit the answering model's context window (grounding + scaffold
+    # + task would not fit) — tracked separately from n_errors: it is a
+    # different outcome. The arm never got a chance to answer at all, rather
+    # than answering-and-being-scored or hitting a transient transport/schema
+    # failure. See providers.base.ContextWindowExceededError.
+    n_context_exceeded: int = 0
 
     @property
     def n_total(self) -> int:
-        return self.n_runs + self.n_errors
+        return self.n_runs + self.n_errors + self.n_context_exceeded
 
     @property
     def coverage(self) -> str:
@@ -44,6 +51,7 @@ class ArmMetrics:
             "arm": self.arm,
             "n_runs": self.n_runs,
             "n_errors": self.n_errors,
+            "n_context_exceeded": self.n_context_exceeded,
             "n_total": self.n_total,
             "adherence_rate": self.adherence_rate,
             "stale_decision_rate": self.stale_decision_rate,
@@ -64,13 +72,20 @@ def recall_rate(retrieved_flags: list) -> float | None:
 
 
 def aggregate(
-    arm: str, scores: list, retrieved_flags: list | None = None, n_errors: int = 0
+    arm: str,
+    scores: list,
+    retrieved_flags: list | None = None,
+    n_errors: int = 0,
+    n_context_exceeded: int = 0,
 ) -> ArmMetrics:
     """Aggregate Score objects (and optional retrieval flags) for one arm.
 
-    `n_errors`: cells for this arm that errored rather than scored — surfaced
-    on the result so a partial-coverage rate is never indistinguishable from a
-    full one (see `ArmMetrics.n_errors` / `.coverage`).
+    `n_errors`: cells for this arm that errored rather than scored. `n_context
+    _exceeded`: cells that hit the answering model's context window and so
+    never got a chance to answer — kept apart from `n_errors` so a reader can
+    tell a structural ceiling from a transient failure. Both are surfaced on
+    the result so a partial-coverage rate is never indistinguishable from a
+    full one (see `ArmMetrics.n_errors` / `.n_context_exceeded` / `.coverage`).
     """
     return ArmMetrics(
         arm=arm,
@@ -81,6 +96,7 @@ def aggregate(
         false_prohibit_rate=_rate([s.false_prohibit for s in scores]),
         governing_recall_rate=recall_rate(retrieved_flags) if retrieved_flags is not None else None,
         n_errors=n_errors,
+        n_context_exceeded=n_context_exceeded,
     )
 
 

@@ -45,14 +45,19 @@ def _fmt(x, nd=2):
     return f"{x:.{nd}f}"
 
 
+def _has_partial_coverage(d: dict) -> bool:
+    """An arm has partial coverage if any cell didn't score — a generic error
+    OR a context-window-exceeded cell both leave n_runs short of n_total."""
+    return bool(d.get("n_errors", 0) or d.get("n_context_exceeded", 0))
+
+
 def _coverage(d: dict) -> str:
-    """`n_runs/n_total`, flagged with an asterisk when the arm has error
-    cells — a partial-coverage rate must never read identically to a full
-    one. `.get` defaults keep this readable against older reports that
-    predate n_errors/n_total."""
-    n_errors = d.get("n_errors", 0)
+    """`n_runs/n_total`, flagged with an asterisk when the arm has error or
+    context-window-exceeded cells — a partial-coverage rate must never read
+    identically to a full one. `.get` defaults keep this readable against
+    older reports that predate n_errors/n_context_exceeded/n_total."""
     n_total = d.get("n_total", d.get("n_runs", 0))
-    return f"{d.get('n_runs', 0)}/{n_total}" + ("*" if n_errors else "")
+    return f"{d.get('n_runs', 0)}/{n_total}" + ("*" if _has_partial_coverage(d) else "")
 
 
 def _leaderboard(run: dict) -> str:
@@ -67,10 +72,11 @@ def _leaderboard(run: dict) -> str:
             f"{_fmt(d['false_permit_rate'])} | {_fmt(d['false_prohibit_rate'])} | "
             f"{_fmt(d.get('governing_recall_rate'))} | {_coverage(d)} |"
         )
-    if any(d.get("n_errors", 0) for d in m.values()):
+    if any(_has_partial_coverage(d) for d in m.values()):
         rows.append(
-            "\n\\* partial coverage — this arm has error cells; its rate is "
-            "averaged over completed cells only, not the full scenario set."
+            "\n\\* partial coverage — this arm has error and/or context-window-"
+            "exceeded cells; its rate is averaged over completed cells only, "
+            "not the full scenario set."
         )
     return "\n".join(rows)
 
@@ -348,7 +354,8 @@ def emit_charts(run: dict, dataset: dict | None, cost_curve: dict | None, out_di
         # 2. Adherence vs N — the headline.
         svg = line_chart(
             "Decision adherence vs corpus size",
-            {a: [(p["N"], p["adherence_rate"]) for p in arms[a]] for a in arms},
+            {a: [(p["N"], p["adherence_rate"]) for p in arms[a]
+                 if p.get("adherence_rate") is not None] for a in arms},
             x_label="Corpus size N (log scale)", y_label="adherence rate",
             x_log=True, y_max=1.05,
             bands=_bands(dataset, "adherence_rate"),
@@ -371,7 +378,8 @@ def emit_charts(run: dict, dataset: dict | None, cost_curve: dict | None, out_di
         if "rac" in arms and "naive_rag" in arms:
             svg = line_chart(
                 "rac vs naive RAG — adherence vs corpus size",
-                {a: [(p["N"], p["adherence_rate"]) for p in arms[a]] for a in ("rac", "naive_rag")},
+                {a: [(p["N"], p["adherence_rate"]) for p in arms[a]
+                     if p.get("adherence_rate") is not None] for a in ("rac", "naive_rag")},
                 x_label="Corpus size N (log scale)", y_label="adherence rate",
                 x_log=True, y_max=1.05,
                 bands=_bands(dataset, "adherence_rate", arms=("rac", "naive_rag")),

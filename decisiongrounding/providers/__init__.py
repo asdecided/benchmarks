@@ -16,6 +16,7 @@ from .answering import (
 )
 from .base import (
     Action,
+    ContextWindowExceededError,
     CorpusArtifact,
     GroundingContext,
     ProposedChange,
@@ -82,6 +83,7 @@ __all__ = [
     "ARMS",
     "REAL_ARMS",
     "Provider",
+    "ContextWindowExceededError",
     "CorpusArtifact",
     "Task",
     "GroundingContext",
