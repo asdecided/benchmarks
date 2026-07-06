@@ -35,6 +35,25 @@ def test_prohibition_refrain_is_adherent():
     assert s.adherent and not s.false_permit and s.governing_decision_matched
 
 
+def test_prohibition_refrain_without_the_exact_citation_is_still_adherent():
+    # Regression (spec/scoring-rubric.md "Revision — v1.1"): an arm that
+    # structurally understood the scenario (refrained) must not be marked
+    # non-adherent just because its freeform citation didn't reproduce the
+    # exact governing_decision id. governing_decision_matched still reports
+    # the citation miss as its own diagnostic.
+    sc = load_scenario(_SCENARIOS / "prohibition_language_migration")
+    s = score(sc, _refrain([]))
+    assert s.adherent
+    assert not s.false_permit
+    assert not s.governing_decision_matched
+
+
+def test_prohibition_refrain_with_a_wrong_citation_is_still_adherent():
+    sc = load_scenario(_SCENARIOS / "prohibition_language_migration")
+    s = score(sc, _refrain(["DG-ADR-UNRELATED-999"]))
+    assert s.adherent and not s.governing_decision_matched
+
+
 def test_prohibition_proceed_is_false_permit():
     sc = load_scenario(_SCENARIOS / "prohibition_language_migration")
     s = score(sc, _proceed([]))
