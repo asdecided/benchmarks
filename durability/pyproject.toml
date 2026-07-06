@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rac-benchmarks-durability"
+version = "0.1.0"
+description = "Durability evidence member for RAC: measures the governance claim behind per-artifact splitting — not retrieval quality (the granularity member proved that a null under a shared ranker), but whether the structure retrieval-safety depends on survives realistic editing. A deterministic seeded edit engine over the granularity member's dual renderings drives a safety-decay curve (leaks and misses per round, gated vs ungated artifacts vs canon vs a canon-linter-gated arm, all at equal prominence), a detectability matrix (artifact gates vs a best-effort canon linter, per break class), a three-way merge-conflict rate, and a per-break blast radius. Drives rac only as an external CLI/MCP server on PATH (DG-ADR-0001); never a merge gate (ADR-066/ADR-097)."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.11"
+# Stdlib-only: no engine imports (rac is an external CLI/MCP server on PATH),
+# no embeddings, no network, no third-party runtime dependency. git is invoked
+# as an external binary for deterministic three-way merges.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+py-modules = ["edits", "linter", "run"]
