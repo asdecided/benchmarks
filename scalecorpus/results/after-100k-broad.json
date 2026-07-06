@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "corpus": "c100k",
+    "size": 100000,
+    "seed": 7,
+    "rac_version": "rac 0.1.dev50+g44d48d40a",
+    "label": "",
+    "cpu_count": 4,
+    "timestamp": "2026-07-05T22:57:49Z"
+  },
+  "metrics": {
+    "warm_retrieval": {
+      "cache": true,
+      "calls": 1,
+      "dnf": 0,
+      "n": 1,
+      "p50_ms": 412379.29,
+      "p95_ms": 412379.29,
+      "p99_ms": 412379.29,
+      "mean_ms": 412379.29,
+      "max_ms": 412379.29,
+      "per_tool": {
+        "search_artifacts[mid]": {
+          "n": 1,
+          "p50_ms": 412379.29,
+          "p95_ms": 412379.29,
+          "p99_ms": 412379.29,
+          "mean_ms": 412379.29,
+          "max_ms": 412379.29
+        }
+      },
+      "server_rss_mb": 379.2,
+      "server_peak_rss_mb": 2048.1
+    }
+  }
+}
