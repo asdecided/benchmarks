@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from providers.base import Action, ProposedChange
-from runner.cli import _execute_runs, _preflight
+from runner.cli import _execute_runs, _preflight, _print_metrics, _write_report
 from scenarios.loader import load_scenarios
 from scoring.scorer import _required_present
 
@@ -97,3 +97,77 @@ def test_execute_runs_streams_and_survives_a_failing_cell(tmp_path):
     lines = [json.loads(line) for line in partial.read_text().splitlines()]
     records = {line["record"] for line in lines}
     assert records == {"run", "error"}
+
+
+# --- partial-coverage visibility: a rate must never look like a full one ----
+
+
+def _result(arm: str, sid: str, adherent: bool = True) -> dict:
+    return {
+        "arm": arm,
+        "scenario_id": sid,
+        "score": {
+            "adherent": adherent, "stale_decision_followed": False,
+            "false_permit": not adherent, "false_prohibit": False,
+            "governing_decision_matched": True,
+        },
+        "retrieval": {"governing_decision_retrieved": None},
+    }
+
+
+def _error(arm: str, sid: str) -> dict:
+    return {"arm": arm, "scenario_id": sid, "error": "RuntimeError('boom')"}
+
+
+def test_print_metrics_flags_partial_coverage_and_hides_a_full_average(capsys):
+    # 3 of 5 cells completed for "rac"; 2 errored. The printed rate must not
+    # read as a clean 1.00 the way it would if errors were silently dropped.
+    results = [_result("rac", f"s{i}") for i in range(3)]
+    errors = [_error("rac", "s3"), _error("rac", "s4")]
+    _print_metrics(results, errors)
+    out = capsys.readouterr()
+    assert "3/5" in out.out
+    # the adherence cell for a partial arm is flagged, not a bare "1.00"
+    assert "1.00*" in out.out
+    assert "partial coverage" in out.err
+
+
+def test_print_metrics_full_coverage_has_no_warning(capsys):
+    results = [_result("rac", f"s{i}") for i in range(2)]
+    _print_metrics(results, errors=[])
+    out = capsys.readouterr()
+    assert "2/2" in out.out
+    assert "1.00" in out.out and "1.00*" not in out.out
+    assert "partial coverage" not in out.err
+
+
+def test_print_metrics_arm_with_zero_completed_cells_shows_na_not_zero(capsys):
+    # An arm that errored on every cell has nothing to average — that must
+    # print as n/a, not a misleading 0.00.
+    _print_metrics(results=[], errors=[_error("naive_rag", "s0"), _error("naive_rag", "s1")])
+    out = capsys.readouterr()
+    assert "naive_rag" in out.out
+    assert "0/2" in out.out
+    assert "n/a" in out.out
+
+
+def test_write_report_surfaces_an_arm_that_errored_on_every_cell(tmp_path):
+    # naive_rag never appears in `results` (every cell errored) — it must
+    # still show up in metrics_by_arm with its coverage, not vanish silently.
+    results = [_result("rac", "s0")]
+    errors = [_error("naive_rag", "s0"), _error("naive_rag", "s1")]
+    path = _write_report(results, tmp_path, "test", errors)
+    report = json.loads(path.read_text())
+    assert report["metrics_by_arm"]["rac"]["n_errors"] == 0
+    assert report["metrics_by_arm"]["rac"]["n_total"] == 1
+    nr = report["metrics_by_arm"]["naive_rag"]
+    assert nr["n_runs"] == 0 and nr["n_errors"] == 2 and nr["n_total"] == 2
+
+
+def test_write_report_metrics_include_coverage_fields(tmp_path):
+    results = [_result("rac", "s0"), _result("rac", "s1")]
+    errors = [_error("rac", "s2")]
+    path = _write_report(results, tmp_path, "test", errors)
+    report = json.loads(path.read_text())
+    d = report["metrics_by_arm"]["rac"]
+    assert d["n_runs"] == 2 and d["n_errors"] == 1 and d["n_total"] == 3

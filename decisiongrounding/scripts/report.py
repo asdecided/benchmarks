@@ -45,17 +45,32 @@ def _fmt(x, nd=2):
     return f"{x:.{nd}f}"
 
 
+def _coverage(d: dict) -> str:
+    """`n_runs/n_total`, flagged with an asterisk when the arm has error
+    cells — a partial-coverage rate must never read identically to a full
+    one. `.get` defaults keep this readable against older reports that
+    predate n_errors/n_total."""
+    n_errors = d.get("n_errors", 0)
+    n_total = d.get("n_total", d.get("n_runs", 0))
+    return f"{d.get('n_runs', 0)}/{n_total}" + ("*" if n_errors else "")
+
+
 def _leaderboard(run: dict) -> str:
     m = run["metrics_by_arm"]
-    rows = ["| arm | adherence | stale | false-permit | false-prohibit | gov-recall |",
-            "|---|--:|--:|--:|--:|--:|"]
+    rows = ["| arm | adherence | stale | false-permit | false-prohibit | gov-recall | coverage |",
+            "|---|--:|--:|--:|--:|--:|--:|"]
     # adherence high to low
     for arm in sorted(m, key=lambda a: m[a]["adherence_rate"], reverse=True):
         d = m[arm]
         rows.append(
             f"| `{arm}` | {_fmt(d['adherence_rate'])} | {_fmt(d['stale_decision_rate'])} | "
             f"{_fmt(d['false_permit_rate'])} | {_fmt(d['false_prohibit_rate'])} | "
-            f"{_fmt(d.get('governing_recall_rate'))} |"
+            f"{_fmt(d.get('governing_recall_rate'))} | {_coverage(d)} |"
+        )
+    if any(d.get("n_errors", 0) for d in m.values()):
+        rows.append(
+            "\n\\* partial coverage — this arm has error cells; its rate is "
+            "averaged over completed cells only, not the full scenario set."
         )
     return "\n".join(rows)
 

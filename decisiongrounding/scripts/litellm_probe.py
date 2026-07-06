@@ -21,6 +21,14 @@ FAIL in native mode), probe that instead — it exercises the exact request the
 
     LITELLM_BASE_URL=https://your-litellm  LITELLM_API_KEY=sk-... \
     python -m scripts.litellm_probe --mode openai --model <alias>
+
+Windows note: the verdict lines below print a unicode check/cross mark. cp1252
+(the default console encoding on Windows outside a UTF-8-configured terminal)
+cannot encode those, and a bare `print()` would crash with a UnicodeEncodeError
+on the last line of an otherwise-successful probe. This module falls back to
+plain-ASCII `[OK]`/`[FAIL]` markers when the console encoding can't represent
+them; running with `PYTHONIOENCODING=utf-8` set (or a UTF-8 console) gets you
+the unicode marks instead.
 """
 
 from __future__ import annotations
@@ -34,6 +42,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from providers.answering import ClaudeAnsweringModel, usage_dict  # noqa: E402
 from providers.base import SCAFFOLD, GroundingContext, Task  # noqa: E402
+
+
+def _console_can_encode(chars: str) -> bool:
+    encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+    try:
+        chars.encode(encoding)
+    except (UnicodeEncodeError, LookupError):
+        return False
+    return True
+
+
+# ASCII fallback so a Windows console stuck on cp1252 doesn't crash mid-verdict;
+# see the module docstring's "Windows note".
+_UNICODE_MARKS = _console_can_encode("✓✗")
+CHECK = "✓" if _UNICODE_MARKS else "[OK]"
+CROSS = "✗" if _UNICODE_MARKS else "[FAIL]"
 
 
 def _probe_request(model: ClaudeAnsweringModel) -> dict:
@@ -115,10 +139,10 @@ def main(argv=None) -> int:
 
     print("\nverdict:")
     if ok:
-        print("  ✓ Anthropic-native passthrough works — set ANTHROPIC_BASE_URL + the LiteLLM key")
+        print(f"  {CHECK} Anthropic-native passthrough works — set ANTHROPIC_BASE_URL + the LiteLLM key")
         print("    and run as usual. Confirm the batch line above before using --batch.")
     else:
-        print("  ✗ Not a transparent Anthropic passthrough. Probe the OpenAI-compatible")
+        print(f"  {CROSS} Not a transparent Anthropic passthrough. Probe the OpenAI-compatible")
         print("    surface instead:  python -m scripts.litellm_probe --mode openai")
         print("    and run with  --answering litellm:<model-alias>  (synchronous only —")
         print("    no Batch API on that surface).")
@@ -152,7 +176,7 @@ def _probe_openai(args) -> int:
         if model.last_usage is None:
             print("      WARN — no usage reported; cost report would fall back to estimates.")
         print("\nverdict:")
-        print("  ✓ OpenAI-compatible surface works — run with:")
+        print(f"  {CHECK} OpenAI-compatible surface works — run with:")
         print(f"      --answering litellm:{args.model}")
         print("    Synchronous only: --batch / make real-batch need a direct-Anthropic key.")
         print("    Pin the gateway alias to a fixed model, or the recorded model identity")
@@ -161,7 +185,7 @@ def _probe_openai(args) -> int:
     except Exception as exc:  # noqa: BLE001
         print(f"      FAIL — {type(exc).__name__}: {exc}")
         print("\nverdict:")
-        print("  ✗ The gateway rejected the structured-output request. Scoring needs")
+        print(f"  {CROSS} The gateway rejected the structured-output request. Scoring needs")
         print("    schema-enforced JSON; check the alias supports response_format")
         print("    json_schema (LiteLLM translates it per backend).")
         return 1

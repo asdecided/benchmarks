@@ -169,6 +169,23 @@
       },
       "description": "Real answering-model token usage for this cell, when the model reports it (the claude arm). null for the offline stub. Drives the per-arm token-cost report; input tokens differ sharply by arm (context_dump pastes the whole corpus)."
     },
+    "schema_retries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempts", "tool_call_fallback"],
+      "properties": {
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many response_format attempts missed the ProposedChange schema before this cell was answered (0 for offline-stub/claude, or a litellm cell that succeeded on the first attempt)."
+        },
+        "tool_call_fallback": {
+          "type": "boolean",
+          "description": "True if the litellm backend had to fall back to tool/function-calling for structured output after exhausting its schema-miss retries."
+        }
+      },
+      "description": "Schema-miss retry telemetry for the litellm answering backend. Not present on Batch-API run records (schema_retries only applies to the synchronous litellm transport)."
+    },
     "harness_version": { "type": "string" }
   }
 }
