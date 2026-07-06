@@ -3,12 +3,14 @@
 """Run all four arms over a granularity corpus and emit the family scorecard.
 
     python granularity/run.py --corpus DIR [--out results.json]
+    python granularity/run.py --seeds 42,43,44 --count 1000 [--out variance.json]
 
-Runs the four arms (see ``arms``) over ``DIR``'s ``queries.json``, scores each
-with the shared family scorer (P@1/3/5, R@1/3/5, MRR macro-averaged, and
-full-returned-list supersession violations — a ``must_not_return`` id ANYWHERE
-in the returned list is a violation), and writes a scorecard whose ``metrics``
-block is byte-identical across runs on an unchanged corpus (ADR-066).
+Single-seed mode runs the four arms (see ``arms``) over ``DIR``'s
+``queries.json``, scores each with the shared family scorer (P@1/3/5, R@1/3/5,
+MRR macro-averaged, and full-returned-list supersession violations — a
+``must_not_return`` id ANYWHERE in the returned list is a violation), and writes
+a scorecard whose ``metrics`` block is byte-identical across runs on an
+unchanged corpus (ADR-066).
 
 The four arms and the three paired comparisons they exist to isolate:
 
@@ -22,6 +24,12 @@ both directions honestly, including any the monolithic arm wins. Metrics also
 break out per selectivity (``named`` vs ``topical``) so the size-independent
 series the coined vocabulary provides is separable from the saturating one.
 
+Multi-seed mode (``--seeds``) builds a corpus + query set per seed into a temp
+dir, runs the four arms on each, and aggregates mean, min–max spread, and — for
+every pairwise delta — whether its sign is consistent across seeds. Default
+single-seed behaviour is unchanged and byte-identical on rerun; multi-seed is an
+explicit opt-in.
+
 Scoring is reused verbatim from the per-tool battery's ``harness.scoring``
 (``score_retrieval_case``). Nothing here imports the engine (DG-ADR-0001).
 """
@@ -32,6 +40,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +52,8 @@ from harness.cases import K_VALUES  # noqa: E402
 from harness.scoring import RetrievalResult, score_retrieval_case  # noqa: E402
 from harness.cases import RetrievalCase  # noqa: E402
 
+import build_corpus  # noqa: E402
+import build_queries  # noqa: E402
 from _model import MODEL_VERSION  # noqa: E402
 from arms import (  # noqa: E402
     run_artifacts_arm,
@@ -233,6 +244,79 @@ def run(corpus: Path) -> dict[str, Any]:
     }
 
 
+# --- multi-seed variance --------------------------------------------------
+
+
+def run_seeds(count: int, seeds: list[int]) -> dict[str, Any]:
+    """Build + score the four arms per seed; aggregate mean, spread, sign."""
+    per_seed: dict[str, Any] = {}
+    for seed in seeds:
+        with tempfile.TemporaryDirectory(prefix="gran-seed-") as td:
+            tdp = Path(td)
+            manifest = build_corpus.build(count, tdp, seed)
+            build_corpus.write_manifest(tdp, manifest)
+            build_queries.write_queries(tdp, count, seed)
+            per_seed[str(seed)] = run(tdp)
+    return _aggregate_seeds(count, seeds, per_seed)
+
+
+def _overall_of(scorecard: dict[str, Any], arm: str) -> dict[str, Any]:
+    return scorecard["metrics"][arm]["overall"]
+
+
+def _aggregate_seeds(
+    count: int, seeds: list[int], per_seed: dict[str, Any]
+) -> dict[str, Any]:
+    variance: dict[str, Any] = {}
+    for arm in ARMS:
+        arm_var: dict[str, Any] = {}
+        for key, _label, _is_float, _hib in _METRICS:
+            values = [_overall_of(per_seed[str(s)], arm)[key] for s in seeds]
+            arm_var[key] = {
+                "mean": _round(_mean([float(v) for v in values])),
+                "min": min(values),
+                "max": max(values),
+                "spread": _round(float(max(values)) - float(min(values))),
+            }
+        variance[arm] = arm_var
+
+    sign_consistency: dict[str, Any] = {}
+    for high, low, label in COMPARISONS:
+        pair: dict[str, Any] = {}
+        for key, _label, _is_float, _hib in _METRICS:
+            deltas = [
+                _round(
+                    float(_overall_of(per_seed[str(s)], high)[key])
+                    - float(_overall_of(per_seed[str(s)], low)[key])
+                )
+                for s in seeds
+            ]
+            signs = {(1 if d > 0 else -1 if d < 0 else 0) for d in deltas}
+            pair[key] = {
+                "deltas": deltas,
+                "consistent": len(signs) == 1,
+                "sign": _sign_label(signs),
+            }
+        sign_consistency[f"{high} - {low}"] = {"describes": label, "metrics": pair}
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "model_version": MODEL_VERSION,
+        "count": count,
+        "seeds": seeds,
+        "variance": variance,
+        "sign_consistency": sign_consistency,
+        "per_seed": per_seed,
+    }
+
+
+def _sign_label(signs: set[int]) -> str:
+    if len(signs) != 1:
+        return "mixed"
+    sign = next(iter(signs))
+    return "+" if sign > 0 else "-" if sign < 0 else "0"
+
+
 # --- single-seed tables ---------------------------------------------------
 
 
@@ -306,7 +390,42 @@ def _print_single(scorecard: dict[str, Any]) -> None:
     _print_comparisons(scorecard)
 
 
+# --- multi-seed table -----------------------------------------------------
+
+
+def _print_variance(report: dict[str, Any]) -> None:
+    seeds = report["seeds"]
+    print(f"Multi-seed variance — count={report['count']} seeds={seeds}\n")
+    label_w = max(len(label) for _k, label, _f, _h in _METRICS)
+    print("Per arm — mean [min, max]")
+    header = f"{'metric':<{label_w}}" + "".join(f"  {arm:>22}" for arm in ARMS)
+    print(header)
+    print("-" * len(header))
+    for key, label, is_float, _hib in _METRICS:
+        cells = ""
+        for arm in ARMS:
+            v = report["variance"][arm][key]
+            if is_float:
+                cell = f"{v['mean']:.4f} [{v['min']:.4f},{v['max']:.4f}]"
+            else:
+                cell = f"{int(v['mean'])} [{int(v['min'])},{int(v['max'])}]"
+            cells += f"  {cell:>22}"
+        print(f"{label:<{label_w}}{cells}")
+    print("\nSign consistency of each pairwise delta across seeds")
+    for pair, block in report["sign_consistency"].items():
+        print(f"\n  {pair}  ({block['describes']})")
+        for key, _label, _is_float, _hib in _METRICS:
+            m = block["metrics"][key]
+            flag = "stable" if m["consistent"] else "MIXED"
+            print(f"    {key:<26} sign={m['sign']:<6} {flag:<7} deltas={m['deltas']}")
+    print()
+
+
 # --- driver ---------------------------------------------------------------
+
+
+def _parse_seeds(text: str) -> list[int]:
+    return [int(s.strip()) for s in text.split(",") if s.strip()]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -314,17 +433,49 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--corpus",
         type=Path,
-        required=True,
+        default=None,
         help="Granularity corpus directory (artifacts/ + canon/ + queries.json).",
+    )
+    parser.add_argument(
+        "--seeds",
+        type=str,
+        default=None,
+        help="Comma-separated seeds for multi-seed variance (e.g. 42,43,44). "
+        "Builds a temp corpus per seed; requires --count.",
+    )
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=None,
+        help="Corpus size for --seeds mode.",
     )
     parser.add_argument(
         "--out",
         type=Path,
         default=None,
-        help="Scorecard JSON path (default: <corpus>/results.json).",
+        help="Scorecard JSON path (default: <corpus>/results.json, or "
+        "./variance.json in --seeds mode).",
     )
     args = parser.parse_args(argv)
 
+    if args.seeds:
+        if args.count is None:
+            parser.error("--seeds requires --count")
+        seeds = _parse_seeds(args.seeds)
+        if not seeds:
+            parser.error("--seeds must list at least one integer")
+        report = run_seeds(args.count, seeds)
+        out = args.out or Path("variance.json")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        print(f"multi-seed variance over {seeds} at count={args.count} -> {out}\n")
+        _print_variance(report)
+        return 0
+
+    if args.corpus is None:
+        parser.error("one of --corpus or --seeds is required")
     if not args.corpus.is_dir():
         parser.error(f"corpus not found: {args.corpus}")
     if not (args.corpus / "queries.json").is_file():

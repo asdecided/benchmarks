@@ -95,6 +95,18 @@ Queries split evenly, per class, into two selectivity forms:
 separable from the saturating one. Corpora are **not comparable across model
 versions**; the manifest and scorecard both record `model_version`.
 
+## Multi-seed variance
+
+A single seed gives no variance estimate. `run.py --seeds 42,43,44 --count N`
+builds a corpus + query set per seed into a temp dir, runs the four arms on
+each, and aggregates per metric per arm: **mean, min–max spread**, and — for
+every pairwise delta — whether its **sign is consistent** across seeds. The
+headline deltas (P@1, R@1, MRR, supersession violations for the two meaningful
+pairs) are seed-stable; near-floor metrics (P@3 / R@3) can flag `mixed` when a
+delta is a fraction of a percent, which the sign-consistency column surfaces
+rather than hides. Default single-seed behaviour is unchanged and byte-identical
+on rerun (ADR-066); multi-seed is an explicit opt-in.
+
 ## Why the canon arm is chunk-retrieval by construction
 
 The engine physically cannot represent a canon file as many artifacts, so the
@@ -145,6 +157,9 @@ export PATH=/path/to/rac/venv/bin:$PATH        # rac (with `mcp --index`) on PAT
 python granularity/build_corpus.py  --count 1000 --out DIR --seed 42 --manifest
 python granularity/build_queries.py --count 1000 --out DIR --seed 42
 python granularity/run.py --corpus DIR          # writes DIR/results.json + tables
+
+# multi-seed variance (opt-in; builds a temp corpus per seed):
+python granularity/run.py --seeds 42,43,44 --count 1000 --out variance.json
 ```
 
 The `--count` ladder is 1k / 10k / 100k, aligned with the scale member, for a
