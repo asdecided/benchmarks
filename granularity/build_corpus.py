@@ -38,6 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _model import (  # noqa: E402  (local module, path-injected above)
+    MODEL_VERSION,
     Decision,
     Requirement,
     decision_count,
@@ -170,6 +171,7 @@ def build(count: int, out: Path, seed: int) -> dict[str, object]:
 
     return {
         "schema_version": 1,
+        "model_version": MODEL_VERSION,
         "count": count,
         "seed": seed,
         "per_type": {"decision": n_dec, "requirement": n_req},

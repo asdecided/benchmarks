@@ -27,15 +27,26 @@ import math
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Iterator
+from typing import Callable, Iterator
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 _ID = re.compile(r"RAC-[0-9A-Z]+")
 _HEADING = re.compile(r"^## (?!#)")  # a canon block heading: exactly '## '
+_FRONT_ID = re.compile(r"^id:\s*(RAC-[0-9A-Z]+)\s*$", re.MULTILINE)
+_FRONT_TYPE = re.compile(r"^type:\s*(\w+)\s*$", re.MULTILINE)
+# A canon block's ``### Status`` section (H3 nested under the ``##`` block).
+_STATUS_HEADING = re.compile(r"^### Status\s*$", re.MULTILINE)
 
 # Standard Okapi BM25 constants.
 _K1 = 1.5
 _B = 0.75
+
+# A chunk source is a zero-argument callable returning a fresh ``(id, text)``
+# stream. BM25 needs two passes (document frequencies, then scoring), so the
+# ranker asks the source for a new iterator per pass rather than materialising
+# the whole stream — the canon variant and the per-artifact variant both plug
+# into the identical ranker this way (one ranker, one variable: granularity).
+ChunkSource = Callable[[], Iterator[tuple[str, str]]]
 
 
 def tokenize(text: str) -> list[str]:
@@ -66,15 +77,81 @@ def iter_chunks(path: Path) -> Iterator[tuple[str, str]]:
         yield cur_id, "".join(buf)
 
 
-class _Corpus:
-    """Streaming BM25 statistics for one canon file (bounded-vocabulary df)."""
+def _frontmatter(text: str) -> tuple[str | None, str | None]:
+    """``(id, type)`` from a per-file artifact's leading ``---`` block, else Nones."""
+    if not text.startswith("---"):
+        return None, None
+    end = text.find("\n---", 3)
+    block = text if end == -1 else text[:end]
+    idm = _FRONT_ID.search(block)
+    tm = _FRONT_TYPE.search(block)
+    return (idm.group(1) if idm else None, tm.group(1) if tm else None)
 
-    def __init__(self, path: Path) -> None:
-        self.path = path
+
+def iter_artifact_chunks(
+    artifacts_dir: Path, only_type: str | None = None
+) -> Iterator[tuple[str, str]]:
+    """Stream ``(id, whole-file-text)`` — one chunk per per-file artifact.
+
+    Files are visited in sorted relative-path order so the tie-break domain is
+    stable and reproducible. For the granularity twin of a decisions canon this
+    is decision files only (``only_type='decision'``), whose zero-padded
+    ``dec-<index>.md`` names sort into the same index order the canon streams —
+    the residual difference from canon document order is that path sort, not
+    stream position, fixes ties (README documents it). One file is held in
+    memory at a time, so nothing is bounded by the corpus's total byte size.
+    """
+    for path in sorted(artifacts_dir.rglob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        fid, ftype = _frontmatter(text)
+        if fid is None:
+            continue
+        if only_type is not None and ftype != only_type:
+            continue
+        yield fid, text
+
+
+def _is_superseded(chunk_text: str) -> bool:
+    """True when a canon block's ``### Status`` first non-empty line is ``Superseded``.
+
+    The canon rendering carries each retired block's verbatim status line as
+    plain text (``### Status`` / ``Superseded``); a status-aware reader parses it
+    deterministically. Anything else — ``Accepted``, a missing status, or a
+    section that runs straight into the next heading — is treated as live.
+    """
+    m = _STATUS_HEADING.search(chunk_text)
+    if m is None:
+        return False
+    for line in chunk_text[m.end() :].splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("#"):  # next heading before any status text
+            return False
+        return stripped == "Superseded"
+    return False
+
+
+def iter_live_chunks(path: Path) -> Iterator[tuple[str, str]]:
+    """``iter_chunks`` with superseded blocks dropped — the strongest honest canon.
+
+    A team that reads the status line it already rendered would never surface a
+    retired block; this filter models exactly that and nothing more.
+    """
+    for doc_id, text in iter_chunks(path):
+        if _is_superseded(text):
+            continue
+        yield doc_id, text
+
+
+class _Corpus:
+    """Streaming BM25 statistics for one chunk source (bounded-vocabulary df)."""
+
+    def __init__(self, chunks: ChunkSource) -> None:
         self.n_docs = 0
         self.total_len = 0
         self.df: Counter[str] = Counter()
-        for _id, text in iter_chunks(path):
+        for _id, text in chunks():
             tokens = tokenize(text)
             self.n_docs += 1
             self.total_len += len(tokens)
@@ -88,22 +165,26 @@ class _Corpus:
         return math.log(1 + (self.n_docs - n + 0.5) / (n + 0.5))
 
 
-def rank(path: Path, queries: dict[str, list[str]]) -> dict[str, list[str]]:
-    """Rank every canon chunk per query; return ``{query_id: [ids, best-first]}``.
+def rank_chunks(
+    chunks: ChunkSource, queries: dict[str, list[str]]
+) -> dict[str, list[str]]:
+    """Rank every chunk from ``chunks`` per query; ``{query_id: [ids, best-first]}``.
 
     ``queries`` maps a query id to its token list. One streaming pass over the
-    canon scores each chunk against every query; a chunk enters a query's result
-    list only if it matches at least one query term (score > 0). Ties break by
-    document order, so the ranking is fully deterministic.
+    chunk source scores each chunk against every query; a chunk enters a query's
+    result list only if it matches at least one query term (score > 0). Ties
+    break by streaming order, so the ranking is fully deterministic. This is the
+    one ranker every canon-family arm shares — only the chunk source (a whole
+    canon, its live-only subset, or the per-file artifacts) varies.
     """
-    corpus = _Corpus(path)
+    corpus = _Corpus(chunks)
     # Precompute per-query idf weights once.
     weights: dict[str, dict[str, float]] = {
         qid: {t: corpus.idf(t) for t in set(tokens)} for qid, tokens in queries.items()
     }
     hits: dict[str, list[tuple[float, int, str]]] = {qid: [] for qid in queries}
 
-    for order, (doc_id, text) in enumerate(iter_chunks(path)):
+    for order, (doc_id, text) in enumerate(chunks()):
         tokens = tokenize(text)
         dl = len(tokens)
         tf = Counter(tokens)
@@ -119,7 +200,12 @@ def rank(path: Path, queries: dict[str, list[str]]) -> dict[str, list[str]]:
 
     ranked: dict[str, list[str]] = {}
     for qid, triples in hits.items():
-        # Highest score first; document order breaks ties (ascending order).
+        # Highest score first; streaming order breaks ties (ascending order).
         triples.sort(key=lambda t: (-t[0], t[1]))
         ranked[qid] = [doc_id for _score, _order, doc_id in triples]
     return ranked
+
+
+def rank(path: Path, queries: dict[str, list[str]]) -> dict[str, list[str]]:
+    """Rank every canon chunk per query — the canon arm's convenience entry point."""
+    return rank_chunks(lambda: iter_chunks(path), queries)

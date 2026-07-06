@@ -10,6 +10,7 @@ are its superseded ancestors without reading the corpus. Case shape (ADR-097
 family form)::
 
     {"id", "class": "topic"|"supersession"|"related",
+     "selectivity": "named"|"topical",
      "query", "must_return": [live decision id],
      "must_not_return": [superseded ancestor ids...]}
 
@@ -27,6 +28,17 @@ Three classes:
   ancestors are the negatives. A second, independently seeded population of the
   supersession-defense case.
 
+Two selectivity forms, split evenly within every class:
+
+- ``topical`` — the v1 form: three shared topic terms. The 40-topic pool
+  saturates as the corpus grows (thousands of artifacts share any term), so
+  this series stays honestly visible as the saturation baseline.
+- ``named`` — the coined per-chain term plus one topic term. The coined word
+  names one artifact family out of the whole corpus, so its selectivity is
+  size-independent — the series the validity claim needs. Chain members share
+  the coined term, so a named supersession/related query still collides the
+  superseded ancestor with its live head; only liveness picks the head.
+
 The artifacts arm answers ``supersession`` / ``related`` with the typed
 live-decision tool (``find_decisions``), which the per-file model's
 ``Superseded`` status enables; the canon arm has no such filter — that is the
@@ -43,6 +55,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _model import (  # noqa: E402
+    MODEL_VERSION,
     chain_info,
     decision_count,
     decision_record,
@@ -78,9 +91,47 @@ def _stride(candidates: list, want: int) -> list:
     return [candidates[int(i * step)] for i in range(want)]
 
 
-def _query(terms: tuple[str, ...]) -> str:
-    """The query string for a case — the artifact's distinctive topic terms."""
+def _topical_query(terms: tuple[str, ...]) -> str:
+    """The v1 form: the artifact's three shared topic terms."""
     return " ".join(terms)
+
+
+def _named_query(coined: str, terms: tuple[str, ...]) -> str:
+    """The size-independent form: the coined family name plus one topic term."""
+    return f"{coined} {terms[0]}"
+
+
+def _finalise(selected: list[dict]) -> list[dict]:
+    """Assign an id, a selectivity, and the matching query string per case.
+
+    Within each class the selection is split evenly by streaming position:
+    even positions become ``named`` (coined + one topic term), odd positions
+    stay ``topical`` (three topic terms). Interleaving by position — rather than
+    a front/back cut — spreads both forms across the whole id range.
+    """
+    cases: list[dict] = []
+    per_class_seen: dict[str, int] = {}
+    for i, case in enumerate(selected):
+        rank = per_class_seen.get(case["class"], 0)
+        per_class_seen[case["class"]] = rank + 1
+        selectivity = "named" if rank % 2 == 0 else "topical"
+        terms = tuple(case["terms"])
+        query = (
+            _named_query(case["coined"], terms)
+            if selectivity == "named"
+            else _topical_query(terms)
+        )
+        cases.append(
+            {
+                "id": f"G{i:03d}",
+                "class": case["class"],
+                "selectivity": selectivity,
+                "query": query,
+                "must_return": case["must_return"],
+                "must_not_return": case["must_not_return"],
+            }
+        )
+    return cases
 
 
 def build_cases(count: int, seed: int) -> list[dict]:
@@ -98,7 +149,8 @@ def build_cases(count: int, seed: int) -> list[dict]:
             supersession_c.append(
                 {
                     "class": "supersession",
-                    "query": _query(dec.terms),
+                    "coined": dec.coined,
+                    "terms": list(dec.terms),
                     "must_return": [dec.id],
                     "must_not_return": list(dec.ancestor_ids),
                 }
@@ -107,7 +159,8 @@ def build_cases(count: int, seed: int) -> list[dict]:
             topic_c.append(
                 {
                     "class": "topic",
-                    "query": _query(dec.terms),
+                    "coined": dec.coined,
+                    "terms": list(dec.terms),
                     "must_return": [dec.id],
                     "must_not_return": [],
                 }
@@ -120,7 +173,8 @@ def build_cases(count: int, seed: int) -> list[dict]:
             related_c.append(
                 {
                     "class": "related",
-                    "query": _query(req.terms),
+                    "coined": req.coined,
+                    "terms": list(req.terms),
                     "must_return": [req.head_ref],
                     "must_not_return": list(req.head_ancestors),
                 }
@@ -131,15 +185,13 @@ def build_cases(count: int, seed: int) -> list[dict]:
         + _stride(supersession_c, totals["supersession"])
         + _stride(related_c, totals["related"])
     )
-    cases: list[dict] = []
-    for i, case in enumerate(selected):
-        cases.append({"id": f"G{i:03d}", **case})
-    return cases
+    return _finalise(selected)
 
 
 def build_query_set(count: int, seed: int) -> dict:
     return {
         "schema_version": 1,
+        "model_version": MODEL_VERSION,
         "count": count,
         "seed": seed,
         "cases": build_cases(count, seed),
@@ -180,11 +232,16 @@ def main(argv: list[str] | None = None) -> int:
     path = write_queries(args.out, args.count, args.seed)
     payload = json.loads(path.read_text(encoding="utf-8"))
     by_class: dict[str, int] = {}
+    by_selectivity: dict[str, int] = {}
     for case in payload["cases"]:
         by_class[case["class"]] = by_class.get(case["class"], 0) + 1
+        sel = case["selectivity"]
+        by_selectivity[sel] = by_selectivity.get(sel, 0) + 1
     mix = ", ".join(f"{k}={v}" for k, v in sorted(by_class.items()))
+    sel_mix = ", ".join(f"{k}={v}" for k, v in sorted(by_selectivity.items()))
     print(f"wrote {len(payload['cases'])} cases -> {path}")
     print(f"  classes: {mix}")
+    print(f"  selectivity: {sel_mix}")
     return 0
 
 

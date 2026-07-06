@@ -24,6 +24,7 @@ the engine (DG-ADR-0001). Stdlib only.
 
 from __future__ import annotations
 
+import hashlib
 import random
 import sys
 from dataclasses import dataclass, field
@@ -41,6 +42,13 @@ from _common import (  # noqa: E402  (path-injected sibling module)
     VERBS,
     _ALPHABET,
 )
+
+# Corpus model version. v1 was the shared 40-topic pool only; v2 adds a coined
+# per-chain pseudo-word so a query can name one artifact family with a
+# size-independent selectivity the shared pool cannot provide. Corpora are not
+# comparable across model versions; the manifest and the scorecard both record
+# this so a mixed run is never scored as one.
+MODEL_VERSION = 2
 
 # The granularity corpus fixes the repository key at RAC and reserves a "GRA"
 # lead in the 12-char suffix so its ids never collide with the scale "SCA"
@@ -154,6 +162,40 @@ def _terms(seed: int, key: str, n: int = 3) -> list[str]:
     return _rng(seed, key).sample(TOPICS, n)
 
 
+# A coined pseudo-word is built by alternating consonants and vowels drawn from
+# a stable digest of ``seed:key`` — a pure function, no clock and no salted
+# hash. It reads like a real feature name, tokenises to one lowercase token
+# (never breaking classification or validation), and its large space
+# (~13**4 * 5**3 ≈ 3.5M seven-letter words) keeps it selective at every corpus
+# size, which the fixed 40-topic pool cannot be.
+_COINED_CONSONANTS = "bdfgklmnprstv"
+_COINED_VOWELS = "aeiou"
+_COINED_PATTERN = (
+    _COINED_CONSONANTS,
+    _COINED_VOWELS,
+    _COINED_CONSONANTS,
+    _COINED_VOWELS,
+    _COINED_CONSONANTS,
+    _COINED_VOWELS,
+    _COINED_CONSONANTS,
+)
+
+
+def _coined(seed: int, key: str) -> str:
+    """A deterministic coined pseudo-word for a chain/solo/requirement key.
+
+    Chain members share one key, so they share the coined term — a named query
+    still collides the superseded ancestor with its live head (the supersession
+    class keeps its point), while naming that family selects it out of the whole
+    corpus regardless of size.
+    """
+    digest = hashlib.sha256(f"{seed}:{key}".encode("utf-8")).digest()
+    return "".join(
+        alphabet[digest[i] % len(alphabet)]
+        for i, alphabet in enumerate(_COINED_PATTERN)
+    )
+
+
 # --- artifact records -----------------------------------------------------
 
 
@@ -164,6 +206,7 @@ class Decision:
     title: str
     status: str  # "Accepted" | "Superseded"
     terms: tuple[str, ...]
+    coined: str  # per-chain coined term, shared across the chain's members
     supersedes: str | None
     chain_key: str
     head_id: str
@@ -176,6 +219,7 @@ class Requirement:
     id: str
     title: str
     terms: tuple[str, ...]
+    coined: str  # the requirement's coined term (a referenced head's, if any)
     related: tuple[str, ...]  # referenced decision ids (live)
     # If this requirement references a live chain head, the head and its
     # superseded ancestors — the raw material of a "related" query case.
@@ -183,23 +227,28 @@ class Requirement:
     head_ancestors: tuple[str, ...] = field(default_factory=tuple)
 
 
-def _title(seed: int, index: int, topic: str) -> str:
+def _title(seed: int, index: int, topic: str, coined: str) -> str:
     rng = _rng(seed, "title", index)
-    return f"{rng.choice(ADJECTIVES).capitalize()} {rng.choice(SUBSYSTEMS)} {topic}"
+    return (
+        f"{rng.choice(ADJECTIVES).capitalize()} {rng.choice(SUBSYSTEMS)} "
+        f"{topic} — {coined}"
+    )
 
 
 def decision_record(index: int, seed: int, n_decisions: int) -> Decision:
     info = chain_info(index, n_decisions)
     terms = _terms(seed, info.key)
+    coined = _coined(seed, info.key)
     status = "Superseded" if info.superseded else "Accepted"
     supersedes = artifact_id(info.supersedes) if info.supersedes is not None else None
     ancestors = tuple(artifact_id(m) for m in info.members if m != info.head)
     return Decision(
         index=index,
         id=artifact_id(index),
-        title=_title(seed, index, terms[0]),
+        title=_title(seed, index, terms[0], coined),
         status=status,
         terms=tuple(terms),
+        coined=coined,
         supersedes=supersedes,
         chain_key=info.key,
         head_id=artifact_id(info.head),
@@ -228,6 +277,7 @@ def _pick_related(index: int, seed: int, n_decisions: int) -> list[int]:
 
 def requirement_record(index: int, seed: int, n_decisions: int) -> Requirement:
     terms = _terms(seed, f"req:{index}")
+    coined = _coined(seed, f"req:{index}")
     related_idx = _pick_related(index, seed, n_decisions)
     related = tuple(artifact_id(i) for i in related_idx)
 
@@ -239,17 +289,20 @@ def requirement_record(index: int, seed: int, n_decisions: int) -> Requirement:
         if anc:  # this reference is a live chain head with superseded ancestors
             head_ref = artifact_id(info.head)
             head_ancestors = anc
-            # Fold the head's shared chain terms into the requirement's own
-            # vocabulary so a "related" query drawn from the requirement
-            # collides the head with its ancestors in the canon rendering.
+            # Fold the head's shared chain terms AND coined name into the
+            # requirement's own vocabulary so a "related" query drawn from the
+            # requirement collides the head with its ancestors in the canon
+            # rendering — both under the topical form and the named form.
             terms = tuple(_terms(seed, info.key))
+            coined = _coined(seed, info.key)
             break
 
     return Requirement(
         index=index,
         id=artifact_id(index),
-        title=_title(seed, index, terms[0]),
+        title=_title(seed, index, terms[0], coined),
         terms=terms,
+        coined=coined,
         related=related,
         head_ref=head_ref,
         head_ancestors=head_ancestors,
@@ -259,11 +312,12 @@ def requirement_record(index: int, seed: int, n_decisions: int) -> Requirement:
 # --- shared body prose (identical text in both renderings) ----------------
 
 
-def _context(terms: tuple[str, ...]) -> str:
+def _context(terms: tuple[str, ...], coined: str) -> str:
     return (
-        f"This artifact concerns the {terms[0]} path and how the {terms[1]} "
-        f"subsystem must sustain {terms[2]} without regressing {terms[0]}. The "
-        f"{terms[0]} and {terms[2]} concerns are treated as first-class."
+        f"This artifact concerns the {terms[0]} path under the {coined} "
+        f"initiative and how the {terms[1]} subsystem must sustain {terms[2]} "
+        f"without regressing {terms[0]}. The {coined} work treats the "
+        f"{terms[0]} and {terms[2]} concerns as first-class."
     )
 
 
@@ -277,12 +331,12 @@ def decision_sections(dec: Decision) -> list[tuple[str, list[str]]]:
     rng = _rng("dec-body", dec.index)
     sections: list[tuple[str, list[str]]] = [
         ("Status", [dec.status]),
-        ("Context", [_context(dec.terms)]),
+        ("Context", [_context(dec.terms, dec.coined)]),
         (
             "Decision",
             [
-                f"We standardise the {dec.terms[0]} approach and require the "
-                f"{dec.terms[1]} to remain {rng.choice(ADJECTIVES)}."
+                f"We standardise the {dec.coined} {dec.terms[0]} approach and "
+                f"require the {dec.terms[1]} to remain {rng.choice(ADJECTIVES)}."
             ],
         ),
         (
@@ -313,8 +367,9 @@ def requirement_sections(req: Requirement) -> list[tuple[str, list[str]]]:
         (
             "Problem",
             [
-                f"The {req.terms[0]} path does not yet guarantee {req.terms[1]} at "
-                f"scale, so {req.terms[2]} degrades as the corpus grows."
+                f"The {req.coined} {req.terms[0]} path does not yet guarantee "
+                f"{req.terms[1]} at scale, so {req.terms[2]} degrades as the "
+                f"{req.coined} corpus grows."
             ],
         ),
         ("Requirements", statements),
