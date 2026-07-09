@@ -1,0 +1,46 @@
+{
+  "scenario_id": "conflicting_medium_overlap_cache_layer",
+  "version": "1.0.0",
+  "scenario_type": "conflicting_scoped",
+  "expected_tie": false,
+  "lexical_overlap": "medium",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-CACHE-001",
+        "type": "decision",
+        "path": "corpus/cache-001.md"
+      },
+      {
+        "id": "DG-ADR-CACHE-002",
+        "type": "decision",
+        "path": "corpus/cache-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Write the computed totals into the shared cache module standard library function from the request handler for speed.",
+    "proposed_action": "write computed totals into the shared cache module standard library function from the request handler"
+  },
+  "binding_decisions": [
+    "DG-ADR-CACHE-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-CACHE-002",
+      "type": "conflicts_with",
+      "target": "DG-ADR-CACHE-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-CACHE-002",
+    "prohibited_actions": [
+      "write totals to the cache module from a request handler"
+    ],
+    "required_actions": [
+      "follow the in-scope decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-CACHE-002 governs request handlers and prohibits the cache write there; DG-ADR-CACHE-001 is out of scope (batch jobs)."
+  }
+}

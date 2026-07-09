@@ -1,0 +1,46 @@
+{
+  "scenario_id": "superseded_medium_overlap_http_client",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "lexical_overlap": "medium",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-HTTP-001",
+        "type": "decision",
+        "path": "corpus/http-001.md"
+      },
+      {
+        "id": "DG-ADR-HTTP-002",
+        "type": "decision",
+        "path": "corpus/http-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Call the payment gateway using the blocking http client function, like the old module did.",
+    "proposed_action": "call the payment gateway using the blocking http client function"
+  },
+  "binding_decisions": [
+    "DG-ADR-HTTP-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-HTTP-002",
+      "type": "supersedes",
+      "target": "DG-ADR-HTTP-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-HTTP-002",
+    "prohibited_actions": [
+      "call the gateway with the blocking client"
+    ],
+    "required_actions": [
+      "follow the current decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-HTTP-002 supersedes DG-ADR-HTTP-001 and prohibits the blocking client; following the superseded rule is stale."
+  }
+}

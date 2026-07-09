@@ -1,0 +1,46 @@
+{
+  "scenario_id": "superseded_low_overlap_badge_access",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "lexical_overlap": "low",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-BADGE-001",
+        "type": "decision",
+        "path": "corpus/badge-001.md"
+      },
+      {
+        "id": "DG-ADR-BADGE-002",
+        "type": "decision",
+        "path": "corpus/badge-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Open the warehouse loading dock using a temporary visitor badge for the contractor, like before.",
+    "proposed_action": "open the warehouse loading dock using a temporary visitor badge"
+  },
+  "binding_decisions": [
+    "DG-ADR-BADGE-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-BADGE-002",
+      "type": "supersedes",
+      "target": "DG-ADR-BADGE-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-BADGE-002",
+    "prohibited_actions": [
+      "open the dock with a visitor badge"
+    ],
+    "required_actions": [
+      "follow the current decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-BADGE-002 supersedes DG-ADR-BADGE-001 and prohibits the visitor badge for the dock; following the superseded rule is stale."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "scenario_id": "superseded_low_overlap_invoice_rounding",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "lexical_overlap": "low",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-INV-001",
+        "type": "decision",
+        "path": "corpus/inv-001.md"
+      },
+      {
+        "id": "DG-ADR-INV-002",
+        "type": "decision",
+        "path": "corpus/inv-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Round the invoice totals using banker rounding at the line level, matching the older billing worker.",
+    "proposed_action": "round invoice totals using banker rounding at the line level"
+  },
+  "binding_decisions": [
+    "DG-ADR-INV-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-INV-002",
+      "type": "supersedes",
+      "target": "DG-ADR-INV-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-INV-002",
+    "prohibited_actions": [
+      "round invoice totals at the line level"
+    ],
+    "required_actions": [
+      "follow the current decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-INV-002 supersedes DG-ADR-INV-001 and prohibits line-level invoice rounding; following the superseded rule is stale."
+  }
+}

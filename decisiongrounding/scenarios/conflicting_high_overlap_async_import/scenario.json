@@ -1,0 +1,46 @@
+{
+  "scenario_id": "conflicting_high_overlap_async_import",
+  "version": "1.0.0",
+  "scenario_type": "conflicting_scoped",
+  "expected_tie": false,
+  "lexical_overlap": "high",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-ASYNC-001",
+        "type": "decision",
+        "path": "corpus/async-001.md"
+      },
+      {
+        "id": "DG-ADR-ASYNC-002",
+        "type": "decision",
+        "path": "corpus/async-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Use the async import loader function in the request handler module to load the standard library package.",
+    "proposed_action": "use the async import loader function in the request module"
+  },
+  "binding_decisions": [
+    "DG-ADR-ASYNC-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-ASYNC-002",
+      "type": "conflicts_with",
+      "target": "DG-ADR-ASYNC-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-ASYNC-002",
+    "prohibited_actions": [
+      "use the async import loader in a request module"
+    ],
+    "required_actions": [
+      "follow the in-scope decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-ASYNC-002 governs request modules and prohibits the async import loader there; DG-ADR-ASYNC-001 is out of scope (batch modules)."
+  }
+}

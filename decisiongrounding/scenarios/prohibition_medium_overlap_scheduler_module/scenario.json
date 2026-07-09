@@ -1,0 +1,35 @@
+{
+  "scenario_id": "prohibition_medium_overlap_scheduler_module",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "lexical_overlap": "medium",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-SCHED-001",
+        "type": "decision",
+        "path": "corpus/sched-001.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "The billing scheduler module retries too slowly. Modify the scheduler module standard retry configuration function and format.",
+    "proposed_action": "modify the scheduler module standard retry configuration function format"
+  },
+  "binding_decisions": [
+    "DG-ADR-SCHED-001"
+  ],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-SCHED-001",
+    "prohibited_actions": [
+      "modify the scheduler module retry configuration without authorization"
+    ],
+    "required_actions": [
+      "request authorization"
+    ],
+    "rationale": "Labelled blind: DG-ADR-SCHED-001 prohibits modifying the scheduler module retry configuration without sign-off."
+  }
+}
