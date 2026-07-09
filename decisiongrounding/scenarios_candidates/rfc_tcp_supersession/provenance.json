@@ -1,0 +1,44 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-0793",
+      "number": 793,
+      "file": "corpus/RFC-0793.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc793.txt",
+      "source_sha256": "e55b1faa35edbeecceb2400233a16ae81897bdf9c31d5b3031e91139e5ea8142",
+      "category": "",
+      "title": "TRANSMISSION CONTROL PROTOCOL",
+      "obsoletes": [],
+      "replaces": []
+    },
+    {
+      "id": "RFC-9293",
+      "number": 9293,
+      "file": "corpus/RFC-9293.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc9293.txt",
+      "source_sha256": "6d9ac8be4b0286f8c3d337addf442b2eb6a9b14e1366594ea7fbc273f93dc2d9",
+      "category": "Standards Track",
+      "title": "6691",
+      "obsoletes": [
+        "RFC-0793",
+        "RFC-0879",
+        "RFC-2873",
+        "RFC-6093",
+        "RFC-6429",
+        "RFC-6528"
+      ],
+      "replaces": [
+        "RFC-0793"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-9293",
+      "type": "supersedes",
+      "target": "RFC-0793"
+    }
+  ]
+}
