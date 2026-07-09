@@ -9,15 +9,31 @@ the corpus grows past top-k.
 
 For real benchmark runs, swap in a pinned hosted/local embedding model via the
 `[real]` extra (see TODO below). Arms depend only on the `Embedder` interface.
+
+Caching: real backend calls are served through a process-wide content-hash
+cache (`EmbeddingCache`), keyed by (embedder name, input type, sha256 of the
+exact text sent to the backend). Embedders are deterministic by contract, so
+a hit returns exactly the vector the backend would have returned — results
+are unaffected by construction; only cost and wall-clock change. This
+matters because the crossover sweep rebuilds providers per cell, re-embedding
+the same artifacts once per N tier and per seed. Environment switches:
+
+- ``DG_EMBED_CACHE=0``   disable caching entirely
+- ``DG_EMBED_CACHE_DIR`` opt-in persistent layer (one small JSON file per
+  vector under this directory), shared across processes and runs
 """
 
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import os
 import re
 from abc import ABC, abstractmethod
+from pathlib import Path
+
+from util.io import atomic_write_text
 
 from .base import estimate_tokens
 
@@ -38,6 +54,10 @@ class Embedder(ABC):
 
     name: str = "base"
     dim: int = 0
+    # Whether calls to this backend go through the process-wide content-hash
+    # cache. On for real (paid / networked) backends; the offline hashing
+    # embedder opts out — recomputing it is cheaper than caching it.
+    cacheable: bool = True
     # The backend's max input length in tokens, or None when there is no limit
     # to enforce (e.g. the offline hashing embedder). `embed_chunked` uses this
     # to decide whether a document needs sub-chunking before it is embedded.
@@ -50,6 +70,8 @@ class Embedder(ABC):
 
 class LocalDeterministicEmbedder(Embedder):
     """Hashing bag-of-words embedder. Offline, deterministic, dependency-free."""
+
+    cacheable = False  # pure local hashing — caching costs more than it saves
 
     def __init__(self, dim: int = 256) -> None:
         self.dim = dim
@@ -188,6 +210,100 @@ def _is_too_long_error(exc: Exception) -> bool:
     return bool(_TOO_LONG_SIGNAL.search(str(exc)))
 
 
+# --- content-hash embedding cache -------------------------------------------
+
+
+class EmbeddingCache:
+    """Content-addressed cache for backend embedding calls.
+
+    Results-neutral by construction: the key is (embedder.name, input_type,
+    sha256(text)) — the exact identity of a deterministic backend call — so a
+    hit returns exactly what the backend would have returned. `dim` is
+    deliberately NOT part of the key: for hosted backends it is 0 until
+    probed, and `name` already pins the model.
+
+    Two layers: a process-wide in-memory dict (always on when caching is
+    enabled) and an optional persistent directory (`disk_dir`) holding one
+    JSON vector per key, shared across processes/seeds/runs. Disk writes are
+    atomic so a concurrent second process never reads a torn vector.
+    """
+
+    def __init__(self, disk_dir: "Path | None" = None) -> None:
+        self._mem: dict[str, list[float]] = {}
+        self._disk = Path(disk_dir) if disk_dir else None
+        self.hits = 0
+        self.misses = 0
+
+    @staticmethod
+    def _key(embedder: Embedder, text: str, input_type: str | None) -> str:
+        h = hashlib.sha256()
+        h.update(embedder.name.encode("utf-8"))
+        h.update(b"\x00")
+        h.update((input_type or "").encode("utf-8"))
+        h.update(b"\x00")
+        h.update(text.encode("utf-8"))
+        return h.hexdigest()
+
+    def _disk_path(self, key: str) -> "Path":
+        return self._disk / key[:2] / f"{key}.json"
+
+    def get(self, embedder: Embedder, text: str, input_type: str | None) -> "list[float] | None":
+        key = self._key(embedder, text, input_type)
+        vec = self._mem.get(key)
+        if vec is None and self._disk is not None:
+            p = self._disk_path(key)
+            if p.exists():
+                try:
+                    vec = json.loads(p.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    vec = None  # unreadable entry — treat as a miss, re-embed
+                else:
+                    self._mem[key] = vec  # promote for the rest of the process
+        if vec is None:
+            self.misses += 1
+            return None
+        self.hits += 1
+        return vec
+
+    def put(self, embedder: Embedder, text: str, input_type: str | None,
+            vec: list[float]) -> None:
+        key = self._key(embedder, text, input_type)
+        self._mem[key] = vec
+        if self._disk is not None:
+            atomic_write_text(self._disk_path(key), json.dumps(vec))
+
+    def stats(self) -> dict:
+        return {"hits": self.hits, "misses": self.misses, "entries": len(self._mem)}
+
+
+_cache: "EmbeddingCache | None" = None
+_cache_initialized = False
+
+
+def get_embedding_cache() -> "EmbeddingCache | None":
+    """The process-wide cache singleton, or None when DG_EMBED_CACHE=0.
+
+    Created once from the environment (DG_EMBED_CACHE / DG_EMBED_CACHE_DIR);
+    call `reset_embedding_cache()` to re-read the environment (tests do this
+    in an autouse fixture).
+    """
+    global _cache, _cache_initialized
+    if not _cache_initialized:
+        if os.environ.get("DG_EMBED_CACHE", "1") == "0":
+            _cache = None
+        else:
+            _cache = EmbeddingCache(os.environ.get("DG_EMBED_CACHE_DIR") or None)
+        _cache_initialized = True
+    return _cache
+
+
+def reset_embedding_cache() -> None:
+    """Drop the singleton so the next `get_embedding_cache()` re-reads the env."""
+    global _cache, _cache_initialized
+    _cache = None
+    _cache_initialized = False
+
+
 # Stop halving once a piece is this small and re-raise instead — a genuine
 # outage/misconfiguration must not spin down to nothing before failing loudly.
 _MIN_RETRY_CHARS = 64
@@ -203,7 +319,30 @@ def _embed_with_retry(embedder: Embedder, text: str, input_type: str | None) -> 
     Gives up and re-raises once a piece is at or below `_MIN_RETRY_CHARS`, or
     the error doesn't look length-related — that is a real failure, not an
     oversized chunk.
+
+    This is also the cache interception point: every backend call — whole
+    short texts, proactive sub-chunks from `chunk_by_tokens`, and reactive
+    retry halves — funnels through here, so one check covers all shapes.
     """
+    cache = get_embedding_cache() if embedder.cacheable else None
+    if cache is not None:
+        vec = cache.get(embedder, text, input_type)
+        if vec is not None:
+            # A run served entirely from cache never probes the backend, so
+            # the probed dim (recorded in run provenance) is backfilled here —
+            # the only observable divergence a cache could otherwise cause.
+            if getattr(embedder, "dim", 0) == 0:
+                embedder.dim = len(vec)
+            return vec
+    vec = _embed_with_retry_uncached(embedder, text, input_type)
+    if cache is not None:
+        cache.put(embedder, text, input_type, vec)
+    return vec
+
+
+def _embed_with_retry_uncached(
+    embedder: Embedder, text: str, input_type: str | None
+) -> list[float]:
     try:
         return embedder.embed(text, input_type=input_type)
     except Exception as exc:  # noqa: BLE001 - only retried for a "too long" signal
