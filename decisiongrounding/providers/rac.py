@@ -24,7 +24,38 @@ import shutil
 import subprocess
 import tempfile
 import weakref
+from functools import lru_cache
 from pathlib import Path
+
+
+def rac_version() -> str | None:
+    """Best-effort version of the `rac` CLI — the system under test.
+
+    The benchmark pins rac only by convention, so without this two runs
+    against different rac builds produce indistinguishable reports. Returns
+    the stripped `rac --version` output, or None when the binary is absent
+    or the call fails: provenance must never break a run.
+    """
+    return _rac_version(os.environ.get("RAC_BIN", "rac"))
+
+
+@lru_cache(maxsize=8)
+def _rac_version(rac_bin: str) -> str | None:
+    """One subprocess per resolved binary per process (see the lru_cache);
+    tests vary RAC_BIN and call `_rac_version.cache_clear()`."""
+    if shutil.which(rac_bin) is None:
+        return None
+    try:
+        proc = subprocess.run(
+            [rac_bin, "--version"], capture_output=True, text=True, timeout=10
+        )
+    except Exception:  # noqa: BLE001 - absence/misbehaviour is expected, not fatal
+        return None
+    if proc.returncode != 0:
+        return None
+    out = (proc.stdout or proc.stderr).strip()
+    return out or None
+
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 _STOP = {
