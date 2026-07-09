@@ -188,7 +188,11 @@ class RacProvider(Provider):
         if finalizer is not None:
             finalizer()
 
-    def assemble(self, task: Task) -> GroundingContext:
+    def _resolve(self, task: Task) -> list[str]:
+        """The typed-retrieval core: candidate ids in rank order, supersedes
+        edges followed, capped at top_k. Shared by `assemble` (whole artifacts)
+        and the snippet-budget variant (`RacSnippetsProvider`), so the two
+        differ only in grounding granularity, never in retrieval."""
         if self._dir is None:
             raise RuntimeError("rac arm: prepare() must run before assemble()")
         # 1. Typed candidate decisions. `rac find` substring-matches ID/title and
@@ -203,8 +207,10 @@ class RacProvider(Provider):
 
         # 3. Follow the edges: replace superseded decisions with live successors.
         corpus_ids = set(self._by_id)
-        resolved = resolve_supersedes(matched, edges, corpus_ids, self.top_k)
+        return resolve_supersedes(matched, edges, corpus_ids, self.top_k)
 
+    def assemble(self, task: Task) -> GroundingContext:
+        resolved = self._resolve(task)
         blocks = [
             format_block(aid, self._by_id[aid].type, self._by_id[aid].text)
             for aid in resolved

@@ -17,6 +17,25 @@ def format_block(artifact_id: str, artifact_type: str, body: str) -> str:
     return f"[artifact {artifact_id} | {artifact_type}]\n{body.strip()}\n"
 
 
+def split_sections(text: str) -> list[str]:
+    """Split markdown into section chunks on `## ` headings (front matter kept).
+
+    Shared by the snippet-granularity arms: naive_rag ranks these sections by
+    cosine similarity, and rac_snippets selects them from typed-retrieved
+    artifacts under a token budget."""
+    parts: list[str] = []
+    current: list[str] = []
+    for line in text.splitlines():
+        if line.startswith("## ") and current:
+            parts.append("\n".join(current).strip())
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        parts.append("\n".join(current).strip())
+    return [p for p in parts if p]
+
+
 def parse_blocks(grounding_text: str) -> list[tuple[str, str, str]]:
     """Return (artifact_id, artifact_type, body) for each block in order."""
     blocks: list[tuple[str, str, str]] = []
