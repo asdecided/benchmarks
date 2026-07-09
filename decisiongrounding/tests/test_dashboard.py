@@ -64,10 +64,31 @@ def test_build_dashboard_renders_all_sections():
     out = build_dashboard(_run(), _dataset())
     _assert_html(out)
     for marker in ("Decision Grounding Bench", "Leaderboard", "Adherence vs N",
-                   "rac vs naive RAG", "Scenarios", "Reproduce", "<svg"):
+                   "rac vs naive RAG", "Scenarios", "Signal / noise", "Reproduce", "<svg"):
         assert marker in out, marker
     # the failing naive_rag cell shows the warning marker in the drill-down
     assert "⚠️" in out
+
+
+def test_dashboard_tabs_and_sections_stay_in_lockstep():
+    import re
+    from runner.dashboard import _TABS
+    out = build_dashboard(_run(), _dataset(), live=True)
+    n_tabs = len(_TABS) + 1  # + Run when live
+    # every tab index t{i} has a matching section id s{i}
+    for i in range(n_tabs):
+        assert f"id=t{i}" in out and f"id=s{i}" in out, i
+    assert "id=s6" in out  # the new Signal / noise tab's section
+
+
+def test_signal_noise_tab_shows_snr_when_multiseed():
+    ds = _dataset()
+    ds["n_seeds"] = 3
+    ds["paired"] = {"rac_vs_naive_rag": [
+        {"N": 300, "diff_mean": 0.7, "diff_ci": [0.6, 0.8], "diff_std": 0.1, "n": 3, "values": []},
+    ]}
+    out = build_dashboard(_run(), ds)
+    assert "Signal-to-noise" in out and "7.00" in out  # 0.7 / 0.1
 
 
 def test_build_dashboard_without_crossover_is_still_valid():

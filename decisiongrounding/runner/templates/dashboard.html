@@ -8,7 +8,7 @@
     [CHIPS]  - the config chips (answering model, embedder, scenarios)
     [BODY]   - the tab radios + nav + main, with the data-bound sections
   Point the server / static generator at a custom copy with --template or the
-  DG_UI_TEMPLATE env var. Tabs are pure CSS (#t0..#t7); the JS only activates
+  DG_UI_TEMPLATE env var. Tabs are pure CSS (#t0..#t8); the JS only activates
   when a live Run tab (#run-status) is present, so static snapshots stay inert.
 -->
 <html lang=en>
@@ -43,6 +43,7 @@ input.tabsel{position:absolute;left:-9999px}
 #t5:checked~nav label[for=t5]{color:var(--fg);border-bottom-color:var(--fg);font-weight:600}#t5:checked~main #s5{display:block}
 #t6:checked~nav label[for=t6]{color:var(--fg);border-bottom-color:var(--fg);font-weight:600}#t6:checked~main #s6{display:block}
 #t7:checked~nav label[for=t7]{color:var(--fg);border-bottom-color:var(--fg);font-weight:600}#t7:checked~main #s7{display:block}
+#t8:checked~nav label[for=t8]{color:var(--fg);border-bottom-color:var(--fg);font-weight:600}#t8:checked~main #s8{display:block}
 table{border-collapse:collapse;width:100%;margin:8px 0 18px;font-size:14px}
 th,td{border:1px solid var(--line);padding:7px 10px;text-align:right}
 th:first-child,td:first-child{text-align:left}
