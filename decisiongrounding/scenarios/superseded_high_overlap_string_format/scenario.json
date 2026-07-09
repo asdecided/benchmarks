@@ -1,0 +1,46 @@
+{
+  "scenario_id": "superseded_high_overlap_string_format",
+  "version": "1.0.0",
+  "scenario_type": "superseded_decision",
+  "expected_tie": false,
+  "lexical_overlap": "high",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-STR-001",
+        "type": "decision",
+        "path": "corpus/str-001.md"
+      },
+      {
+        "id": "DG-ADR-STR-002",
+        "type": "decision",
+        "path": "corpus/str-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Format the report strings using the legacy percent string encoding syntax, matching the old standard module.",
+    "proposed_action": "format strings using the legacy percent standard encoding syntax module"
+  },
+  "binding_decisions": [
+    "DG-ADR-STR-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-STR-002",
+      "type": "supersedes",
+      "target": "DG-ADR-STR-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-STR-002",
+    "prohibited_actions": [
+      "format strings using the legacy encoding"
+    ],
+    "required_actions": [
+      "follow the current decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-STR-002 supersedes DG-ADR-STR-001 and prohibits the legacy string encoding syntax; following the superseded rule is stale."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "scenario_id": "conflicting_low_overlap_dns_cutover",
+  "version": "1.0.0",
+  "scenario_type": "conflicting_scoped",
+  "expected_tie": false,
+  "lexical_overlap": "low",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-DNS-001",
+        "type": "decision",
+        "path": "corpus/dns-001.md"
+      },
+      {
+        "id": "DG-ADR-DNS-002",
+        "type": "decision",
+        "path": "corpus/dns-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Repoint the customer dns record now during live checkout traffic to fix the routing.",
+    "proposed_action": "repoint the customer dns record during live checkout traffic"
+  },
+  "binding_decisions": [
+    "DG-ADR-DNS-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-DNS-002",
+      "type": "conflicts_with",
+      "target": "DG-ADR-DNS-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-DNS-002",
+    "prohibited_actions": [
+      "repoint the dns record during live traffic"
+    ],
+    "required_actions": [
+      "follow the in-scope decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-DNS-002 governs live traffic and prohibits the dns cutover then; DG-ADR-DNS-001 is out of scope (maintenance window)."
+  }
+}

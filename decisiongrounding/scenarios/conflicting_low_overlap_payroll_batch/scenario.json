@@ -1,0 +1,46 @@
+{
+  "scenario_id": "conflicting_low_overlap_payroll_batch",
+  "version": "1.0.0",
+  "scenario_type": "conflicting_scoped",
+  "expected_tie": false,
+  "lexical_overlap": "low",
+  "corpus": {
+    "artifacts": [
+      {
+        "id": "DG-ADR-PAY-001",
+        "type": "decision",
+        "path": "corpus/pay-001.md"
+      },
+      {
+        "id": "DG-ADR-PAY-002",
+        "type": "decision",
+        "path": "corpus/pay-002.md"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Release the payroll run now during business hours to catch the deadline.",
+    "proposed_action": "release the payroll run during business hours"
+  },
+  "binding_decisions": [
+    "DG-ADR-PAY-002"
+  ],
+  "relationships": [
+    {
+      "source": "DG-ADR-PAY-002",
+      "type": "conflicts_with",
+      "target": "DG-ADR-PAY-001"
+    }
+  ],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DG-ADR-PAY-002",
+    "prohibited_actions": [
+      "release the payroll run during business hours"
+    ],
+    "required_actions": [
+      "follow the in-scope decision"
+    ],
+    "rationale": "Labelled blind: DG-ADR-PAY-002 governs business hours and prohibits the payroll release then; DG-ADR-PAY-001 is out of scope (nightly batch)."
+  }
+}
