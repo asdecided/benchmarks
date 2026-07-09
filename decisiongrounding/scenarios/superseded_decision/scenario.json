@@ -1,8 +1,9 @@
 {
   "scenario_id": "superseded_decision",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scenario_type": "superseded_decision",
   "expected_tie": false,
+  "lexical_overlap": "low",
   "corpus": {
     "artifacts": [
       {

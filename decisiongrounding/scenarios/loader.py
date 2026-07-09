@@ -65,6 +65,11 @@ class Scenario:
     relationships: tuple[Relationship, ...]
     gold_label: GoldLabel
     directory: Path
+    # Declared lexical overlap band between the task vocabulary and the real
+    # distractor domain (PEP titles): "high" | "medium" | "low" | None. A
+    # graded design lever — `scenarios.overlap` measures the actual band and a
+    # test asserts the declaration matches. None for scenarios that predate it.
+    lexical_overlap: str | None = None
 
 
 def _validate(raw: dict) -> None:
@@ -136,6 +141,7 @@ def load_scenario(directory: str | Path) -> Scenario:
             rationale=gold["rationale"],
         ),
         directory=directory,
+        lexical_overlap=raw.get("lexical_overlap"),
     )
 
 
