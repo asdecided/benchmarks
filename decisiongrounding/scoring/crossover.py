@@ -29,6 +29,7 @@ from scenarios.loader import Scenario
 from scoring.metrics import summarize
 from scoring.scorer import score
 from scoring.stats import stats_by_n
+from util.io import atomic_write_text
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 _STOP = {"the", "a", "an", "to", "of", "and", "or", "for", "in", "on", "with", "is", "are"}
@@ -843,6 +844,6 @@ def emit(dataset: dict, out_dir: str | Path) -> tuple[Path, Path]:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     data_path = out_dir / "crossover_dataset.json"
-    data_path.write_text(json.dumps(dataset, indent=2), encoding="utf-8")
+    atomic_write_text(data_path, json.dumps(dataset, indent=2))
     chart_path = render_chart(dataset, out_dir / "crossover")
     return data_path, chart_path

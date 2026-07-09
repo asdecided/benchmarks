@@ -39,7 +39,7 @@ dev = ["pytest>=7"]
 decisiongrounding = "runner.cli:main"
 
 [tool.setuptools]
-packages = ["providers", "scenarios", "scoring", "runner", "ingest"]
+packages = ["providers", "scenarios", "scoring", "runner", "ingest", "util"]
 
 [tool.setuptools.package-data]
 # The editable dashboard HTML shell ships with the package (the UI loads it).

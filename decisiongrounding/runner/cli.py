@@ -51,6 +51,7 @@ from scoring.crossover import (  # noqa: E402
     merge_seed_datasets,
     run_seeds,
 )
+from util.io import atomic_write_text  # noqa: E402
 
 HARNESS_VERSION = "0.1.0-scaffold"
 _ROOT = Path(__file__).resolve().parent.parent
@@ -294,7 +295,7 @@ def _write_report(
         "runs": results,
         "errors": errors or [],
     }
-    path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    atomic_write_text(path, json.dumps(report, indent=2))
     return path
 
 
