@@ -146,6 +146,21 @@ def test_build_dataset_multiseed_paired_difference():
         assert len(e["diff_ci"]) == 2 and e["n"] == 2 and len(e["values"]) == 2
 
 
+def test_build_dataset_multiseed_reports_both_contrasts():
+    # A three-arm sweep yields a paired diff for every requested contrast whose
+    # arms are present; a contrast with a missing arm is silently skipped.
+    sc = load_scenarios(_REAL)
+    ds = build_dataset_multiseed(
+        sc, arms=("context_dump", "naive_rag", "no_grounding"), ns=(3, 6), seeds=[0, 1],
+        pool=_pool(30),
+        pairs=[("context_dump", "naive_rag"), ("context_dump", "no_grounding"),
+               ("rac", "naive_rag")],  # rac absent -> skipped
+    )
+    assert set(ds["paired"]) == {"context_dump_vs_naive_rag", "context_dump_vs_no_grounding"}
+    for series in ds["paired"].values():
+        assert [e["N"] for e in series] == [3, 6]
+
+
 def test_merge_seed_datasets_augment_equals_fresh_run():
     sc = load_scenarios(_REAL)
     arms, ns = ("context_dump", "naive_rag"), (3, 6)

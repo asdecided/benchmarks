@@ -46,6 +46,7 @@ from providers.rac import rac_version  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
 from scoring.crossover import (  # noqa: E402
+    DEFAULT_PAIRS,
     build_dataset,
     build_dataset_batched,
     build_dataset_multiseed,
@@ -727,7 +728,7 @@ def cmd_demo(args) -> int:
                     pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
                     batched=batch, poll=args.poll, progress=_on_cell)
                 dataset = merge_seed_datasets(existing, new_ps, list(arms), list(ns),
-                                              ("rac", "naive_rag"))
+                                              list(DEFAULT_PAIRS))
         elif seeds is not None:
             if len(seeds) > 1:
                 print(f"  (multi-seed: {seeds}; reporting mean +/- 95% CI)", file=sys.stderr)
@@ -735,7 +736,7 @@ def cmd_demo(args) -> int:
                 scenarios, arms=arms, ns=ns, seeds=seeds,
                 answering_model_name=args.answering, embedder_spec=args.embedder,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
-                batched=batch, poll=args.poll, pair=("rac", "naive_rag"), progress=_on_cell,
+                batched=batch, poll=args.poll, pairs=list(DEFAULT_PAIRS), progress=_on_cell,
                 resume=resume_cells)
         elif batch:
             dataset = build_dataset_batched(
