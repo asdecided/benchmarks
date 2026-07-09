@@ -80,6 +80,16 @@ def test_risk_difference_known_value():
     assert risk_difference(0, 0, 0)["degenerate"] is True
 
 
+def test_risk_difference_ci_is_clamped_to_parameter_space():
+    # b=9,c=0,n=10: diff=0.9, Wald upper = 0.9 + 1.96*sqrt(0.9)/10 ~= 1.086 -> clip to 1.
+    hi = risk_difference(9, 0, 10)
+    assert hi["diff"] == pytest.approx(0.9)
+    assert hi["ci"][1] == 1.0 and hi["ci"][0] >= -1.0
+    # symmetric: lower bound clips to -1.
+    lo = risk_difference(0, 9, 10)
+    assert lo["ci"][0] == -1.0 and lo["ci"][1] <= 1.0
+
+
 def test_paired_odds_ratio_zero_cell_is_degenerate_not_fudged():
     orr = paired_odds_ratio(5, 0)
     assert orr["or"] is None and orr["ci"] is None and orr["degenerate"] is True
