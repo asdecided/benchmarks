@@ -19,6 +19,8 @@ from pathlib import Path
 
 from scoring.charts import grouped_bar_chart, line_chart
 from scoring.cost import cost_by_arm, dollars
+from scoring.health import scenario_health
+from scoring.snr import signal_to_noise
 
 _DEFAULT_TEMPLATE = Path(__file__).resolve().parent / "templates" / "dashboard.html"
 
@@ -267,6 +269,65 @@ def _scenarios_section(run):
     return matrix + "".join(drill)
 
 
+def _snr_txt(rec: dict) -> str:
+    """Plain-text SNR cell (number, or why it isn't one)."""
+    snr = rec.get("snr")
+    if snr is not None:
+        return f"{snr:.2f}" + (" (noise-dominated)" if rec.get("noise_dominated") else "")
+    return {"zero_noise_clean_separation": "clean (σ=0)",
+            "no_effect": "0 (tie)"}.get(rec.get("flag"), "n/a")
+
+
+def _signal_noise_section(dataset) -> str:
+    """The Signal / noise tab: SNR per contrast + the scenario-health audit."""
+    snr = signal_to_noise(dataset)
+    health = scenario_health(dataset)
+    if not snr["pairs"] and not health["total"]:
+        return '<p class=note>Needs a multi-seed crossover dataset.</p>'
+    out = []
+    if snr["pairs"]:
+        out.append("<h2>Signal-to-noise</h2>")
+        if snr["n_seeds"] < 2:
+            out.append('<p class=note>Only 1 seed — seed-to-seed noise is not '
+                       'estimable, so SNR cannot be computed. Re-run with '
+                       '<code>--seeds 0-4</code>.</p>')
+        else:
+            out.append('<p class=note>SNR = |between-arm adherence gap| ÷ '
+                       'across-seed σ of that gap. <b>SNR &lt; 1 is '
+                       'noise-dominated</b>.</p>')
+            for key, pair in snr["pairs"].items():
+                a, b = key.split("_vs_")
+                head = pair.get("headline") or {}
+                out.append(f'<p><b>{_esc(a)}</b> vs <b>{_esc(b)}</b> — headline SNR '
+                           f'at N={pair.get("headline_N")}: {_esc(_snr_txt(head))}</p>')
+                rows = "".join(
+                    f"<tr><td>{r['N']}</td><td>{_f(r.get('signal'))}</td>"
+                    f"<td>{_f(r.get('noise'))}</td><td>{_esc(_snr_txt(r))}</td></tr>"
+                    for r in pair["by_n"])
+                out.append("<table><thead><tr><th>N</th><th>signal</th>"
+                           f"<th>noise σ</th><th>SNR</th></tr></thead><tbody>{rows}"
+                           "</tbody></table>")
+    if health["total"]:
+        c = health["counts"]
+        out.append("<h2>Scenario health</h2>")
+        extra = f", {c['unknown']} unknown" if c["unknown"] else ""
+        out.append(f'<p>Of {health["total"]} scenarios: '
+                   f'<b>{c["discriminating"]} discriminating</b>, {c["broken"]} broken, '
+                   f'{c["contaminated"]} contaminated, {c["tie"]} tie{extra}.</p>')
+        flagged = [s for s in health["scenarios"] if s["class"] != "discriminating"]
+        if flagged:
+            rows = "".join(
+                f"<tr><td><code>{_esc(s['scenario_id'])}</code></td>"
+                f"<td>{_esc(s['class'])}</td><td>{_f(s['max_gap'])}</td></tr>"
+                for s in flagged)
+            out.append("<table><thead><tr><th>scenario</th><th>class</th>"
+                       f"<th>max arm gap</th></tr></thead><tbody>{rows}</tbody></table>")
+        out.append('<p class=note>broken = ceiling arm never adheres; '
+                   'contaminated = parametric-memory floor already adheres; '
+                   'tie = no arm separates.</p>')
+    return "".join(out)
+
+
 def _run_tab(paid: bool) -> str:
     if paid:
         real = (
@@ -287,7 +348,7 @@ def _run_tab(paid: bool) -> str:
                 "<code>DG_UI_ALLOW_PAID=1</code> (and <code>ANTHROPIC_API_KEY</code>) to enable; "
                 "you'll still have to estimate and tick a confirmation before any spend.</p>")
     return (
-        "<section class=tab id=s7><h2>Run the benchmark</h2>"
+        "<section class=tab id=s8><h2>Run the benchmark</h2>"
         "<p class=note>Triggers the CLI on the server; the page refreshes when the run finishes.</p>"
         "<button onclick=runOffline()>Run offline (free)</button> "
         "<button onclick=refreshMain()>↻ Refresh data</button> "
@@ -407,8 +468,10 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
         secs.append('<section class=tab id=s4><p class=note>Needs both rac and naive_rag in a crossover dataset.</p></section>')
     # 5 Scenarios
     secs.append(f'<section class=tab id=s5><h2>Scenarios &amp; failures</h2>{_scenarios_section(run)}</section>')
-    # 6 Reproduce
-    secs.append('<section class=tab id=s6><h2>Reproduce</h2><pre>'
+    # 6 Signal / noise (SNR + scenario-health audit)
+    secs.append(f'<section class=tab id=s6>{_signal_noise_section(dataset) if dataset else "<p class=note>Needs a crossover dataset.</p>"}</section>')
+    # 7 Reproduce
+    secs.append('<section class=tab id=s7><h2>Reproduce</h2><pre>'
                 'make real-crossover   # headline + adherence-vs-N over the real pool\n'
                 'make real-batch       # via the Batch API (~50% cost)\n\n'
                 'make ui               # serve this dashboard live at 127.0.0.1:8099\n'
@@ -424,9 +487,10 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
     return "".join(secs)
 
 
-# Tab labels, in section order (s0..s6, +s7 Run when live). Kept beside the
+# Tab labels, in section order (s0..s7, +s8 Run when live). Kept beside the
 # renderer so the nav and the sections stay in lockstep.
-_TABS = ["Overview", "Leaderboard", "Curves", "Cost", "rac vs RAG", "Scenarios", "Reproduce"]
+_TABS = ["Overview", "Leaderboard", "Curves", "Cost", "rac vs RAG", "Scenarios",
+         "Signal / noise", "Reproduce"]
 
 
 def build_dashboard(run, dataset, cost_curve=None, *, live=False, paid_enabled=False, template=None):

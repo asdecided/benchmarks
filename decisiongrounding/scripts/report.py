@@ -29,6 +29,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scoring.charts import grouped_bar_chart, line_chart  # noqa: E402
 from scoring.cost import cost_by_arm, dollars  # noqa: E402
+from scoring.health import scenario_health  # noqa: E402
+from scoring.snr import signal_to_noise  # noqa: E402
 from scoring.stats import paired_significance  # noqa: E402
 
 _ARM_DESC = {
@@ -350,6 +352,109 @@ def _per_scenario_section(dataset: dict) -> list[str]:
     return parts
 
 
+def _snr_cell(rec: dict) -> str:
+    """Render one SNR record: a number (·* when noise-dominated), or the
+    reason it isn't a number."""
+    snr = rec.get("snr")
+    if snr is not None:
+        return f"{snr:.2f}" + ("*" if rec.get("noise_dominated") else "")
+    flag = rec.get("flag")
+    if flag == "zero_noise_clean_separation":
+        return "clean (σ=0)"
+    if flag == "no_effect":
+        return "0 (tie)"
+    return "n/a"
+
+
+def _snr_section(dataset: dict) -> list[str]:
+    """Signal-to-noise for each arm contrast: |paired Δ| / across-seed σ. The
+    honest headline of whether the crossover result is above run-to-run noise.
+
+    `.get`-guarded; needs the `paired` block. With <2 seeds, noise is not
+    estimable and the section says so rather than inventing a ratio.
+    """
+    snr = signal_to_noise(dataset)
+    if not snr["pairs"]:
+        return []
+    parts = ["## Signal-to-noise", ""]
+    if snr["n_seeds"] < 2:
+        parts += [
+            f"Only {snr['n_seeds']} seed — seed-to-seed noise is not estimable, so "
+            "signal-to-noise cannot be computed (you cannot measure noise from a "
+            "single run). Re-run with e.g. `--seeds 0-4` to report it.",
+            "",
+        ]
+        return parts
+    parts.append(
+        "SNR = |between-arm adherence gap| ÷ across-seed standard deviation of "
+        "that gap. **SNR < 1 (·\\*) is noise-dominated** — the gap is within the "
+        "seed-to-seed wobble and should not be leaned on.",
+    )
+    parts.append("")
+    for key, pair in snr["pairs"].items():
+        a, b = key.split("_vs_")
+        head = pair.get("headline") or {}
+        hn = pair.get("headline_N")
+        parts.append(f"**`{a}` vs `{b}`** — headline SNR at N={hn}: {_snr_cell(head)}")
+        parts.append("")
+        parts.append("| N | signal \\|Δ\\| | noise σ | SNR |")
+        parts.append("|---|--:|--:|--:|")
+        for rec in pair["by_n"]:
+            parts.append(
+                f"| {rec['N']} | {_fmt(rec.get('signal'))} | "
+                f"{_fmt(rec.get('noise'))} | {_snr_cell(rec)} |"
+            )
+        parts.append("")
+    parts.append(
+        "\\* noise-dominated (SNR < 1). `clean (σ=0)` = an identical gap every "
+        "seed; `0 (tie)` = no gap and no variance."
+    )
+    parts.append("")
+    return parts
+
+
+def _scenario_health_section(dataset: dict) -> list[str]:
+    """Per-scenario discrimination/validity audit — how many scenarios actually
+    carry signal vs. are broken, contaminated, or ties (OpenAI's broken-task
+    ceiling analysis, applied here). `.get`-guarded on `per_scenario`.
+    """
+    health = scenario_health(dataset)
+    if not health["total"]:
+        return []
+    c = health["counts"]
+    parts = ["## Scenario health (discrimination audit)", ""]
+    bits = [f"**{c['discriminating']} discriminating**", f"{c['broken']} broken",
+            f"{c['contaminated']} contaminated", f"{c['tie']} tie"]
+    if c["unknown"]:
+        bits.append(f"{c['unknown']} unknown")
+    parts.append(f"Of {health['total']} scenarios: " + ", ".join(bits) + ".")
+    if not health["controls"]["ceiling"]:
+        parts.append("_(no `context_dump` ceiling arm in the sweep — 'broken' "
+                     "cannot be detected.)_")
+    if not health["controls"]["floor"]:
+        parts.append("_(no `no_grounding` floor arm in the sweep — 'contaminated' "
+                     "cannot be detected.)_")
+    flagged = [s for s in health["scenarios"] if s["class"] != "discriminating"]
+    if flagged:
+        parts += ["", "| scenario | class | ceiling adheres | floor adheres | max arm gap |",
+                  "|---|---|:--:|:--:|--:|"]
+        _yn = {True: "yes", False: "no", None: "—"}
+        for s in flagged:
+            parts.append(
+                f"| `{s['scenario_id']}` | {s['class']} | "
+                f"{_yn[s['ceiling_adherent']]} | {_yn[s['floor_adherent']]} | "
+                f"{_fmt(s['max_gap'])} |"
+            )
+    parts.append("")
+    parts.append(
+        "_broken = the see-everything arm never adheres (likely mis-specified); "
+        "contaminated = the parametric-memory floor already adheres (doesn't test "
+        "grounding); tie = no arm separates from another._"
+    )
+    parts.append("")
+    return parts
+
+
 def _head_to_head(dataset: dict, run: dict) -> str:
     """rac vs naive_rag only — the comparison that actually adjudicates the thesis."""
     arms = dataset["arms"]
@@ -646,6 +751,12 @@ def build_report(run: dict, dataset: dict | None, cost_curve: dict | None, chart
     # 4a. Per-scenario failure attribution — is one scenario carrying the result?
     if dataset:
         parts += _per_scenario_section(dataset)
+
+    # 4a-bis. Signal-to-noise + scenario-health audit — is the result above the
+    # run-to-run noise, and how many scenarios actually carry signal?
+    if dataset:
+        parts += _snr_section(dataset)
+        parts += _scenario_health_section(dataset)
 
     # 4b. Pre-registered paired significance (when the artifacts carry stats).
     parts += _stats_section(run, dataset)
