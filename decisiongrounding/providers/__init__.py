@@ -36,16 +36,23 @@ from .embedding import (
 )
 from .memory_provider import MemoryProviderArm
 from .naive_rag import NaiveRagProvider
+from .naive_rag_full import NaiveRagFullProvider
 from .no_grounding import NoGroundingProvider
 from .rac import RacProvider, resolve_supersedes
+from .rac_snippets import RacSnippetsProvider
 
-# Real, runnable arms this pass: context_dump, naive_rag, no_grounding (offline);
-# rac (needs the external rac CLI). memory_provider is a typed stub.
+# Real, runnable arms this pass: context_dump, naive_rag, no_grounding,
+# naive_rag_full (offline); rac, rac_snippets (need the external rac CLI).
+# naive_rag_full and rac_snippets are the token-budget parity variants that
+# complete the 2x2 (retrieval method x grounding granularity).
+# memory_provider is a typed stub.
 ARMS: dict[str, type[Provider]] = {
     "context_dump": ContextDumpProvider,
     "naive_rag": NaiveRagProvider,
+    "naive_rag_full": NaiveRagFullProvider,
     "no_grounding": NoGroundingProvider,
     "rac": RacProvider,
+    "rac_snippets": RacSnippetsProvider,
     "memory_provider": MemoryProviderArm,
 }
 
@@ -75,9 +82,10 @@ def make_answering_model(name: str, seed: int) -> AnsweringModel:
 
 
 def build_provider(arm: str, answering_model, embedder_spec: str = "local-hash") -> Provider:
-    """Instantiate an arm, wiring a real embedder into naive_rag when asked."""
-    if arm == "naive_rag":
-        return NaiveRagProvider(answering_model, embedder=make_embedder(embedder_spec))
+    """Instantiate an arm, wiring a real embedder into the embedding-retrieval
+    arms when asked. rac_snippets inherits rac (typed retrieval, no embedder)."""
+    if arm in ("naive_rag", "naive_rag_full"):
+        return ARMS[arm](answering_model, embedder=make_embedder(embedder_spec))
     return ARMS[arm](answering_model)
 
 
@@ -96,6 +104,8 @@ __all__ = [
     "ClaudeAnsweringModel",
     "OpenAICompatAnsweringModel",
     "SchemaMissError",
+    "GatewayHTTPError",
+    "error_kind",
     "make_answering_model",
     "build_provider",
     "Embedder",
@@ -106,8 +116,10 @@ __all__ = [
     "make_embedder",
     "ContextDumpProvider",
     "NaiveRagProvider",
+    "NaiveRagFullProvider",
     "NoGroundingProvider",
     "RacProvider",
+    "RacSnippetsProvider",
     "resolve_supersedes",
     "MemoryProviderArm",
 ]
