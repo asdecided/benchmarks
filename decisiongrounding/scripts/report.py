@@ -306,6 +306,50 @@ def _resolution_section(records: list[dict]) -> list[str]:
     return parts
 
 
+def _per_scenario_section(dataset: dict) -> list[str]:
+    """Per-arm failure attribution across scenarios — surfaces whether one
+    scenario dominates an arm's failures (the pilot found 12 of rac's 13
+    failures came from a single scenario). A concentrated failure means the
+    verdict rests on that scenario's idiosyncrasies, not a general effect.
+
+    `.get`-guarded so datasets predating `per_scenario` render nothing.
+    """
+    per = dataset.get("per_scenario")
+    if not per:
+        return []
+    parts = ["## Per-scenario failure attribution", ""]
+    for arm in per:
+        # failures[scenario_id] = (# non-adherent cells, # scored cells)
+        failures: dict[str, tuple[int, int]] = {}
+        for sid, cells in per[arm].items():
+            scored = [c for c in cells if c.get("adherent") is not None]
+            miss = sum(1 for c in scored if not c["adherent"])
+            if scored:
+                failures[sid] = (miss, len(scored))
+        total_fail = sum(m for m, _ in failures.values())
+        if total_fail == 0:
+            parts.append(f"- **`{arm}`** — no failures across scenarios.")
+            continue
+        ranked = sorted(failures.items(), key=lambda kv: kv[1][0], reverse=True)
+        top_sid, (top_fail, _) = ranked[0]
+        parts.append(f"**`{arm}`** — {total_fail} failing cell(s) across scenarios:")
+        parts.append("")
+        parts.append("| scenario | failing cells | scored cells |")
+        parts.append("|---|--:|--:|")
+        for sid, (miss, scored) in ranked:
+            if miss:
+                parts.append(f"| `{sid}` | {miss} | {scored} |")
+        if top_fail > total_fail / 2:
+            parts.append("")
+            parts.append(
+                f"⚠ **{top_fail} of {total_fail}** of `{arm}`'s failures come from "
+                f"a single scenario (`{top_sid}`) — this arm's result rests "
+                f"substantively on that scenario, not a broad effect."
+            )
+        parts.append("")
+    return parts
+
+
 def _head_to_head(dataset: dict, run: dict) -> str:
     """rac vs naive_rag only — the comparison that actually adjudicates the thesis."""
     arms = dataset["arms"]
@@ -598,6 +642,10 @@ def build_report(run: dict, dataset: dict | None, cost_curve: dict | None, chart
         parts += ["## rac vs naive RAG (head-to-head)", "",
                   *_img(charts, "head_to_head", "rac vs naive RAG adherence vs N"),
                   _head_to_head(dataset, run), ""]
+
+    # 4a. Per-scenario failure attribution — is one scenario carrying the result?
+    if dataset:
+        parts += _per_scenario_section(dataset)
 
     # 4b. Pre-registered paired significance (when the artifacts carry stats).
     parts += _stats_section(run, dataset)
