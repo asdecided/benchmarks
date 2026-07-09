@@ -769,6 +769,12 @@ def cmd_demo(args) -> int:
             row = " ".join(f"N={p['N']}:{_fmt_adherent(p['adherent'])}" for p in series)
             print(f"{arm:<13}{sid:<32}{row}")
     data_path, chart_path = emit(dataset, out_dir)
+    from providers.embedding import get_embedding_cache
+    _emb_cache = get_embedding_cache()
+    if _emb_cache is not None and (_emb_cache.hits or _emb_cache.misses):
+        s = _emb_cache.stats()
+        print(f"  (embedding cache: {s['hits']} hits / {s['misses']} misses, "
+              f"{s['entries']} entries)", file=sys.stderr)
     print(f"\nwrote {report}\nwrote {data_path}\nwrote {chart_path}")
     if args.answering == "offline-stub":
         print(
