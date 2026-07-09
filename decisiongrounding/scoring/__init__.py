@@ -9,6 +9,7 @@ from .metrics import (
     summarize,
     t_critical_95,
 )
+from .health import scenario_health
 from .scorer import Score, score
 from .snr import signal_to_noise
 
@@ -16,6 +17,7 @@ __all__ = [
     "Score",
     "score",
     "signal_to_noise",
+    "scenario_health",
     "ArmMetrics",
     "aggregate",
     "adherence_variance",
