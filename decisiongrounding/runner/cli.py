@@ -41,6 +41,7 @@ from providers.base import (  # noqa: E402
     ProposedChange,
     check_context_window,
 )
+from providers.rac import rac_version  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
 from scoring.crossover import (  # noqa: E402
@@ -249,6 +250,12 @@ def _backend_versions() -> dict:
             out[pkg] = md.version(pkg)
         except Exception:  # noqa: BLE001 - absence is expected offline
             pass
+    # The system under test: without this, two runs against different rac
+    # builds produce indistinguishable reports. Same omit-when-absent
+    # convention as the pip packages.
+    v = rac_version()
+    if v is not None:
+        out["rac"] = v
     return out
 
 

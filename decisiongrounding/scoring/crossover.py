@@ -24,6 +24,7 @@ from typing import Callable
 
 from providers import build_provider, make_answering_model
 from providers.answering import usage_dict
+from providers.rac import rac_version
 from providers.base import SCAFFOLD, ContextWindowExceededError, CorpusArtifact, check_context_window
 from scenarios.loader import Scenario
 from scoring.metrics import summarize
@@ -186,6 +187,10 @@ def _envelope(discriminating, use_real, pool, seed, ns, model_version, embedder_
         "ns": list(ns),
         "answering_model": model_version,
         "embedder": embedder_spec,
+        # Version of the system under test. None when the rac arm isn't in
+        # this curve — a rac version on a curve that never ran rac would be
+        # noise, and None states explicitly that rac was not in play.
+        "rac_version": rac_version() if "rac" in arms else None,
         # Provenance so the cost-vs-N curve can be recomputed offline (no spend).
         "pool_dir": pool_dir,
         "scenarios_dir": scenarios_dir,
