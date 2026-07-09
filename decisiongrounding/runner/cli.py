@@ -51,7 +51,7 @@ from scoring.crossover import (  # noqa: E402
     merge_seed_datasets,
     run_seeds,
 )
-from util.io import atomic_write_text  # noqa: E402
+from util.io import atomic_write_text, read_jsonl  # noqa: E402
 
 HARNESS_VERSION = "0.1.0-scaffold"
 _ROOT = Path(__file__).resolve().parent.parent
@@ -213,6 +213,29 @@ def _execute_runs(
             fp.write(json.dumps({"record": "run", **r}) + "\n")
             fp.flush()
     return results, errors
+
+
+def _load_resume_cells(
+    path: Path, default_seed: int
+) -> dict[tuple[int, int, str, str], dict]:
+    """Read a crossover `.partial.jsonl` sidecar into a resume cache keyed by
+    (seed, N, arm, scenario_id) -> cell record, for `build_dataset(resume=...)`.
+
+    Only `record == "cell"` lines count — a demo sidecar can also carry the
+    base table's "run"/"error"/"context_window_exceeded" lines, which have no
+    N/seed identity. Records without a `seed` field (sidecars written before
+    single-seed runs were seed-tagged) are assigned `default_seed`. When the
+    same cell appears more than once (a resumed run re-appends every cell),
+    the last line wins — the newest attempt is the truth.
+    """
+    cells: dict[tuple[int, int, str, str], dict] = {}
+    for rec in read_jsonl(path):
+        if rec.get("record") != "cell":
+            continue
+        key = (int(rec.get("seed", default_seed)), int(rec["N"]),
+               rec["arm"], rec["scenario_id"])
+        cells[key] = rec
+    return cells
 
 
 def _backend_versions() -> dict:
@@ -615,12 +638,19 @@ def cmd_demo(args) -> int:
     _sweep_fp = sweep_partial.open("a", encoding="utf-8")
 
     def _on_cell(rec: dict) -> None:
+        # Every sidecar record carries its seed so a crashed run can be
+        # resumed cell-by-cell (--resume). Multi-seed paths tag it upstream
+        # (_tag_seed); setdefault covers the single-seed path.
+        rec.setdefault("seed", args.seed)
         _sweep_fp.write(json.dumps(rec) + "\n")
         _sweep_fp.flush()
         done, total = rec["idx"], rec["total"]
         elapsed = time.time() - _t0
         eta = (elapsed / done) * (total - done) if done else 0
-        flag = "ERR" if rec.get("error") else ("adhere" if rec["adherent"] else "miss")
+        if rec.get("cached"):
+            flag = "cached"
+        else:
+            flag = "ERR" if rec.get("error") else ("adhere" if rec["adherent"] else "miss")
         print(
             f"  [{done:>3}/{total}] {done * 100 // total:>3}%  N={rec['N']:<4} "
             f"{rec['arm']:<13}{rec['scenario_id']:<34} {flag:<6} "
@@ -639,6 +669,40 @@ def cmd_demo(args) -> int:
     if batch:
         print("  (Batch API: assembling cells locally, then one batch per seed at ~50% price)",
               file=sys.stderr)
+    resume_arg = getattr(args, "resume", None)
+    resume_cells = None
+    if resume_arg:
+        if augment:
+            _sweep_fp.close()
+            raise SystemExit("--resume and --augment are mutually exclusive: "
+                             "--resume replays cells from a crashed sweep's "
+                             ".partial.jsonl; --augment adds whole seeds to a "
+                             "finished crossover_dataset.json")
+        if batch:
+            _sweep_fp.close()
+            raise SystemExit("--resume does not support --batch yet; rerun "
+                             "without --batch (cached cells are skipped, so "
+                             "only the missing cells pay full price)")
+        if resume_arg == "auto":
+            # The sidecar just opened for THIS run is still empty at this
+            # point; a crashed run's sidecar always has content. Filtering on
+            # size (rather than path) also survives a same-second timestamp
+            # collision where the two paths coincide.
+            candidates = [p for p in out_dir.glob("run-*-crossover.partial.jsonl")
+                          if p.stat().st_size > 0]
+            if not candidates:
+                _sweep_fp.close()
+                raise SystemExit(f"--resume auto: no run-*-crossover.partial.jsonl "
+                                 f"found under {out_dir}")
+            resume_path = max(candidates, key=lambda p: p.stat().st_mtime)
+        else:
+            resume_path = Path(resume_arg)
+            if not resume_path.exists():
+                _sweep_fp.close()
+                raise SystemExit(f"--resume: {resume_path} not found")
+        resume_cells = _load_resume_cells(resume_path, args.seed)
+        print(f"  (resume: {len(resume_cells)} completed cells from "
+              f"{resume_path.name})", file=sys.stderr)
     try:
         if augment:
             existing = json.loads(Path(augment).read_text(encoding="utf-8"))
@@ -664,7 +728,8 @@ def cmd_demo(args) -> int:
                 scenarios, arms=arms, ns=ns, seeds=seeds,
                 answering_model_name=args.answering, embedder_spec=args.embedder,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
-                batched=batch, poll=args.poll, pair=("rac", "naive_rag"), progress=_on_cell)
+                batched=batch, poll=args.poll, pair=("rac", "naive_rag"), progress=_on_cell,
+                resume=resume_cells)
         elif batch:
             dataset = build_dataset_batched(
                 scenarios, arms=arms, ns=ns, seed=args.seed, embedder_spec=args.embedder,
@@ -676,7 +741,7 @@ def cmd_demo(args) -> int:
                 scenarios, arms=arms, ns=ns, seed=args.seed,
                 answering_model_name=args.answering, embedder_spec=args.embedder,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
-                progress=_on_cell,
+                progress=_on_cell, resume=resume_cells,
             )
     finally:
         _sweep_fp.close()
@@ -823,6 +888,13 @@ def main(argv: list[str] | None = None) -> int:
                 "--augment", default=None,
                 help="path to an existing crossover_dataset.json: run only the "
                 "--seeds not already in it and merge (append-friendly, no re-run)",
+            )
+            sp.add_argument(
+                "--resume", default=None, metavar="PARTIAL_JSONL",
+                help="path to a run-*-crossover.partial.jsonl from a crashed "
+                "sweep, or 'auto' for the newest one under --out; completed "
+                "cells are replayed from it instead of re-run (errored cells "
+                "are re-run)",
             )
 
     # The local web UI is a different shape (no scenarios/answering knobs).
