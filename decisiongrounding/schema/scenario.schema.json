@@ -41,6 +41,11 @@
       "type": "boolean",
       "description": "True when all arms are expected to score equally (e.g. easy single-decision cases). Labeled explicitly so ties are not mistaken for signal."
     },
+    "lexical_overlap": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "Optional. Declared band of lexical overlap between the task vocabulary and the real distractor domain (PEP titles). A graded design lever for testing whether lexical retrieval collapses at scale; scenarios.overlap measures the actual band and a test asserts the declaration matches."
+    },
     "corpus": {
       "type": "object",
       "additionalProperties": false,

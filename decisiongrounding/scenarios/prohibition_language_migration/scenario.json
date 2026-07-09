@@ -1,8 +1,9 @@
 {
   "scenario_id": "prohibition_language_migration",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scenario_type": "prohibition_at_point_of_action",
   "expected_tie": false,
+  "lexical_overlap": "high",
   "corpus": {
     "artifacts": [
       {
