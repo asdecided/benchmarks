@@ -15,6 +15,7 @@ files and never mutated.
 from __future__ import annotations
 
 import argparse
+import threading
 import importlib.util
 import json
 import os
@@ -649,32 +650,47 @@ def cmd_demo(args) -> int:
     sweep_partial.parent.mkdir(parents=True, exist_ok=True)
     _t0 = time.time()
     _sweep_fp = sweep_partial.open("a", encoding="utf-8")
+    # The sidecar is written from crossover worker threads under --concurrency,
+    # so the whole write+flush+print is serialised: interleaved writes would
+    # corrupt the JSONL that --resume reads back.
+    _sidecar_lock = threading.Lock()
 
     def _on_cell(rec: dict) -> None:
         # Every sidecar record carries its seed so a crashed run can be
         # resumed cell-by-cell (--resume). Multi-seed paths tag it upstream
         # (_tag_seed); setdefault covers the single-seed path.
         rec.setdefault("seed", args.seed)
-        _sweep_fp.write(json.dumps(rec) + "\n")
-        _sweep_fp.flush()
-        done, total = rec["idx"], rec["total"]
-        elapsed = time.time() - _t0
-        eta = (elapsed / done) * (total - done) if done else 0
-        if rec.get("cached"):
-            flag = "cached"
-        else:
-            flag = "ERR" if rec.get("error") else ("adhere" if rec["adherent"] else "miss")
-        print(
-            f"  [{done:>3}/{total}] {done * 100 // total:>3}%  N={rec['N']:<4} "
-            f"{rec['arm']:<13}{rec['scenario_id']:<34} {flag:<6} "
-            f"eta {eta/60:4.1f}m",
-            file=sys.stderr,
-        )
+        with _sidecar_lock:
+            _sweep_fp.write(json.dumps(rec) + "\n")
+            _sweep_fp.flush()
+            done, total = rec["idx"], rec["total"]
+            elapsed = time.time() - _t0
+            eta = (elapsed / done) * (total - done) if done else 0
+            if rec.get("cached"):
+                flag = "cached"
+            else:
+                flag = "ERR" if rec.get("error") else ("adhere" if rec["adherent"] else "miss")
+            print(
+                f"  [{done:>3}/{total}] {done * 100 // total:>3}%  N={rec['N']:<4} "
+                f"{rec['arm']:<13}{rec['scenario_id']:<34} {flag:<6} "
+                f"eta {eta/60:4.1f}m",
+                file=sys.stderr,
+            )
 
     pool_dir = args.pool if args.distractors == "real" else None
     seeds = _parse_seeds(getattr(args, "seeds", None))
     augment = getattr(args, "augment", None)
     batch = bool(getattr(args, "batch", False))
+    concurrency = max(1, int(getattr(args, "concurrency", 1) or 1))
+    rpm = getattr(args, "rpm", None)
+    rate_limiter = None
+    if rpm:
+        from util.ratelimit import RateLimiter
+
+        rate_limiter = RateLimiter(rpm=float(rpm))
+    if concurrency > 1:
+        print(f"  (concurrency: up to {concurrency} cells in flight"
+              + (f", rate-limited to {rpm}/min" if rpm else "") + ")", file=sys.stderr)
     if batch and args.answering != "claude":
         _sweep_fp.close()
         raise SystemExit("--batch requires --answering claude (the Batch API "
@@ -726,7 +742,8 @@ def cmd_demo(args) -> int:
                     scenarios, arms, ns, todo,
                     answering_model_name=args.answering, embedder_spec=args.embedder,
                     pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
-                    batched=batch, poll=args.poll, progress=_on_cell)
+                    batched=batch, poll=args.poll, progress=_on_cell,
+                    concurrency=concurrency, rate_limiter=rate_limiter)
                 dataset = merge_seed_datasets(existing, new_ps, list(arms), list(ns),
                                               list(DEFAULT_PAIRS))
         elif seeds is not None:
@@ -737,7 +754,7 @@ def cmd_demo(args) -> int:
                 answering_model_name=args.answering, embedder_spec=args.embedder,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
                 batched=batch, poll=args.poll, pairs=list(DEFAULT_PAIRS), progress=_on_cell,
-                resume=resume_cells)
+                resume=resume_cells, concurrency=concurrency, rate_limiter=rate_limiter)
         elif batch:
             dataset = build_dataset_batched(
                 scenarios, arms=arms, ns=ns, seed=args.seed, embedder_spec=args.embedder,
@@ -750,6 +767,7 @@ def cmd_demo(args) -> int:
                 answering_model_name=args.answering, embedder_spec=args.embedder,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
                 progress=_on_cell, resume=resume_cells,
+                concurrency=concurrency, rate_limiter=rate_limiter,
             )
     finally:
         _sweep_fp.close()
@@ -916,6 +934,19 @@ def main(argv: list[str] | None = None) -> int:
                 "sweep, or 'auto' for the newest one under --out; completed "
                 "cells are replayed from it instead of re-run (errored cells "
                 "are re-run)",
+            )
+            sp.add_argument(
+                "--concurrency", type=int, default=1, metavar="N",
+                help="run up to N crossover cells in flight via a thread pool "
+                "(I/O-bound on the answering/embedding APIs). The dataset is "
+                "byte-identical to a sequential run; a ~15h real sweep drops to "
+                "roughly 1/N. Does not apply to --batch (parallel server-side).",
+            )
+            sp.add_argument(
+                "--rpm", type=float, default=None, metavar="RATE",
+                help="requests-per-minute cap for the concurrency pool (token "
+                "bucket); keeps a hosted API under its limit. Only delays calls, "
+                "never changes results.",
             )
 
     # The local web UI is a different shape (no scenarios/answering knobs).

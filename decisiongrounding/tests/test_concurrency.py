@@ -74,3 +74,24 @@ def test_rate_limiter_throttles_and_is_thread_safe():
 def test_rate_limiter_rejects_nonpositive():
     with pytest.raises(ValueError):
         RateLimiter(rpm=0)
+
+
+def test_cli_concurrency_byte_identical_and_sidecar_uncorrupted(tmp_path):
+    from runner.cli import main
+
+    args = ["demo", "--scenarios", _SCENARIOS, "--ns", "10,50", "--seeds", "0-1"]
+    seq_dir, par_dir = tmp_path / "seq", tmp_path / "par"
+    assert main(args + ["--out", str(seq_dir)]) == 0
+    assert main(args + ["--out", str(par_dir), "--concurrency", "6"]) == 0
+
+    a = json.loads((seq_dir / "crossover_dataset.json").read_text())
+    b = json.loads((par_dir / "crossover_dataset.json").read_text())
+    assert _canon(a) == _canon(b)
+
+    # The sidecar written from worker threads is uncorrupted: every line parses
+    # and every cell appears exactly once.
+    sidecar = next(par_dir.glob("run-*-crossover.partial.jsonl"))
+    lines = [json.loads(ln) for ln in sidecar.read_text().splitlines() if ln.strip()]
+    cells = [r for r in lines if r.get("record") == "cell"]
+    keys = {(r["seed"], r["N"], r["arm"], r["scenario_id"]) for r in cells}
+    assert len(keys) == len(cells)  # no duplicate/interleaved rows
