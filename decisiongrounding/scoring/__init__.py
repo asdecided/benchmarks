@@ -10,10 +10,12 @@ from .metrics import (
     t_critical_95,
 )
 from .scorer import Score, score
+from .snr import signal_to_noise
 
 __all__ = [
     "Score",
     "score",
+    "signal_to_noise",
     "ArmMetrics",
     "aggregate",
     "adherence_variance",
