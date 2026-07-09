@@ -617,26 +617,33 @@ def build_dataset_multiseed(
     scenarios_dir: str | None = None,
     batched: bool = False,
     poll: int = 20,
-    pair: tuple[str, str] = ("rac", "naive_rag"),
+    pair: "tuple[str, str] | None" = None,
+    pairs: "list[tuple[str, str]] | None" = None,
     progress: "Callable[[dict], None] | None" = None,
     resume: "dict[tuple[int, int, str, str], dict] | None" = None,
 ) -> dict:
     """Run the crossover over several seeds and aggregate per (arm, N) into
     mean +/- a t-based 95% CI. The plain fields stay the mean (backward
-    compatible); `<field>_ci` / `_std` / `_values`, `n_seeds`, `seeds`, and a
-    paired `pair[0]`-vs-`pair[1]` adherence difference (`paired`) are added.
+    compatible); `<field>_ci` / `_std` / `_values`, `n_seeds`, `seeds`, and
+    paired adherence differences (`paired`) are added.
+
+    `pairs` selects the arm contrasts for the paired diffs (default
+    `DEFAULT_PAIRS`: rac-vs-naive_rag and rac-vs-no_grounding); a single
+    `pair=(a, b)` tuple is still accepted for back-compat. A contrast whose
+    arms aren't both in the sweep is skipped.
 
     Calls the single-seed builders per seed, so batched + multiseed compose.
     Offline runs (deterministic stub + embedder) show little spread; the
     aggregation is exercised regardless.
     """
+    resolved = pairs if pairs is not None else ([pair] if pair is not None else DEFAULT_PAIRS)
     uniq = list(dict.fromkeys(int(s) for s in seeds)) or [0]
     per_seed = run_seeds(
         scenarios, arms, ns, uniq,
         answering_model_name=answering_model_name, embedder_spec=embedder_spec,
         pool=pool, pool_dir=pool_dir, scenarios_dir=scenarios_dir,
         batched=batched, poll=poll, progress=progress, resume=resume)
-    return _aggregate_seeds(per_seed, list(arms), list(ns), pair)
+    return _aggregate_seeds(per_seed, list(arms), list(ns), resolved)
 
 
 def run_seeds(
@@ -710,10 +717,28 @@ def _aggregate_arm_points(arms, ns, cols, n_seeds) -> dict:
     return points
 
 
-def _paired(per_seed, ns, pair) -> dict | None:
-    """Per-N paired adherence difference pair[0]-pair[1], differenced within each
-    seed (common random numbers), with its own CI."""
-    a, b = pair
+# The arm contrasts whose paired adherence difference (and thus signal-to-noise)
+# the multi-seed crossover reports by default: the pre-registered falsifier
+# (rac vs naive_rag, H1) and the parametric-memory floor (rac vs no_grounding,
+# H2). A pair whose arms aren't both in the sweep is silently skipped, so this
+# default is safe for any arm subset (offline runs without rac emit neither).
+DEFAULT_PAIRS = (("rac", "naive_rag"), ("rac", "no_grounding"))
+
+
+def _normalize_pairs(pairs) -> list[tuple[str, str]]:
+    """Accept a single ``(a, b)`` tuple or a list of them; return a list of
+    tuples. ``None``/empty -> ``[]``."""
+    if not pairs:
+        return []
+    if isinstance(pairs[0], str):  # a bare (a, b) tuple
+        return [(pairs[0], pairs[1])]
+    return [(p[0], p[1]) for p in pairs]
+
+
+def _paired_one(per_seed, ns, a, b) -> list | None:
+    """Per-N paired adherence difference a-b, differenced within each seed
+    (common random numbers), with its own CI. None when either arm is absent
+    from any seed's sweep."""
     if not per_seed or not all(a in ds["arms"] and b in ds["arms"] for _, ds in per_seed):
         return None
     out = []
@@ -727,7 +752,23 @@ def _paired(per_seed, ns, pair) -> dict | None:
             s = summarize(diffs)
             out.append({"N": n, "diff_mean": s["mean"], "diff_ci": s["ci"],
                         "diff_std": s["std"], "n": s["n"], "values": s["values"]})
-    return {f"{a}_vs_{b}": out} if out else None
+    return out or None
+
+
+def _paired(per_seed, ns, pairs) -> dict | None:
+    """Per-N within-seed paired adherence differences for one or more arm pairs.
+
+    `pairs` accepts a single ``(a, b)`` tuple (back-compat) or a list of them.
+    Each pair whose both arms appear in every seed's sweep contributes a
+    ``"{a}_vs_{b}"`` entry; pairs with a missing arm are skipped. The
+    across-seed std of each entry (`diff_std`) is the noise term the
+    signal-to-noise report divides into (see `scoring.snr`)."""
+    result = {}
+    for a, b in _normalize_pairs(pairs):
+        series = _paired_one(per_seed, ns, a, b)
+        if series:
+            result[f"{a}_vs_{b}"] = series
+    return result or None
 
 
 def _agg_per_scenario(per_seed, arms) -> dict:
@@ -755,7 +796,7 @@ def _agg_per_scenario(per_seed, arms) -> dict:
     return out
 
 
-def _aggregate_seeds(per_seed, arms, ns, pair) -> dict:
+def _aggregate_seeds(per_seed, arms, ns, pairs) -> dict:
     base = dict(per_seed[0][1])
     cols = _columns_from_datasets(per_seed, arms, ns)
     base["arms"] = _aggregate_arm_points(arms, ns, cols, len(per_seed))
@@ -769,7 +810,7 @@ def _aggregate_seeds(per_seed, arms, ns, pair) -> dict:
     cells = [c for _, ds in per_seed for c in (ds.get("cells") or [])]
     base["cells"] = cells
     base["stats"] = stats_by_n(cells) if cells else None
-    paired = _paired(per_seed, ns, pair)
+    paired = _paired(per_seed, ns, pairs)
     if paired:
         base["paired"] = paired
     return base
@@ -808,13 +849,19 @@ def merge_seed_datasets(existing: dict, new_per_seed, arms, ns, pair) -> dict:
     base = dict(existing)
     base["arms"] = _aggregate_arm_points(arms, ns, cols, len(all_seeds))
 
-    # Paired: prior per-seed diffs + the new seeds' diffs.
-    a, b = pair
-    old_paired = (existing.get("paired") or {}).get(f"{a}_vs_{b}")
-    new_paired = (_paired(add, ns, pair) or {}).get(f"{a}_vs_{b}")
-    if old_paired is not None or new_paired is not None:
-        old_by_n = {e["N"]: e for e in (old_paired or [])}
-        new_by_n = {e["N"]: e for e in (new_paired or [])}
+    # Paired: prior per-seed diffs + the new seeds' diffs, for every contrast —
+    # the requested pairs plus any already present in `existing` (so an
+    # under-specified merge never silently drops a contrast). Arm names contain
+    # underscores, but "_vs_" is a safe delimiter for the existing keys.
+    requested = _normalize_pairs(pair)
+    keys = {f"{a}_vs_{b}": (a, b) for a, b in requested}
+    for k in (existing.get("paired") or {}):
+        keys.setdefault(k, tuple(k.split("_vs_")))
+    new_paired = _paired(add, ns, list(keys.values())) or {}
+    merged_paired = {}
+    for key in keys:
+        old_by_n = {e["N"]: e for e in (existing.get("paired") or {}).get(key, [])}
+        new_by_n = {e["N"]: e for e in new_paired.get(key, [])}
         merged = []
         for n in ns:
             vals = list(old_by_n.get(n, {}).get("values", [])) + list(new_by_n.get(n, {}).get("values", []))
@@ -823,7 +870,9 @@ def merge_seed_datasets(existing: dict, new_per_seed, arms, ns, pair) -> dict:
                 merged.append({"N": n, "diff_mean": s["mean"], "diff_ci": s["ci"],
                                "diff_std": s["std"], "n": s["n"], "values": s["values"]})
         if merged:
-            base["paired"] = {f"{a}_vs_{b}": merged}
+            merged_paired[key] = merged
+    if merged_paired:
+        base["paired"] = merged_paired
 
     base["per_scenario"] = _merge_per_scenario(existing.get("per_scenario", {}), add, arms, n_old)
     base["errors"] = list(existing.get("errors", [])) + [e for _, ds in add for e in ds["errors"]]
