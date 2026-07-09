@@ -22,6 +22,15 @@ Z95 = 1.96  # two-sided 95% normal critical value, matching metrics._T95's df>=3
 # pins which pair carries the confirmatory weight.
 CONFIRMATORY_PAIR = ("rac", "naive_rag")
 
+# The pre-registered H1 family (spec/analysis-plan-amendment-1.md): the
+# confirmatory test is rac-vs-naive_rag adherence at N=300, reported
+# UNcorrected; the secondary cells at N in {50, 150} of the same pair/outcome
+# are Holm-corrected; N=10 is descriptive and everything else is exploratory,
+# reported raw and labelled as such.
+CONFIRMATORY_OUTCOME = "adherent"
+CONFIRMATORY_N = 300
+SECONDARY_NS = (50, 150)
+
 # Join fields for pairing records across arms. `example_id` is the alias the
 # gitchameleon resolution records use for `scenario_id`; `seed` and `N` scope
 # crossover cells so a pair is always the same scenario under the same
@@ -226,6 +235,55 @@ def stats_by_n(
         n: paired_significance(by_n[n], outcome=outcome, pairs=pairs)
         for n in sorted(by_n)
     }
+
+
+def holm_adjust(pvalues: list[float]) -> list[float]:
+    """Holm-Bonferroni step-down adjusted p-values, returned in input order.
+
+    Controls the family-wise error rate across `m = len(pvalues)` tests with no
+    independence assumption. The k-th smallest raw p (k = 1..m) is scaled by
+    (m - k + 1); a running maximum keeps the adjusted sequence monotonic and
+    each value is capped at 1. `m <= 1` returns the inputs unchanged (nothing
+    to correct). Pure and deterministic.
+    """
+    m = len(pvalues)
+    if m <= 1:
+        return [min(1.0, p) for p in pvalues]
+    order = sorted(range(m), key=lambda i: pvalues[i])
+    adj = [0.0] * m
+    running = 0.0
+    for rank, idx in enumerate(order):
+        running = max(running, min(1.0, (m - rank) * pvalues[idx]))
+        adj[idx] = running
+    return adj
+
+
+def annotate_holm_family(stats_by_n_result: dict) -> None:
+    """Tag the pre-registered H1 family in a crossover `stats` block, in place.
+
+    For the confirmatory pair/outcome (rac vs naive_rag, adherent), the cells
+    at `SECONDARY_NS` get a Holm-adjusted `p_value_holm` (Holm across whichever
+    of {50, 150} are present) and `family = "secondary"`; the `CONFIRMATORY_N`
+    cell is tagged `family = "confirmatory"` and left UNcorrected — the single
+    pre-registered primary test. Every other cell is untouched (exploratory,
+    reported raw and labelled). See spec/analysis-plan-amendment-1.md.
+    """
+    key = f"{CONFIRMATORY_PAIR[0]}_vs_{CONFIRMATORY_PAIR[1]}"
+
+    def _mcnemar_at(n: int) -> dict | None:
+        block = stats_by_n_result.get(n)
+        if not block or block.get("outcome") != CONFIRMATORY_OUTCOME:
+            return None
+        return (block.get("pairs") or {}).get(key, {}).get("mcnemar")
+
+    secondary = [mc for mc in (_mcnemar_at(n) for n in SECONDARY_NS) if mc is not None]
+    if secondary:
+        for mc, adj in zip(secondary, holm_adjust([mc["p_value"] for mc in secondary])):
+            mc["p_value_holm"] = adj
+            mc["family"] = "secondary"
+    conf = _mcnemar_at(CONFIRMATORY_N)
+    if conf is not None:
+        conf["family"] = "confirmatory"
 
 
 def records_from_runs(runs: list[dict], *, outcome: str = "adherent") -> list[dict]:
