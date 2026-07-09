@@ -103,15 +103,29 @@ def _cost_table(run: dict) -> tuple[str, bool]:
     return "\n".join(rows), exact
 
 
-def _curve_cell(p: dict, field: str, nd=2) -> str:
-    """`mean` (single seed) or `mean ±half` (multi-seed CI)."""
+def _curve_incomplete(p: dict) -> bool:
+    """A curve cell has incomplete coverage when any of its scenarios failed —
+    a generic error OR a context-window-exceeded cell. `.get` keeps this
+    readable against datasets that predate error_count/CWE fields."""
+    return bool(p.get("error_count", 0) or p.get("context_window_exceeded_count", 0))
+
+
+def _curve_cell(p: dict, field: str, nd=2, flag_coverage=False) -> str:
+    """`mean` (single seed) or `mean ±half` (multi-seed CI). When
+    `flag_coverage`, an adherence cell whose scenarios didn't all complete
+    gets a trailing `*` — a partial-coverage rate (averaged over completed
+    cells only) must never read identically to a full one."""
     v = p.get(field)
     if v is None:
         return _fmt(None, nd)
     ci = p.get(f"{field}_ci")
     if ci and p.get("n_seeds", 1) > 1:
-        return f"{_fmt(v, nd)} ±{_fmt((ci[1] - ci[0]) / 2, nd)}"
-    return _fmt(v, nd)
+        body = f"{_fmt(v, nd)} ±{_fmt((ci[1] - ci[0]) / 2, nd)}"
+    else:
+        body = _fmt(v, nd)
+    if flag_coverage and _curve_incomplete(p):
+        body += "*"
+    return body
 
 
 def _bands(dataset: dict, field: str, arms=None):
@@ -131,13 +145,28 @@ def _bands(dataset: dict, field: str, arms=None):
 def _curve_table(dataset: dict, field: str, label: str, nd=2) -> str:
     arms = list(dataset["arms"])
     ns = dataset["ns"]
+    # Only the adherence curve is coverage-flagged: it is the rate that
+    # excludes failed cells, so a partial cell must be visibly marked.
+    flag = field == "adherence_rate"
     head = "| arm | " + " | ".join(f"N={n}" for n in ns) + " |"
     sep = "|---|" + "--:|" * len(ns)
     rows = [f"{label}", "", head, sep]
+    incomplete = False
     for arm in arms:
         pts = {p["N"]: p for p in dataset["arms"][arm]}
-        cells = " | ".join(_curve_cell(pts.get(n, {}), field, nd) for n in ns)
+        for n in ns:
+            if flag and _curve_incomplete(pts.get(n, {})):
+                incomplete = True
+        cells = " | ".join(
+            _curve_cell(pts.get(n, {}), field, nd, flag_coverage=flag) for n in ns)
         rows.append(f"| `{arm}` | {cells} |")
+    if incomplete:
+        rows.append(
+            "\n\\* partial coverage — some scenarios at this N errored or "
+            "exceeded the context window; the rate is over completed cells "
+            "only (error and context-window cells are excluded, like the "
+            "base-N table)."
+        )
     return "\n".join(rows)
 
 

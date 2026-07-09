@@ -793,11 +793,18 @@ def cmd_demo(args) -> int:
     n_cwe = sum(1 for e in all_errors if _is_context_exceeded(e))
     n_other = len(all_errors) - n_cwe
     if n_other:
+        from collections import Counter
+
+        kinds = Counter(e.get("kind") or "error" for e in all_errors
+                        if not _is_context_exceeded(e))
+        breakdown = ", ".join(f"{n}× {k}" for k, n in sorted(kinds.items()))
         print(
             f"\n! {n_other} cell(s) errored across the base-N table and/or the "
-            "crossover sweep — the adherence numbers above are averaged over "
-            f"completed cells only. See 'errors' in {report} and the crossover "
-            "dataset.",
+            f"crossover sweep ({breakdown}) — these are infrastructure/parse "
+            "failures (schema miss, gateway rejection, transport), NOT the model "
+            "answering wrongly, so they are excluded from adherence_rate exactly "
+            "like context-window cells; the numbers above are over completed "
+            f"cells only. See 'errors' in {report} and the crossover dataset.",
             file=sys.stderr,
         )
     if n_cwe:

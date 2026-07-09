@@ -111,26 +111,49 @@ def _metric_table(run):
     return table
 
 
-def _curve_cell(p, field):
-    """A curve table cell: `mean` (single seed) or `mean ±half` (multi-seed CI)."""
+def _curve_incomplete(p):
+    """A curve cell whose scenarios didn't all complete — a generic error OR a
+    context-window-exceeded cell. `.get` keeps old datasets readable."""
+    return bool(p.get("error_count", 0) or p.get("context_window_exceeded_count", 0))
+
+
+def _curve_cell(p, field, flag_coverage=False):
+    """A curve table cell: `mean` (single seed) or `mean ±half` (multi-seed CI).
+    A coverage-flagged adherence cell with incomplete coverage gets a `*`."""
     v = p.get(field)
     if v is None:
         return "n/a"
     ci = p.get(f"{field}_ci")
     if ci and p.get("n_seeds", 1) > 1:
-        return f"{_f(v)} ±{_f((ci[1] - ci[0]) / 2)}"
-    return _f(v)
+        body = f"{_f(v)} ±{_f((ci[1] - ci[0]) / 2)}"
+    else:
+        body = _f(v)
+    if flag_coverage and _curve_incomplete(p):
+        body += "*"
+    return body
 
 
 def _curve_table(dataset, field):
     arms, ns = dataset["arms"], dataset["ns"]
+    flag = field == "adherence_rate"
     head = "".join(f"<th>N={n}</th>" for n in ns)
     rows = [f"<table><thead><tr><th>arm</th>{head}</tr></thead><tbody>"]
+    incomplete = False
     for a in arms:
         pts = {p["N"]: p for p in arms[a]}
-        cells = "".join(f"<td>{_curve_cell(pts.get(n, {}), field)}</td>" for n in ns)
+        for n in ns:
+            if flag and _curve_incomplete(pts.get(n, {})):
+                incomplete = True
+        cells = "".join(
+            f"<td>{_curve_cell(pts.get(n, {}), field, flag_coverage=flag)}</td>"
+            for n in ns)
         rows.append(f"<tr><td><code>{_esc(a)}</code></td>{cells}</tr>")
-    return "".join(rows) + "</tbody></table>"
+    table = "".join(rows) + "</tbody></table>"
+    if incomplete:
+        table += ("<p class=note>* partial coverage — some scenarios at this N "
+                  "errored or exceeded the context window; the rate is over "
+                  "completed cells only.</p>")
+    return table
 
 
 def _bands(dataset, field, arms=None):
@@ -367,8 +390,9 @@ def render_main(run, dataset, cost_curve=None, *, live=False, paid_enabled=False
             ra_top, na_top = ra.get(top), na.get(top)
             if ra_top is None or na_top is None:
                 v = (f"At N={top}, no adherence rate is available for at least one arm — "
-                     "every cell hit the answering model's context window (see "
-                     "context_window_exceeded_count); the thesis is not evaluable at this N.")
+                     "every cell either hit the answering model's context window or "
+                     "failed (see context_window_exceeded_count / error_count); the "
+                     "thesis is not evaluable at this N.")
             elif na_top < ra_top - 1e-9:
                 v = f"rac holds adherence as the corpus grows where naive_rag decays (N={top}: rac {_f(ra_top)} vs naive_rag {_f(na_top)})."
             elif abs(na_top - ra_top) <= 1e-9:
