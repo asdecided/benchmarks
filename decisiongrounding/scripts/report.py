@@ -31,7 +31,7 @@ from scoring.charts import grouped_bar_chart, line_chart  # noqa: E402
 from scoring.cost import cost_by_arm, dollars  # noqa: E402
 from scoring.health import scenario_health  # noqa: E402
 from scoring.snr import signal_to_noise  # noqa: E402
-from scoring.stats import paired_significance  # noqa: E402
+from scoring.stats import SECONDARY_NS, paired_significance  # noqa: E402
 
 _ARM_DESC = {
     "context_dump": "pastes the entire corpus into the prompt (the no-retrieval ceiling)",
@@ -235,11 +235,20 @@ def _fmt_p(p: float) -> str:
     return "<0.0001" if p < 1e-4 else f"{p:.4f}"
 
 
+def _holm_cell(mc: dict) -> str:
+    """The family / Holm-adjusted-p cell for one McNemar result."""
+    if "p_value_holm" in mc:
+        return f"{_fmt_p(mc['p_value_holm'])} (Holm)"
+    if mc.get("family") == "confirmatory":
+        return "confirmatory (uncorr.)"
+    return "—"
+
+
 def _stats_pair_rows(pairs_block: dict) -> list[str]:
     """Markdown rows for one paired-significance block (per arm pair)."""
     rows = [
-        "| pair | n | b | c | McNemar p | risk diff [95% CI] | odds ratio [95% CI] |",
-        "|---|--:|--:|--:|--:|--:|--:|",
+        "| pair | n | b | c | McNemar p | Holm p / family | risk diff [95% CI] | odds ratio [95% CI] |",
+        "|---|--:|--:|--:|--:|--:|--:|--:|",
     ]
     for name, st in pairs_block.items():
         mc, rd, orr = st["mcnemar"], st["risk_difference"], st["odds_ratio"]
@@ -248,6 +257,7 @@ def _stats_pair_rows(pairs_block: dict) -> list[str]:
                   else f"{orr['or']:.2f} [{orr['ci'][0]:.2f}, {orr['ci'][1]:.2f}]")
         rows.append(
             f"| `{name}` | {st['n_pairs']} | {mc['b']} | {mc['c']} | {p_txt} | "
+            f"{_holm_cell(mc)} | "
             f"{rd['diff']:+.2f} [{rd['ci'][0]:+.2f}, {rd['ci'][1]:+.2f}] | {or_txt} |"
         )
     return rows
@@ -276,6 +286,12 @@ def _stats_section(run: dict, dataset: dict | None) -> list[str]:
         "and conditional odds ratios, per `spec/analysis-plan-amendment-1.md`. "
         "`b` = first arm adherent where the second is not; `c` = the reverse. "
         "Analysis only — these statistics never gate anything (ADR-066/ADR-097).",
+        "",
+        "**Multiple comparisons.** The confirmatory test is `rac`-vs-`naive_rag` "
+        "adherence at **N=300**, reported uncorrected. Its secondary cells at "
+        "**N∈{50,150}** are **Holm-corrected** (the `Holm p / family` column). "
+        "Every other pair and N is exploratory context, reported raw and "
+        "uncorrected (`—`).",
         "",
     ]
     return intro + parts
@@ -547,9 +563,24 @@ def _head_to_head(dataset: dict, run: dict) -> str:
     return "\n".join(lines)
 
 
+def _secondary_holm_line(dataset: dict) -> str | None:
+    """One-line summary of the Holm-corrected H1 secondary cells (N∈{50,150})."""
+    ds_stats = dataset.get("stats") or {}
+    bits = []
+    for n in SECONDARY_NS:
+        block = ds_stats.get(n) or ds_stats.get(str(n)) or {}
+        mc = (block.get("pairs") or {}).get("rac_vs_naive_rag", {}).get("mcnemar")
+        if mc and "p_value_holm" in mc:
+            bits.append(f"N={n}: Holm p={_fmt_p(mc['p_value_holm'])}")
+    if not bits:
+        return None
+    return "Secondary (Holm-corrected across N∈{50,150}): " + "; ".join(bits) + "."
+
+
 def _mcnemar_line(dataset: dict, top) -> str | None:
     """The pre-registered confirmatory sentence for rac vs naive_rag at the top
-    N, when the dataset carries per-cell stats."""
+    N, when the dataset carries per-cell stats — followed by the Holm-corrected
+    secondary summary when present."""
     ds_stats = dataset.get("stats") or {}
     block = ds_stats.get(top) or ds_stats.get(str(top)) or {}
     st = (block.get("pairs") or {}).get("rac_vs_naive_rag")
@@ -557,13 +588,16 @@ def _mcnemar_line(dataset: dict, top) -> str | None:
         return None
     mc = st["mcnemar"]
     if mc.get("degenerate"):
-        return (f"Pre-registered confirmatory test at N={top}: exact McNemar is "
-                "degenerate (the arms never disagreed on any paired cell) — "
-                "no discordant evidence either way.")
-    return (f"Pre-registered confirmatory test at N={top}: exact McNemar "
-            f"b={mc['b']}, c={mc['c']}, p={_fmt_p(mc['p_value'])}; paired risk "
-            f"difference {st['risk_difference']['diff']:+.2f} "
-            f"[{st['risk_difference']['ci'][0]:+.2f}, {st['risk_difference']['ci'][1]:+.2f}].")
+        line = (f"Pre-registered confirmatory test at N={top} (uncorrected): exact "
+                "McNemar is degenerate (the arms never disagreed on any paired "
+                "cell) — no discordant evidence either way.")
+    else:
+        line = (f"Pre-registered confirmatory test at N={top} (uncorrected): exact "
+                f"McNemar b={mc['b']}, c={mc['c']}, p={_fmt_p(mc['p_value'])}; paired "
+                f"risk difference {st['risk_difference']['diff']:+.2f} "
+                f"[{st['risk_difference']['ci'][0]:+.2f}, {st['risk_difference']['ci'][1]:+.2f}].")
+    secondary = _secondary_holm_line(dataset)
+    return f"{line}\n\n{secondary}" if secondary else line
 
 
 _PROSE_PIPELINE = """\
