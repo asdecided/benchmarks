@@ -28,7 +28,7 @@ from .base import (
     estimate_tokens,
 )
 from .embedding import Embedder, LocalDeterministicEmbedder, cosine, embed_chunked
-from .grounding_format import format_block
+from .grounding_format import format_block, split_sections
 
 
 @dataclass(frozen=True)
@@ -37,21 +37,6 @@ class _Chunk:
     artifact_type: str
     text: str
     vector: list[float]
-
-
-def _split_sections(text: str) -> list[str]:
-    """Split markdown into section chunks on `## ` headings (front matter kept)."""
-    parts: list[str] = []
-    current: list[str] = []
-    for line in text.splitlines():
-        if line.startswith("## ") and current:
-            parts.append("\n".join(current).strip())
-            current = [line]
-        else:
-            current.append(line)
-    if current:
-        parts.append("\n".join(current).strip())
-    return [p for p in parts if p]
 
 
 class NaiveRagProvider(Provider):
@@ -66,7 +51,7 @@ class NaiveRagProvider(Provider):
     def prepare(self, corpus: list[CorpusArtifact]) -> None:
         self._chunks = []
         for a in corpus:
-            for section in _split_sections(a.text):
+            for section in split_sections(a.text):
                 self._chunks.append(
                     _Chunk(
                         a.id,
