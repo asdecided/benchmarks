@@ -678,11 +678,6 @@ def cmd_demo(args) -> int:
                              "--resume replays cells from a crashed sweep's "
                              ".partial.jsonl; --augment adds whole seeds to a "
                              "finished crossover_dataset.json")
-        if batch:
-            _sweep_fp.close()
-            raise SystemExit("--resume does not support --batch yet; rerun "
-                             "without --batch (cached cells are skipped, so "
-                             "only the missing cells pay full price)")
         if resume_arg == "auto":
             # The sidecar just opened for THIS run is still empty at this
             # point; a crashed run's sidecar always has content. Filtering on
@@ -734,7 +729,7 @@ def cmd_demo(args) -> int:
             dataset = build_dataset_batched(
                 scenarios, arms=arms, ns=ns, seed=args.seed, embedder_spec=args.embedder,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=args.scenarios,
-                poll=args.poll, progress=_on_cell,
+                poll=args.poll, progress=_on_cell, resume=resume_cells,
             )
         else:
             dataset = build_dataset(

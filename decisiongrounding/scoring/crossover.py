@@ -374,6 +374,7 @@ def build_dataset_batched(
     scenarios_dir: str | None = None,
     poll: int = 20,
     progress: "Callable[[dict], None] | None" = None,
+    resume: "dict[tuple[int, int, str, str], dict] | None" = None,
 ) -> dict:
     """Same adherence-vs-N curve as build_dataset, but the held-constant answering
     calls go through the Message Batches API (≈50% of standard price, and it runs
@@ -381,6 +382,10 @@ def build_dataset_batched(
     embeddings) still happens locally up front; only the answering is batched.
 
     Pinned to the claude model — the offline stub has nothing to batch.
+
+    `resume`: same cell cache and replay policy as `build_dataset` — a cached
+    successful or context-window-exceeded cell skips grounding assembly AND is
+    never submitted to the batch; only the missing/errored cells pay.
     """
     use_real = pool is not None
     _check_pool(pool, ns, scenarios, use_real)
@@ -394,7 +399,18 @@ def build_dataset_batched(
         for arm in arms:
             for sc in discriminating:
                 cell = {"cid": f"c{len(cells)}", "n": n, "arm": arm, "sc": sc,
-                        "tok": 0, "gov": None, "req": None, "error": None, "kind": None}
+                        "tok": 0, "gov": None, "req": None, "error": None, "kind": None,
+                        "cached": None}
+                hit = resume.get((seed, n, arm, sc.scenario_id)) if resume else None
+                if hit is not None and (hit.get("error") is None
+                                        or hit.get("kind") == "context_window_exceeded"):
+                    # Replayed verbatim in the aggregation pass; req stays None
+                    # so the cell is never assembled or submitted.
+                    cell["cached"] = hit
+                    cell["error"] = hit.get("error")
+                    cell["kind"] = hit.get("kind")
+                    cells.append(cell)
+                    continue
                 try:
                     provider = build_provider(arm, model, embedder_spec)
                     provider.prepare(_corpus_for(n, sc, ns, seed, pool, use_real))
@@ -416,10 +432,10 @@ def build_dataset_batched(
                 cells.append(cell)
 
     # Submit one batch for the cells that assembled; poll until it ends.
-    client = model._ensure_client()
     requests = [{"custom_id": c["cid"], "params": c["req"]} for c in cells if c["req"] is not None]
     answers: dict[str, tuple] = {}  # cid -> (ProposedChange|None, usage|None, error|None)
     if requests:
+        client = model._ensure_client()
         batch = client.messages.batches.create(requests=requests)
         while client.messages.batches.retrieve(batch.id).processing_status != "ended":
             time.sleep(max(5, poll))
@@ -454,9 +470,21 @@ def build_dataset_batched(
                 cell = next(it)
                 idx += 1
                 is_cwe = cell.get("kind") == "context_window_exceeded"
+                hit = cell.get("cached")
                 pc, usage, err = answers.get(cell["cid"], (None, None, cell["error"]))
                 cell_error = err or cell["error"]
-                if is_cwe:
+                if hit is not None:
+                    adherent = hit["adherent"]
+                    stale = hit["stale_decision_followed"]
+                    gov_retrieved = hit["governing_decision_retrieved"]
+                    tok_est = hit["token_estimate"]
+                    usage = hit.get("usage")
+                    cell_error = hit.get("error")
+                    if is_cwe:
+                        cwe_count += 1
+                        errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                                       "error": cell_error, "kind": "context_window_exceeded"})
+                elif is_cwe:
                     cwe_count += 1
                     errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
                                    "error": cell_error, "kind": "context_window_exceeded"})
@@ -493,12 +521,15 @@ def build_dataset_batched(
                     cell_records.append({"seed": seed, "N": n, "arm": arm,
                                          "scenario_id": sc.scenario_id, "adherent": adherent})
                 if progress is not None:
-                    progress({"record": "cell", "idx": idx, "total": total_cells, "N": n,
-                              "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
-                              "stale_decision_followed": stale,
-                              "governing_decision_retrieved": gov_retrieved,
-                              "token_estimate": tok_est, "usage": usage, "error": cell_error,
-                              "kind": cell.get("kind")})
+                    rec = {"record": "cell", "idx": idx, "total": total_cells, "N": n,
+                           "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
+                           "stale_decision_followed": stale,
+                           "governing_decision_retrieved": gov_retrieved,
+                           "token_estimate": tok_est, "usage": usage, "error": cell_error,
+                           "kind": cell.get("kind")}
+                    if hit is not None:
+                        rec["cached"] = True
+                    progress(rec)
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
                                       token_estimates, usages, cwe_count=cwe_count))
     return _envelope(discriminating, use_real, pool, seed, ns, model.version,
@@ -580,7 +611,7 @@ def run_seeds(
             ds = build_dataset_batched(
                 scenarios, arms=arms, ns=ns, seed=s, embedder_spec=embedder_spec,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=scenarios_dir,
-                poll=poll, progress=_tag_seed(progress, s))
+                poll=poll, progress=_tag_seed(progress, s), resume=resume)
         else:
             ds = build_dataset(
                 scenarios, arms=arms, ns=ns, seed=s,
