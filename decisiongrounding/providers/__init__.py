@@ -10,9 +10,11 @@ from __future__ import annotations
 from .answering import (
     AnsweringModel,
     ClaudeAnsweringModel,
+    GatewayHTTPError,
     OpenAICompatAnsweringModel,
     SchemaMissError,
     ScriptedAnsweringModel,
+    error_kind,
 )
 from .base import (
     Action,

@@ -295,6 +295,52 @@ class SchemaMissError(RuntimeError):
     """
 
 
+class GatewayHTTPError(RuntimeError):
+    """An HTTP-level rejection from the OpenAI-compatible gateway (litellm) —
+    a policy/config/availability failure of the infrastructure, not of the
+    model's answer. Typed so error accounting can classify it at raise time
+    (see `error_kind`) instead of string-matching. Subclasses RuntimeError so
+    existing `except RuntimeError` call sites keep working unchanged.
+    """
+
+    def __init__(self, message: str, status: "int | None" = None) -> None:
+        super().__init__(message)
+        self.status = status
+
+
+def error_kind(exc: Exception) -> str:
+    """Classify a cell failure by exception TYPE, at the catch site.
+
+    Returns one of: "context_window_exceeded" (structural ceiling — the only
+    kind that is replayed rather than re-run on --resume), "schema"
+    (structured output didn't satisfy the ProposedChange contract), "gateway"
+    (the gateway rejected the request at the HTTP level), "transport"
+    (network/API-level failure reaching a backend), "error" (anything else).
+    Purely type-based — the codebase deliberately avoids string-matching
+    error text (see the `_CONTEXT_LENGTH_SIGNAL` note); third-party
+    exceptions (anthropic SDK, urllib) are classified here because they
+    cannot carry our kind at raise time.
+    """
+    if isinstance(exc, ContextWindowExceededError):
+        return "context_window_exceeded"
+    if isinstance(exc, SchemaMissError):
+        return "schema"
+    if isinstance(exc, GatewayHTTPError):
+        return "gateway"
+    try:
+        import anthropic
+
+        if isinstance(exc, anthropic.APIError):
+            return "transport"
+    except ImportError:  # offline install — no anthropic exceptions to see
+        pass
+    import urllib.error
+
+    if isinstance(exc, (urllib.error.URLError, TimeoutError, ConnectionError)):
+        return "transport"
+    return "error"
+
+
 def _proposed_change_from_json_text(text: str, backend: str) -> ProposedChange:
     """Decode the structured-output JSON text into a ProposedChange.
 
@@ -672,8 +718,11 @@ class OpenAICompatAnsweringModel(AnsweringModel):
                 return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")[:500]
-            raise RuntimeError(
-                f"litellm gateway returned HTTP {exc.code}: {detail}"
+            # Message text is load-bearing: _reraise_if_context_length and
+            # existing tests match on it. Only the type (and .status) is new.
+            raise GatewayHTTPError(
+                f"litellm gateway returned HTTP {exc.code}: {detail}",
+                status=exc.code,
             ) from None
 
     def respond(
