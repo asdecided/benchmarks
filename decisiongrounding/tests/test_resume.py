@@ -202,11 +202,72 @@ def test_demo_sidecar_records_are_seed_tagged(tmp_path):
     assert cells and all(r["seed"] == 3 for r in cells)
 
 
-def test_resume_rejects_augment_and_batch(tmp_path):
+def test_resume_rejects_augment(tmp_path):
     with pytest.raises(SystemExit, match="mutually exclusive"):
         main(_demo_args(tmp_path, "--resume", "x.jsonl", "--augment", "y.json"))
-    with pytest.raises(SystemExit, match="--batch"):
-        main(_demo_args(tmp_path, "--resume", "x.jsonl", "--batch"))
+
+
+def test_batched_resume_skips_submission(monkeypatch):
+    """A cached cell is never assembled or submitted to the batch — only the
+    missing cells pay."""
+    import types
+
+    from providers.answering import ClaudeAnsweringModel
+    from scoring.crossover import build_dataset_batched
+    from tests.test_batch import _FakeBatches
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    fake_batches = _FakeBatches()
+    fake = types.SimpleNamespace(messages=types.SimpleNamespace(batches=fake_batches))
+    monkeypatch.setattr(ClaudeAnsweringModel, "_ensure_client", lambda self: fake)
+
+    scenarios = load_scenarios(_SCENARIOS)
+    arms = ("context_dump", "no_grounding")
+    records: list[dict] = []
+    ds1 = build_dataset_batched(scenarios, arms=arms, ns=(3, 6), seed=0,
+                                embedder_spec="local-hash", poll=0,
+                                progress=records.append)
+    n_cells = len(records)
+    submitted_fresh = len(fake_batches._requests)
+    assert submitted_fresh == n_cells
+
+    # Resume with every cell cached except one — exactly one request submitted.
+    resume = _resume_from(records)
+    missing = sorted(resume)[0]
+    del resume[missing]
+    replayed: list[dict] = []
+    ds2 = build_dataset_batched(scenarios, arms=arms, ns=(3, 6), seed=0,
+                                embedder_spec="local-hash", poll=0,
+                                progress=replayed.append, resume=resume)
+    assert len(fake_batches._requests) == 1
+    assert sum(1 for r in replayed if r.get("cached")) == n_cells - 1
+    assert json.dumps(ds1, sort_keys=True) == json.dumps(ds2, sort_keys=True)
+
+
+def test_batched_resume_fully_cached_never_touches_the_client(monkeypatch):
+    import types
+
+    from providers.answering import ClaudeAnsweringModel
+    from scoring.crossover import build_dataset_batched
+    from tests.test_batch import _FakeBatches
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    fake = types.SimpleNamespace(messages=types.SimpleNamespace(batches=_FakeBatches()))
+    monkeypatch.setattr(ClaudeAnsweringModel, "_ensure_client", lambda self: fake)
+    scenarios = load_scenarios(_SCENARIOS)
+    records: list[dict] = []
+    ds1 = build_dataset_batched(scenarios, arms=("context_dump",), ns=(3,), seed=0,
+                                embedder_spec="local-hash", poll=0,
+                                progress=records.append)
+
+    def no_client(self):
+        raise AssertionError("fully-cached resume must not build a client")
+
+    monkeypatch.setattr(ClaudeAnsweringModel, "_ensure_client", no_client)
+    ds2 = build_dataset_batched(scenarios, arms=("context_dump",), ns=(3,), seed=0,
+                                embedder_spec="local-hash", poll=0,
+                                resume=_resume_from(records))
+    assert json.dumps(ds1, sort_keys=True) == json.dumps(ds2, sort_keys=True)
 
 
 def test_resume_auto_with_no_sidecar_fails_clearly(tmp_path):
