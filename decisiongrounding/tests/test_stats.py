@@ -8,8 +8,10 @@ from pathlib import Path
 import pytest
 
 from scoring.stats import (
+    annotate_holm_family,
     binom_two_sided_p,
     collect_pairs,
+    holm_adjust,
     mcnemar_exact,
     pair_stats,
     paired_odds_ratio,
@@ -88,6 +90,53 @@ def test_risk_difference_ci_is_clamped_to_parameter_space():
     # symmetric: lower bound clips to -1.
     lo = risk_difference(0, 9, 10)
     assert lo["ci"][0] == -1.0 and lo["ci"][1] <= 1.0
+
+
+# --- Holm correction ----------------------------------------------------------
+
+def test_holm_adjust_known_vectors():
+    assert holm_adjust([0.01, 0.04]) == pytest.approx([0.02, 0.04])
+    assert holm_adjust([]) == []
+    assert holm_adjust([0.03]) == pytest.approx([0.03])          # m=1 identity
+    assert holm_adjust([0.6, 0.7]) == pytest.approx([1.0, 1.0])  # capped at 1
+    # order preserved; monotonic when sorted (the larger raw p can't adjust below
+    # the smaller's adjusted value).
+    adj = holm_adjust([0.04, 0.01])
+    assert adj == pytest.approx([0.04, 0.02])
+
+
+def _stats_block(pvals_by_n, pair="rac_vs_naive_rag", outcome="adherent"):
+    return {n: {"outcome": outcome,
+                "pairs": {pair: {"mcnemar": {"p_value": p}}}}
+            for n, p in pvals_by_n.items()}
+
+
+def test_annotate_holm_family_corrects_secondary_leaves_confirmatory():
+    stats = _stats_block({10: 0.9, 50: 0.01, 150: 0.04, 300: 0.001})
+    annotate_holm_family(stats)
+    mc = lambda n: stats[n]["pairs"]["rac_vs_naive_rag"]["mcnemar"]
+    # secondary {50,150} Holm-corrected across the family of 2
+    assert mc(50)["p_value_holm"] == pytest.approx(0.02) and mc(50)["family"] == "secondary"
+    assert mc(150)["p_value_holm"] == pytest.approx(0.04) and mc(150)["family"] == "secondary"
+    # confirmatory N=300 tagged but UNcorrected (no holm key)
+    assert mc(300)["family"] == "confirmatory" and "p_value_holm" not in mc(300)
+    # N=10 (descriptive) untouched
+    assert "family" not in mc(10) and "p_value_holm" not in mc(10)
+
+
+def test_annotate_holm_family_ignores_non_confirmatory_pairs():
+    stats = _stats_block({50: 0.01, 150: 0.04}, pair="context_dump_vs_no_grounding")
+    annotate_holm_family(stats)
+    mc = stats[50]["pairs"]["context_dump_vs_no_grounding"]["mcnemar"]
+    assert "family" not in mc and "p_value_holm" not in mc
+
+
+def test_annotate_holm_family_partial_grid_is_identity():
+    # only N=50 present -> family of 1 -> Holm is the identity
+    stats = _stats_block({50: 0.03})
+    annotate_holm_family(stats)
+    mc = stats[50]["pairs"]["rac_vs_naive_rag"]["mcnemar"]
+    assert mc["p_value_holm"] == pytest.approx(0.03) and mc["family"] == "secondary"
 
 
 def test_paired_odds_ratio_zero_cell_is_degenerate_not_fudged():
@@ -192,11 +241,25 @@ def test_paired_significance_validates_against_schema():
         import jsonschema  # type: ignore
     except ImportError:
         pytest.skip("jsonschema not installed")
+    schema = json.loads(_STATS_SCHEMA.read_text())
     out = paired_significance(_designed_records())
-    jsonschema.validate(out, json.loads(_STATS_SCHEMA.read_text()))
+    jsonschema.validate(out, schema)
     report = json.loads(_HEADLINE.read_text())
     real = paired_significance(records_from_runs(report["runs"]))
-    jsonschema.validate(real, json.loads(_STATS_SCHEMA.read_text()))
+    jsonschema.validate(real, schema)
+    # a Holm-annotated crossover block (p_value_holm + family) still validates
+    cells = []
+    for n in (50, 150, 300):
+        for i in range(6):
+            cells.append({"seed": 0, "N": n, "arm": "rac",
+                          "scenario_id": f"s{i}", "adherent": True})
+            cells.append({"seed": 0, "N": n, "arm": "naive_rag",
+                          "scenario_id": f"s{i}", "adherent": i < 2})
+    annotated = stats_by_n(cells)
+    annotate_holm_family(annotated)
+    assert "p_value_holm" in annotated[50]["pairs"]["rac_vs_naive_rag"]["mcnemar"]
+    for block in annotated.values():
+        jsonschema.validate(block, schema)
 
 
 # --- crossover integration ----------------------------------------------------

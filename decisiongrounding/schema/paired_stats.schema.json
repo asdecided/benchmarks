@@ -54,6 +54,8 @@
             "n_discordant": { "type": "integer", "minimum": 0 },
             "statistic": { "type": "integer", "minimum": 0 },
             "p_value": { "type": "number", "minimum": 0, "maximum": 1 },
+            "p_value_holm": { "type": "number", "minimum": 0, "maximum": 1 },
+            "family": { "enum": ["confirmatory", "secondary", "exploratory"] },
             "method": { "const": "mcnemar-exact-binomial" },
             "degenerate": { "const": true }
           }

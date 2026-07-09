@@ -29,7 +29,7 @@ from providers.base import SCAFFOLD, ContextWindowExceededError, CorpusArtifact,
 from scenarios.loader import Scenario
 from scoring.metrics import summarize
 from scoring.scorer import score
-from scoring.stats import stats_by_n
+from scoring.stats import annotate_holm_family, stats_by_n
 from util.io import atomic_write_text
 
 _TOKEN = re.compile(r"[a-z0-9]+")
@@ -176,6 +176,17 @@ def _point(n, adhered, total, retrieved_flags, token_estimates, usages,
     return point
 
 
+def finalize_crossover_stats(cells) -> dict | None:
+    """The crossover `stats` block: per-N paired significance plus the
+    pre-registered Holm annotation on the H1 family (see
+    `scoring.stats.annotate_holm_family`)."""
+    if not cells:
+        return None
+    stats = stats_by_n(cells)
+    annotate_holm_family(stats)
+    return stats
+
+
 def _envelope(discriminating, use_real, pool, seed, ns, model_version, embedder_spec,
               pool_dir, scenarios_dir, arms, points, per_scenario, errors, cells):
     """The dataset dict both builders return."""
@@ -208,7 +219,7 @@ def _envelope(discriminating, use_real, pool, seed, ns, model_version, embedder_
         # paired analysis (spec/analysis-plan-amendment-1.md) runs on. The
         # aggregated fractions above are for display; these are for inference.
         "cells": cells,
-        "stats": stats_by_n(cells) if cells else None,
+        "stats": finalize_crossover_stats(cells),
     }
 
 
@@ -809,7 +820,7 @@ def _aggregate_seeds(per_seed, arms, ns, pairs) -> dict:
     # cross-seed statistics is scenario x seed (common random numbers).
     cells = [c for _, ds in per_seed for c in (ds.get("cells") or [])]
     base["cells"] = cells
-    base["stats"] = stats_by_n(cells) if cells else None
+    base["stats"] = finalize_crossover_stats(cells)
     paired = _paired(per_seed, ns, pairs)
     if paired:
         base["paired"] = paired
@@ -885,7 +896,7 @@ def merge_seed_datasets(existing: dict, new_per_seed, arms, ns, pair) -> dict:
     if old_cells is not None:
         cells = list(old_cells) + [c for _, ds in add for c in (ds.get("cells") or [])]
         base["cells"] = cells
-        base["stats"] = stats_by_n(cells) if cells else None
+        base["stats"] = finalize_crossover_stats(cells)
     else:
         base["cells"] = None
         base["stats"] = None
