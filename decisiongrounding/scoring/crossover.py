@@ -15,10 +15,13 @@ Real curves require real/public-derived corpora — see CONTRIBUTING.md.
 
 from __future__ import annotations
 
+import itertools
 import json
 import random
 import re
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Callable
 
@@ -221,6 +224,38 @@ def _check_pool(pool, ns, scenarios, use_real):
         )
 
 
+def _run_cell(n, arm, sc, ns, seed, pool, use_real, embedder_spec, model) -> dict:
+    """Compute ONE crossover cell's outcome. A pure function of its inputs — the
+    corpus is deterministic per (seed, scenario, N) and the answering model has
+    no cross-cell state — so it can run in any order or thread and the assembled
+    dataset is byte-identical to a sequential run. Never raises: a
+    context-window hit or any other failure is returned as a tagged outcome
+    (mirrors the sequential try/except)."""
+    corpus = _corpus_for(n, sc, ns, seed, pool, use_real)
+    try:
+        sc_score, gov_retrieved, tok_est, usage = _run_arm_on_corpus(
+            arm, corpus, sc, model, embedder_spec
+        )
+        return {"adherent": sc_score.adherent, "stale": sc_score.stale_decision_followed,
+                "gov_retrieved": gov_retrieved, "tok_est": tok_est, "usage": usage,
+                "error": None, "kind": None}
+    except ContextWindowExceededError as exc:
+        return {"adherent": False, "stale": False, "gov_retrieved": None,
+                "tok_est": exc.token_estimate, "usage": None,
+                "error": repr(exc), "kind": "context_window_exceeded"}
+    except Exception as exc:  # noqa: BLE001 - one cell must not lose the curve
+        return {"adherent": False, "stale": False, "gov_retrieved": None,
+                "tok_est": 0, "usage": None, "error": repr(exc), "kind": error_kind(exc)}
+
+
+def _outcome_from_hit(hit: dict) -> dict:
+    """A resume cache hit reshaped into the same outcome dict `_run_cell` yields."""
+    return {"adherent": hit["adherent"], "stale": hit["stale_decision_followed"],
+            "gov_retrieved": hit["governing_decision_retrieved"],
+            "tok_est": hit["token_estimate"], "usage": hit.get("usage"),
+            "error": hit.get("error"), "kind": hit.get("kind"), "cached": True}
+
+
 def build_dataset(
     scenarios: list[Scenario],
     arms: tuple[str, ...] = ("context_dump", "naive_rag"),
@@ -233,6 +268,8 @@ def build_dataset(
     scenarios_dir: str | None = None,
     progress: "Callable[[dict], None] | None" = None,
     resume: "dict[tuple[int, int, str, str], dict] | None" = None,
+    concurrency: int = 1,
+    rate_limiter=None,
 ) -> dict:
     """Compute per-arm adherence at each N, averaged over discriminating scenarios.
 
@@ -268,92 +305,118 @@ def build_dataset(
     answer, so they are excluded from `adherence_rate` and from the paired
     `cells` record, and surfaced instead via each point's `error_count` /
     `context_window_exceeded_count` and the envelope's `errors` list.
+
+    `concurrency`: number of cells to run in flight (a thread pool — the work is
+    I/O-bound on the answering/embedding APIs). Cell outcomes are computed in
+    parallel but the dataset is assembled in deterministic grid order, so the
+    result is **byte-identical** to a sequential run for any `concurrency`.
+    `rate_limiter`: optional `util.ratelimit.RateLimiter` acquired once per cell
+    so the pool self-throttles under a hosted API's requests-per-minute cap.
     """
     use_real = pool is not None
     _check_pool(pool, ns, scenarios, use_real)
     discriminating = [s for s in scenarios if s.scenario_type in DISCRIMINATING]
-    # One answering model instance reused across the sweep (lazy client for real).
+    # One answering model instance for its version string (workers use their own
+    # thread-local models so the mutable `last_usage` never races across cells).
     answering_model = make_answering_model(answering_model_name, seed)
+    order = [(n, arm, sc) for n in ns for arm in arms for sc in discriminating]
+    total_cells = len(order)
+
+    # Split resumed cache hits (replayed) from the cells that must run. Only
+    # successes and context-window hits replay — a generic error is re-run.
+    results: dict[tuple[int, str, str], dict] = {}
+    to_run: list = []
+    for n, arm, sc in order:
+        hit = resume.get((seed, n, arm, sc.scenario_id)) if resume else None
+        if hit is not None and (
+            hit.get("error") is None or hit.get("kind") == "context_window_exceeded"
+        ):
+            results[(n, arm, sc.scenario_id)] = _outcome_from_hit(hit)
+        else:
+            to_run.append((n, arm, sc))
+
+    # Phase 1 — compute cell outcomes (optionally concurrent). Progress streams
+    # live in completion order for a durable, crash-resilient sidecar; the
+    # dataset itself is assembled deterministically in Phase 2, so it is
+    # byte-identical regardless of concurrency. Progress `idx` is a thread-safe
+    # completion counter; the sidecar writer serialises the actual write.
+    _idx = itertools.count(1)
+
+    def _emit(n, arm, sc, outcome):
+        if progress is None:
+            return
+        rec = {"record": "cell", "idx": next(_idx), "total": total_cells, "N": n,
+               "arm": arm, "scenario_id": sc.scenario_id, "adherent": outcome["adherent"],
+               "stale_decision_followed": outcome["stale"],
+               "governing_decision_retrieved": outcome["gov_retrieved"],
+               "token_estimate": outcome["tok_est"], "usage": outcome["usage"],
+               "error": outcome["error"], "kind": outcome["kind"]}
+        if outcome.get("cached"):
+            rec["cached"] = True
+        progress(rec)
+
+    # Replayed cache hits first, so a resumed run's new sidecar is self-contained.
+    for n, arm, sc in order:
+        if (n, arm, sc.scenario_id) in results:
+            _emit(n, arm, sc, results[(n, arm, sc.scenario_id)])
+
+    _tls = threading.local()
+
+    def _model():
+        m = getattr(_tls, "model", None)
+        if m is None:
+            m = make_answering_model(answering_model_name, seed)
+            _tls.model = m
+        return m
+
+    def _work(cell):
+        n, arm, sc = cell
+        if rate_limiter is not None:
+            rate_limiter.acquire()
+        return cell, _run_cell(n, arm, sc, ns, seed, pool, use_real, embedder_spec, _model())
+
+    if concurrency and concurrency > 1 and to_run:
+        with ThreadPoolExecutor(max_workers=concurrency) as pool_ex:
+            for fut in as_completed([pool_ex.submit(_work, c) for c in to_run]):
+                (n, arm, sc), outcome = fut.result()
+                results[(n, arm, sc.scenario_id)] = outcome
+                _emit(n, arm, sc, outcome)
+    else:
+        for cell in to_run:
+            (n, arm, sc), outcome = _work(cell)
+            results[(n, arm, sc.scenario_id)] = outcome
+            _emit(n, arm, sc, outcome)
+
+    # Phase 2 — deterministic assembly in grid order (byte-identical to the old
+    # sequential loop; only outcome COMPUTATION moved to the concurrent phase).
     points: dict[str, list[dict]] = {arm: [] for arm in arms}
     per_scenario: dict[str, dict[str, list[dict]]] = {
         arm: {s.scenario_id: [] for s in discriminating} for arm in arms
     }
     errors: list[dict] = []
     cell_records: list[dict] = []
-    total_cells = len(ns) * len(arms) * len(discriminating)
-    idx = 0
     for n in ns:
         for arm in arms:
-            adhered = 0
-            cwe_count = 0
+            adhered = cwe_count = error_count = 0
             retrieved_flags: list = []
             token_estimates: list[int] = []
             usages: list[dict] = []
-            error_count = 0
             for sc in discriminating:
-                idx += 1
-                cell_error = None
-                cell_kind = None
-                hit = resume.get((seed, n, arm, sc.scenario_id)) if resume else None
-                # Replay only completed cells: successes and context-window
-                # hits (deterministic — re-running reaches the same preflight
-                # failure). A cell that died with any other error is re-run.
-                cached = hit is not None and (
-                    hit.get("error") is None
-                    or hit.get("kind") == "context_window_exceeded"
-                )
-                if cached:
-                    adherent = hit["adherent"]
-                    stale = hit["stale_decision_followed"]
-                    gov_retrieved = hit["governing_decision_retrieved"]
-                    tok_est = hit["token_estimate"]
-                    usage = hit.get("usage")
-                    cell_error = hit.get("error")
-                    cell_kind = hit.get("kind")
-                    if cell_kind == "context_window_exceeded":
-                        cwe_count += 1
-                        errors.append({
-                            "arm": arm, "scenario_id": sc.scenario_id, "N": n,
-                            "error": cell_error, "kind": cell_kind,
-                        })
-                else:
-                    corpus = _corpus_for(n, sc, ns, seed, pool, use_real)
-                    try:
-                        sc_score, gov_retrieved, tok_est, usage = _run_arm_on_corpus(
-                            arm, corpus, sc, answering_model, embedder_spec
-                        )
-                        adherent = sc_score.adherent
-                        stale = sc_score.stale_decision_followed
-                    except ContextWindowExceededError as exc:
-                        cell_error = repr(exc)
-                        cell_kind = "context_window_exceeded"
-                        cwe_count += 1
-                        errors.append({
-                            "arm": arm, "scenario_id": sc.scenario_id, "N": n,
-                            "error": cell_error, "kind": cell_kind,
-                        })
-                        adherent = stale = False
-                        gov_retrieved = None
-                        tok_est = exc.token_estimate
-                        usage = None
-                    except Exception as exc:  # noqa: BLE001 - one cell must not lose the curve
-                        cell_error = repr(exc)
-                        cell_kind = error_kind(exc)
-                        error_count += 1
-                        errors.append(
-                            {"arm": arm, "scenario_id": sc.scenario_id, "N": n,
-                             "error": cell_error, "kind": cell_kind}
-                        )
-                        adherent = stale = False
-                        gov_retrieved = None
-                        tok_est = 0
-                        usage = None
-                # Only a genuinely answered cell (cell_kind is None) contributes
-                # an adherence outcome. Both context-window and generic-error
-                # cells never produced an answer, so they are excluded from the
-                # numerator AND from the paired-statistics record below —
-                # counting an infrastructure failure as "answered and wrong"
-                # would misreport it as a behavioural result (see `_point`).
+                o = results[(n, arm, sc.scenario_id)]
+                adherent, stale = o["adherent"], o["stale"]
+                gov_retrieved, tok_est, usage = o["gov_retrieved"], o["tok_est"], o["usage"]
+                cell_error, cell_kind = o["error"], o["kind"]
+                if cell_kind == "context_window_exceeded":
+                    cwe_count += 1
+                    errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                                   "error": cell_error, "kind": cell_kind})
+                elif cell_kind is not None:
+                    error_count += 1
+                    errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                                   "error": cell_error, "kind": cell_kind})
+                # Only a genuinely answered cell (cell_kind is None) contributes an
+                # adherence outcome and a paired-statistics record; failed cells
+                # are excluded (see `_point`).
                 if cell_kind is None:
                     adhered += 1 if adherent else 0
                 retrieved_flags.append(gov_retrieved)
@@ -367,16 +430,6 @@ def build_dataset(
                 if cell_kind is None:
                     cell_records.append({"seed": seed, "N": n, "arm": arm,
                                          "scenario_id": sc.scenario_id, "adherent": adherent})
-                if progress is not None:
-                    rec = {"record": "cell", "idx": idx, "total": total_cells, "N": n,
-                           "arm": arm, "scenario_id": sc.scenario_id, "adherent": adherent,
-                           "stale_decision_followed": stale,
-                           "governing_decision_retrieved": gov_retrieved,
-                           "token_estimate": tok_est, "usage": usage, "error": cell_error,
-                           "kind": cell_kind}
-                    if cached:
-                        rec["cached"] = True
-                    progress(rec)
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
                                       token_estimates, usages, cwe_count=cwe_count,
                                       error_count=error_count))
@@ -621,6 +674,8 @@ def build_dataset_multiseed(
     pairs: "list[tuple[str, str]] | None" = None,
     progress: "Callable[[dict], None] | None" = None,
     resume: "dict[tuple[int, int, str, str], dict] | None" = None,
+    concurrency: int = 1,
+    rate_limiter=None,
 ) -> dict:
     """Run the crossover over several seeds and aggregate per (arm, N) into
     mean +/- a t-based 95% CI. The plain fields stay the mean (backward
@@ -642,7 +697,8 @@ def build_dataset_multiseed(
         scenarios, arms, ns, uniq,
         answering_model_name=answering_model_name, embedder_spec=embedder_spec,
         pool=pool, pool_dir=pool_dir, scenarios_dir=scenarios_dir,
-        batched=batched, poll=poll, progress=progress, resume=resume)
+        batched=batched, poll=poll, progress=progress, resume=resume,
+        concurrency=concurrency, rate_limiter=rate_limiter)
     return _aggregate_seeds(per_seed, list(arms), list(ns), resolved)
 
 
@@ -651,9 +707,12 @@ def run_seeds(
     answering_model_name: str = "offline-stub", embedder_spec: str = "local-hash",
     pool=None, pool_dir=None, scenarios_dir=None,
     batched: bool = False, poll: int = 20, progress=None, resume=None,
+    concurrency: int = 1, rate_limiter=None,
 ) -> list[tuple[int, dict]]:
     """Build one single-seed crossover dataset per seed (seed-tagged progress).
-    The per-seed datasets feed `_aggregate_seeds` / `merge_seed_datasets`."""
+    The per-seed datasets feed `_aggregate_seeds` / `merge_seed_datasets`.
+    `concurrency`/`rate_limiter` thread into the synchronous per-seed builder
+    (the batched path parallelises server-side via the Batch API)."""
     out: list[tuple[int, dict]] = []
     for s in seeds:
         if batched:
@@ -666,7 +725,8 @@ def run_seeds(
                 scenarios, arms=arms, ns=ns, seed=s,
                 answering_model_name=answering_model_name, embedder_spec=embedder_spec,
                 pool=pool, pool_dir=pool_dir, scenarios_dir=scenarios_dir,
-                progress=_tag_seed(progress, s), resume=resume)
+                progress=_tag_seed(progress, s), resume=resume,
+                concurrency=concurrency, rate_limiter=rate_limiter)
         out.append((int(s), ds))
     return out
 
