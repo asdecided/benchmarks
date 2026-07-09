@@ -32,8 +32,10 @@
       "enum": [
         "context_dump",
         "naive_rag",
+        "naive_rag_full",
         "no_grounding",
         "rac",
+        "rac_snippets",
         "memory_provider"
       ]
     },

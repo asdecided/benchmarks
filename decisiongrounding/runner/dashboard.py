@@ -56,8 +56,10 @@ def curve_from_dataset(dataset) -> dict | None:
 _ARM_DESC = {
     "context_dump": "pastes the entire corpus into the prompt (no-retrieval ceiling)",
     "naive_rag": "embeds the corpus, retrieves top-k chunks (classic RAG)",
+    "naive_rag_full": "cosine retrieval, whole artifact per top hit (whole-artifact granularity)",
     "no_grounding": "supplies nothing — parametric memory only (control)",
     "rac": "typed, supersession-aware grounding assembled by the rac CLI",
+    "rac_snippets": "rac's typed retrieval, snippets under naive_rag's token budget (equal budget)",
     "memory_provider": "pluggable external memory provider (stub)",
 }
 

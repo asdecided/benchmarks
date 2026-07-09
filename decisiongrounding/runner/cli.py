@@ -158,9 +158,12 @@ def _preflight(arms: tuple[str, ...], answering: str, embedder: str) -> None:
                     "--embedder litellm needs LITELLM_API_KEY (or OPENAI_API_KEY) in the environment"
                 )
 
-    if "rac" in arms and shutil.which(os.environ.get("RAC_BIN", "rac")) is None:
+    if {"rac", "rac_snippets"} & set(arms) and shutil.which(
+        os.environ.get("RAC_BIN", "rac")
+    ) is None:
         problems.append(
-            "the rac arm needs the `rac` CLI on PATH (pip install -e the rac repo, or set RAC_BIN)"
+            "the rac/rac_snippets arms need the `rac` CLI on PATH (pip install -e "
+            "the rac repo, or set RAC_BIN)"
         )
 
     if problems:

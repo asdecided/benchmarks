@@ -34,8 +34,10 @@ from scoring.stats import paired_significance  # noqa: E402
 _ARM_DESC = {
     "context_dump": "pastes the entire corpus into the prompt (the no-retrieval ceiling)",
     "naive_rag": "embeds the corpus and retrieves the top-k chunks (classic RAG)",
+    "naive_rag_full": "cosine retrieval, but supplies each top hit's WHOLE artifact (whole-artifact granularity at equal retrieval)",
     "no_grounding": "supplies nothing — the answering model's parametric memory only (control)",
     "rac": "supplies typed, supersession-aware grounding assembled by the rac CLI",
+    "rac_snippets": "rac's typed retrieval, but supplies section snippets under naive_rag's token budget (equal-budget typed retrieval)",
     "memory_provider": "a pluggable external memory provider (stub)",
 }
 
