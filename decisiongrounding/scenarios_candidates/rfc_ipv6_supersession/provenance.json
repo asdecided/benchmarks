@@ -1,0 +1,41 @@
+{
+  "source": "rfc-editor.org",
+  "immutable": true,
+  "rfcs": [
+    {
+      "id": "RFC-2460",
+      "number": 2460,
+      "file": "corpus/RFC-2460.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc2460.txt",
+      "source_sha256": "e48b421dc2635deef363c91af689576c707abd4ffb1be20ff26c00f785f909f2",
+      "category": "Standards Track",
+      "title": "December 1998",
+      "obsoletes": [
+        "RFC-1883"
+      ],
+      "replaces": []
+    },
+    {
+      "id": "RFC-8200",
+      "number": 8200,
+      "file": "corpus/RFC-8200.md",
+      "url": "https://www.rfc-editor.org/rfc/rfc8200.txt",
+      "source_sha256": "371ae3f133d562db5d6385e6def4ca9914c4f831be228ea7779fd28799c2f490",
+      "category": "Standards Track",
+      "title": "Internet Protocol, Version 6 (IPv6) Specification",
+      "obsoletes": [
+        "RFC-2460"
+      ],
+      "replaces": [
+        "RFC-2460"
+      ]
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "RFC-8200",
+      "type": "supersedes",
+      "target": "RFC-2460"
+    }
+  ]
+}

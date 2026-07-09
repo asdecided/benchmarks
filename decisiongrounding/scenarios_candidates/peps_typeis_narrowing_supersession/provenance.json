@@ -1,0 +1,37 @@
+{
+  "source_repo": "python/peps",
+  "pinned_commit": "f866e77409305866038471574f075cd8d83eee9e",
+  "peps": [
+    {
+      "id": "PEP-0724",
+      "number": 724,
+      "file": "corpus/PEP-0724.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0724.rst",
+      "source_sha256": "04aa72d77d6b4785136f350e3435c3d2b010418259aee82678bbf5edcc61091e",
+      "status": "Withdrawn",
+      "title": "Stricter Type Guards",
+      "replaces": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PEP-0742",
+      "number": 742,
+      "file": "corpus/PEP-0742.md",
+      "url": "https://raw.githubusercontent.com/python/peps/f866e77409305866038471574f075cd8d83eee9e/peps/pep-0742.rst",
+      "source_sha256": "dd23a67ae82462063d3180f7c4bdf45db0e6ee0cf5b7e6a5215b50ffcef075c8",
+      "status": "Final",
+      "title": "Narrowing types with TypeIs",
+      "replaces": [
+        "PEP-0724"
+      ],
+      "superseded_by": []
+    }
+  ],
+  "supersedes_edges": [
+    {
+      "source": "PEP-0742",
+      "type": "supersedes",
+      "target": "PEP-0724"
+    }
+  ]
+}
