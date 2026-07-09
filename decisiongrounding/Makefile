@@ -17,7 +17,10 @@ real-run:
 real-batch:
 	BATCH=1 ./scripts/run_real.sh
 # compare + the adherence-vs-N crossover over a real pool (set NS to taste; add
-# BATCH=1 for the Batch API, and SEEDS=0-4 for mean +/- CI error bars):
+# BATCH=1 for the Batch API, and SEEDS=0-4 for mean +/- CI error bars). The
+# default arms include rac + no_grounding, so both signal-to-noise contrasts
+# (rac-vs-naive_rag, rac-vs-no_grounding) populate; SEEDS>=2 is REQUIRED for the
+# signal-to-noise section (noise cannot be estimated from a single seed):
 real-crossover:
 	CROSSOVER=1 ./scripts/run_real.sh
 

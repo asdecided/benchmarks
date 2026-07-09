@@ -116,8 +116,10 @@ python3 -m runner.cli "$HEADLINE_CMD" \
 #    standard price, and it runs server-side so a client/container restart can't
 #    lose it — strongly recommended for the full N sweep).
 #    SEEDS (e.g. SEEDS=0-4) runs the sweep over several seeds and reports
-#    mean +/- 95% CI with a paired rac-vs-naive_rag difference. Cost multiplies
-#    with the number of seeds.
+#    mean +/- 95% CI with paired rac-vs-naive_rag and rac-vs-no_grounding
+#    differences. SEEDS with >=2 seeds is required for the report's
+#    signal-to-noise section (noise is not estimable from one seed). Cost
+#    multiplies with the number of seeds.
 if [ "$CROSSOVER" = "1" ]; then
   [ -d "$POOL/corpus" ] || python3 -m ingest.peps pool build --out "$POOL"
   echo "== crossover (real distractors) =="

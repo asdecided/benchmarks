@@ -606,6 +606,15 @@ _PROSE_LIMITS = """\
   permit / cite / supersede), not prose quality.
 - **If naive RAG does not decay, the report says so.** The head-to-head verdict
   is computed from the numbers, not asserted.
+- **Signal is reported against noise, and errors are not failures.** The
+  Signal-to-noise section divides the between-arm gap by its across-seed spread
+  so a reader can see whether the result is above run-to-run noise (it needs
+  ≥2 seeds; a single-seed run says so rather than inventing a ratio). Cells that
+  errored or exceeded the context window are excluded from adherence and
+  reported as coverage — an infrastructure failure is never scored as a
+  behavioural one. The scenario-health audit flags any scenario that is broken,
+  contaminated (answerable from parametric memory), or non-discriminating.
+  Methodology: `spec/methodology-signal-to-noise.md`.
 """
 
 
