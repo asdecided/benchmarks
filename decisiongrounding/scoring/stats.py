@@ -98,12 +98,17 @@ def risk_difference(b: int, c: int, n: int) -> dict:
 
     d = (b - c) / n over all n pairs; the paired SE uses only the discordant
     structure: sqrt(b + c - (b - c)^2 / n) / n.
+
+    A risk difference is bounded [-1, 1], but the Wald interval is a normal
+    approximation that can spill past that (e.g. b large, c = 0, small n). The
+    CI is clipped to the parameter space so it never reports an impossible
+    rate difference.
     """
     if n <= 0:
         return {"diff": 0.0, "ci": [0.0, 0.0], "degenerate": True}
     diff = (b - c) / n
     se = ((b + c - (b - c) ** 2 / n) ** 0.5) / n
-    return {"diff": diff, "ci": [diff - Z95 * se, diff + Z95 * se]}
+    return {"diff": diff, "ci": [max(-1.0, diff - Z95 * se), min(1.0, diff + Z95 * se)]}
 
 
 def paired_odds_ratio(b: int, c: int) -> dict:
