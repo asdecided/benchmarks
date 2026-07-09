@@ -41,6 +41,7 @@ from providers.base import (  # noqa: E402
     ProposedChange,
     check_context_window,
 )
+from providers.answering import error_kind  # noqa: E402
 from providers.rac import rac_version  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
@@ -204,7 +205,8 @@ def _execute_runs(
                 )
                 continue
             except Exception as exc:  # noqa: BLE001 - one cell must not kill the batch
-                err = {"arm": arm, "scenario_id": sc.scenario_id, "error": repr(exc)}
+                err = {"arm": arm, "scenario_id": sc.scenario_id, "error": repr(exc),
+                       "kind": error_kind(exc)}
                 errors.append(err)
                 fp.write(json.dumps({"record": "error", **err}) + "\n")
                 fp.flush()

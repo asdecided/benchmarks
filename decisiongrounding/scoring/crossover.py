@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Callable
 
 from providers import build_provider, make_answering_model
-from providers.answering import usage_dict
+from providers.answering import error_kind, usage_dict
 from providers.rac import rac_version
 from providers.base import SCAFFOLD, ContextWindowExceededError, CorpusArtifact, check_context_window
 from scenarios.loader import Scenario
@@ -135,20 +135,24 @@ def _corpus_for(n, sc, ns, seed, pool, use_real):
     return list(sc.corpus) + distractors
 
 
-def _point(n, adhered, total, retrieved_flags, token_estimates, usages, cwe_count=0):
+def _point(n, adhered, total, retrieved_flags, token_estimates, usages,
+           cwe_count=0, error_count=0):
     """One (arm, N) curve point — shared by the sync and batched builders so the
     two produce byte-identical shapes.
 
     `cwe_count`: of `total` cells, how many hit the answering model's context
     window (see `ContextWindowExceededError`) and so were never answered.
-    Those cells are excluded from BOTH the numerator and denominator of
-    `adherence_rate` — folding them in as "non-adherent" would misreport a
-    structural ceiling (the arm literally cannot fit at this N) as the arm
-    answering and getting it wrong, corrupting exactly the comparison this
-    curve exists to make. When every cell at this N hit the ceiling,
-    `adherence_rate` is None (no rate to report) rather than a misleading 0.0.
+    `error_count`: how many failed with any OTHER error (a schema miss,
+    gateway rejection, transport failure — see `error_kind`). Both are
+    excluded from BOTH the numerator and denominator of `adherence_rate`:
+    a cell that never produced an answer has no adherence outcome, and
+    counting an infrastructure failure as "the arm answered and got it wrong"
+    misreports it as a behavioural result — exactly the confound this curve
+    exists to avoid (a gateway rejecting every prompt would otherwise read as
+    adherence 0.0). Only genuinely answered cells are `attempted`; when none
+    were, `adherence_rate` is None rather than a misleading 0.0.
     """
-    attempted = total - cwe_count
+    attempted = total - cwe_count - error_count
     rate = (adhered / attempted) if attempted else None
     governed = [f for f in retrieved_flags if f is not None]
     recall = (sum(1 for f in governed if f) / len(governed)) if governed else None
@@ -156,12 +160,15 @@ def _point(n, adhered, total, retrieved_flags, token_estimates, usages, cwe_coun
     point = {
         "N": n, "adherence_rate": rate, "governing_recall": recall,
         "token_estimate_mean": tok_mean,
-        # Always present (0 when nothing hit the ceiling), not conditional —
-        # so multi-seed aggregation (_AGG_FIELDS) sees a real 0 for a seed
-        # with no context-window-exceeded cells, rather than silently
-        # skipping that seed as if it had no opinion (see _columns_from_datasets).
+        # Always present (0 when nothing failed), not conditional — so
+        # multi-seed aggregation (_AGG_FIELDS) sees a real 0 for a seed with
+        # no failed cells, rather than silently skipping that seed as if it
+        # had no opinion (see _columns_from_datasets).
+        "attempted": attempted,
         "context_window_exceeded_count": cwe_count,
         "context_window_exceeded_rate": (cwe_count / total) if total else 0.0,
+        "error_count": error_count,
+        "error_rate": (error_count / total) if total else 0.0,
     }
     if usages:
         point["input_tokens_mean"] = sum(u["input_tokens"] for u in usages) / len(usages)
@@ -255,6 +262,12 @@ def build_dataset(
     transient failures is the point of resuming. Replayed cells still fire
     `progress` (tagged `"cached": true`) so the new sidecar is self-contained
     and a second crash resumes from the newest sidecar alone.
+
+    Cells that fail (context-window OR any generic error — schema, gateway,
+    transport; see `providers.answering.error_kind`) never produced an
+    answer, so they are excluded from `adherence_rate` and from the paired
+    `cells` record, and surfaced instead via each point's `error_count` /
+    `context_window_exceeded_count` and the envelope's `errors` list.
     """
     use_real = pool is not None
     _check_pool(pool, ns, scenarios, use_real)
@@ -276,6 +289,7 @@ def build_dataset(
             retrieved_flags: list = []
             token_estimates: list[int] = []
             usages: list[dict] = []
+            error_count = 0
             for sc in discriminating:
                 idx += 1
                 cell_error = None
@@ -324,15 +338,23 @@ def build_dataset(
                         usage = None
                     except Exception as exc:  # noqa: BLE001 - one cell must not lose the curve
                         cell_error = repr(exc)
+                        cell_kind = error_kind(exc)
+                        error_count += 1
                         errors.append(
                             {"arm": arm, "scenario_id": sc.scenario_id, "N": n,
-                             "error": cell_error}
+                             "error": cell_error, "kind": cell_kind}
                         )
                         adherent = stale = False
                         gov_retrieved = None
                         tok_est = 0
                         usage = None
-                if cell_kind != "context_window_exceeded":
+                # Only a genuinely answered cell (cell_kind is None) contributes
+                # an adherence outcome. Both context-window and generic-error
+                # cells never produced an answer, so they are excluded from the
+                # numerator AND from the paired-statistics record below —
+                # counting an infrastructure failure as "answered and wrong"
+                # would misreport it as a behavioural result (see `_point`).
+                if cell_kind is None:
                     adhered += 1 if adherent else 0
                 retrieved_flags.append(gov_retrieved)
                 token_estimates.append(tok_est)
@@ -342,13 +364,7 @@ def build_dataset(
                     {"N": n, "adherent": adherent, "stale_decision_followed": stale,
                      "governing_decision_retrieved": gov_retrieved}
                 )
-                # A context-window-exceeded cell was never answered — it has no
-                # real adherent value (forced False above only for the summary
-                # counters), so it is excluded from the paired-statistics record
-                # entirely rather than biasing a McNemar/effect-size comparison
-                # with a fabricated non-adherent outcome (mirrors `adhered`'s own
-                # exclusion just above, and `_point`'s adherence_rate handling).
-                if cell_kind != "context_window_exceeded":
+                if cell_kind is None:
                     cell_records.append({"seed": seed, "N": n, "arm": arm,
                                          "scenario_id": sc.scenario_id, "adherent": adherent})
                 if progress is not None:
@@ -362,7 +378,8 @@ def build_dataset(
                         rec["cached"] = True
                     progress(rec)
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
-                                      token_estimates, usages, cwe_count=cwe_count))
+                                      token_estimates, usages, cwe_count=cwe_count,
+                                      error_count=error_count))
     return _envelope(discriminating, use_real, pool, seed, ns, answering_model.version,
                      embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors,
                      cell_records)
@@ -434,11 +451,13 @@ def build_dataset_batched(
                     cell["tok"] = exc.token_estimate
                 except Exception as exc:  # noqa: BLE001 - one cell must not lose the run
                     cell["error"] = repr(exc)
+                    cell["kind"] = error_kind(exc)
                 cells.append(cell)
 
     # Submit one batch for the cells that assembled; poll until it ends.
     requests = [{"custom_id": c["cid"], "params": c["req"]} for c in cells if c["req"] is not None]
-    answers: dict[str, tuple] = {}  # cid -> (ProposedChange|None, usage|None, error|None)
+    # cid -> (ProposedChange|None, usage|None, error|None, kind|None)
+    answers: dict[str, tuple] = {}
     if requests:
         client = model._ensure_client()
         batch = client.messages.batches.create(requests=requests)
@@ -446,13 +465,16 @@ def build_dataset_batched(
             time.sleep(max(5, poll))
         for r in client.messages.batches.results(batch.id):
             if r.result.type != "succeeded":
-                answers[r.custom_id] = (None, None, f"batch result: {r.result.type}")
+                # A non-succeeded batch result is a gateway/service-level
+                # failure, not the model answering wrongly.
+                answers[r.custom_id] = (None, None, f"batch result: {r.result.type}", "gateway")
                 continue
             try:
                 pc = model.parse_message(r.result.message)
-                answers[r.custom_id] = (pc, usage_dict(getattr(r.result.message, "usage", None)), None)
+                answers[r.custom_id] = (
+                    pc, usage_dict(getattr(r.result.message, "usage", None)), None, None)
             except Exception as exc:  # noqa: BLE001
-                answers[r.custom_id] = (None, None, repr(exc))
+                answers[r.custom_id] = (None, None, repr(exc), error_kind(exc))
 
     # Aggregate in the same sweep order, scoring each cell from its batch answer.
     points: dict[str, list[dict]] = {arm: [] for arm in arms}
@@ -468,49 +490,64 @@ def build_dataset_batched(
         for arm in arms:
             adhered = 0
             cwe_count = 0
+            error_count = 0
             retrieved_flags: list = []
             token_estimates: list[int] = []
             usages: list[dict] = []
             for sc in discriminating:
                 cell = next(it)
                 idx += 1
-                is_cwe = cell.get("kind") == "context_window_exceeded"
                 hit = cell.get("cached")
-                pc, usage, err = answers.get(cell["cid"], (None, None, cell["error"]))
-                cell_error = err or cell["error"]
                 if hit is not None:
+                    # Replayed verbatim — a cached cell is only a success or a
+                    # context-window hit (generic errors re-run, not cached).
                     adherent = hit["adherent"]
                     stale = hit["stale_decision_followed"]
                     gov_retrieved = hit["governing_decision_retrieved"]
                     tok_est = hit["token_estimate"]
                     usage = hit.get("usage")
                     cell_error = hit.get("error")
-                    if is_cwe:
+                    cell_kind = hit.get("kind")
+                    if cell_kind == "context_window_exceeded":
                         cwe_count += 1
                         errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
                                        "error": cell_error, "kind": "context_window_exceeded"})
-                elif is_cwe:
-                    cwe_count += 1
-                    errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
-                                   "error": cell_error, "kind": "context_window_exceeded"})
-                    adherent = stale = False
-                    gov_retrieved = None
-                    tok_est = cell["tok"]
-                    usage = None
-                elif pc is None:
-                    errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
-                                   "error": cell_error or "no batch result"})
-                    adherent = stale = False
-                    gov_retrieved = None
-                    tok_est = 0
-                    usage = None
                 else:
-                    sc_score = score(sc, pc)
-                    adherent = sc_score.adherent
-                    stale = sc_score.stale_decision_followed
-                    gov_retrieved = cell["gov"]
-                    tok_est = cell["tok"]
-                if not is_cwe:
+                    pc, usage, err, ans_kind = answers.get(
+                        cell["cid"], (None, None, cell["error"], cell.get("kind")))
+                    cell_error = err or cell["error"]
+                    # Assembly-time kind (CWE / error) wins; else the batch
+                    # answer's kind.
+                    cell_kind = cell.get("kind") or ans_kind
+                    if cell_kind == "context_window_exceeded":
+                        cwe_count += 1
+                        errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                                       "error": cell_error, "kind": "context_window_exceeded"})
+                        adherent = stale = False
+                        gov_retrieved = None
+                        tok_est = cell["tok"]
+                        usage = None
+                    elif pc is None:
+                        cell_kind = cell_kind or "error"
+                        error_count += 1
+                        errors.append({"arm": arm, "scenario_id": sc.scenario_id, "N": n,
+                                       "error": cell_error or "no batch result",
+                                       "kind": cell_kind})
+                        adherent = stale = False
+                        gov_retrieved = None
+                        tok_est = 0
+                        usage = None
+                    else:
+                        cell_kind = None
+                        sc_score = score(sc, pc)
+                        adherent = sc_score.adherent
+                        stale = sc_score.stale_decision_followed
+                        gov_retrieved = cell["gov"]
+                        tok_est = cell["tok"]
+                # Only a genuinely answered cell (cell_kind is None) contributes
+                # an adherence outcome and a paired-statistics observation —
+                # same exclusion as build_dataset (see `_point`).
+                if cell_kind is None:
                     adhered += 1 if adherent else 0
                 retrieved_flags.append(gov_retrieved)
                 token_estimates.append(tok_est)
@@ -520,9 +557,7 @@ def build_dataset_batched(
                     {"N": n, "adherent": adherent, "stale_decision_followed": stale,
                      "governing_decision_retrieved": gov_retrieved}
                 )
-                # Same exclusion as build_dataset: a cell that never got
-                # answered is not a paired-statistics observation.
-                if not is_cwe:
+                if cell_kind is None:
                     cell_records.append({"seed": seed, "N": n, "arm": arm,
                                          "scenario_id": sc.scenario_id, "adherent": adherent})
                 if progress is not None:
@@ -531,12 +566,13 @@ def build_dataset_batched(
                            "stale_decision_followed": stale,
                            "governing_decision_retrieved": gov_retrieved,
                            "token_estimate": tok_est, "usage": usage, "error": cell_error,
-                           "kind": cell.get("kind")}
+                           "kind": cell_kind}
                     if hit is not None:
                         rec["cached"] = True
                     progress(rec)
             points[arm].append(_point(n, adhered, len(discriminating), retrieved_flags,
-                                      token_estimates, usages, cwe_count=cwe_count))
+                                      token_estimates, usages, cwe_count=cwe_count,
+                                      error_count=error_count))
     return _envelope(discriminating, use_real, pool, seed, ns, model.version,
                      embedder_spec, pool_dir, scenarios_dir, arms, points, per_scenario, errors,
                      cell_records)
@@ -546,8 +582,9 @@ def build_dataset_batched(
 # Fields aggregated across seeds. The plain key stays the MEAN (back-compat);
 # `<field>_ci` / `_std` / `_values` are added alongside.
 _AGG_FIELDS = ("adherence_rate", "governing_recall", "token_estimate_mean",
-               "input_tokens_mean", "context_window_exceeded_count",
-               "context_window_exceeded_rate")
+               "input_tokens_mean", "attempted",
+               "context_window_exceeded_count", "context_window_exceeded_rate",
+               "error_count", "error_rate")
 
 
 def _seed_points(ds: dict, arm: str) -> dict:

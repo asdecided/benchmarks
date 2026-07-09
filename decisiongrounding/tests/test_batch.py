@@ -184,6 +184,16 @@ def test_build_dataset_batched_tolerates_a_failed_cell(monkeypatch):
                                seed=0, embedder_spec="local-hash", poll=0)
     assert len(ds["errors"]) == 1 and "batch result: errored" in ds["errors"][0]["error"]
     assert ds["arms"]["context_dump"][0]["N"] == 3  # curve still produced
+    # A non-succeeded batch result is a gateway failure, excluded from the
+    # rate and the paired record — not counted as adherent=False.
+    pt = ds["arms"]["context_dump"][0]
+    assert ds["errors"][0]["kind"] == "gateway"
+    assert pt["error_count"] == 1
+    n_disc = len([s for s in load_scenarios(_SCENARIOS)
+                  if s.scenario_type in __import__("scoring.crossover",
+                                                   fromlist=["DISCRIMINATING"]).DISCRIMINATING])
+    assert pt["attempted"] == n_disc - 1
+    assert not any(c["scenario_id"] == ds["errors"][0]["scenario_id"] for c in ds["cells"])
 
 
 def test_build_dataset_multiseed_batched(monkeypatch):
