@@ -1,11 +1,11 @@
-# rac-benchmarks
+# AsDecided Benchmarks
 
-Evaluation suites for [RAC](https://github.com/itsthelore/rac-core)
+Evaluation suites for [AsDecided](https://github.com/asdecided/core)
 (requirements-as-code) — one subdir per benchmark. Per ADR-092 (one repo per
 concern, subdir per member) this is the single home for RAC's benchmarks; future
 suites land as sibling subdirs rather than new repositories.
 
-Each benchmark consumes `rac` only as an **external CLI on `PATH`** and imports
+Each benchmark consumes the engine only as an **external CLI on `PATH`** and imports
 no engine code (DG-ADR-0001), so the suites stay decoupled from the engine's
 internals. Scoring is deterministic and offline — no embeddings, no LLM judge,
 no network, no randomness, no clock in the scored path (ADR-066): the
@@ -28,7 +28,7 @@ corpus.
 ## Shared harness
 
 [`harness/`](harness/) is the shared package the per-tool benchmarks consume:
-a subprocess runner (rac as an external CLI), a deterministic scorer, a
+a subprocess runner (the engine as an external CLI), a deterministic scorer, a
 `{metrics, metadata, per_query}` scorecard writer, and a CI gate. Each
 benchmark subdir is a thin `run.py` over it, with the `rac eval` flag surface:
 
@@ -47,7 +47,8 @@ committed `baseline.json`. Baselines change only through a human-reviewed
 ## Running the battery
 
 ```
-pip install "git+https://github.com/itsthelore/rac-core.git"   # rac on PATH
+brew install asdecided/tap/asdecided-core
+export RAC_BIN=decided   # temporary benchmark adapter variable
 pip install -e ".[dev]"
 python -m pytest -q
 ```
@@ -55,11 +56,11 @@ python -m pytest -q
 ## History
 
 `decisiongrounding/` is the former **`itsthelore/decisiongrounding`** repository,
-moved here with its history preserved (ADR-092 convergence). The benchmark runs
-unchanged against the published `rac` CLI; its deterministic scoring contract
-(ADR-066) is untouched. Its port onto the shared harness is tracked as a
-`tool-benchmarks` roadmap initiative in rac-core and deliberately does not
-expand the frozen restructure item's scope.
+moved here with its history preserved (ADR-092 convergence). Its deterministic
+scoring contract (ADR-066) is untouched. The benchmark currently names its
+grounding arm and adapter variable `rac`/`RAC_BIN`; point that adapter at the
+native `decided` executable as shown above. Renaming the benchmark vocabulary
+is separate from this repository-topology cutover.
 
 ## License
 

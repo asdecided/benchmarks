@@ -18,7 +18,7 @@ because it launders uncertainty into false confidence.
 This benchmark exists to make those claims comparable and honest. It is
 **agent-agnostic**: the apps, the requirement lists, and the scoring are
 fixed, and any agent that can be run from a command line against a URL can
-be measured. [Proofkeeper](https://github.com/itsthelore/proofkeeper) is the
+be measured. [Proofkeeper](https://github.com/asdecided/proofkeeper) is the
 reference agent, but a benchmark the reference agent merely *wins* carries
 more weight than a marketing page — and if another agent beats it here, the
 results page will say so.
