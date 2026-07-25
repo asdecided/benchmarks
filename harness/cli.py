@@ -79,7 +79,7 @@ def run_benchmark(
     queries_path: str,
     *,
     generated_at: str | None = None,
-    executable: str = "rac",
+    executable: str = "decided",
 ) -> card_mod.Scorecard:
     """Score every committed case and assemble the scorecard.
 

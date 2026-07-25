@@ -40,10 +40,10 @@ SMOKE_CAPABILITY = "LEDGER-0000000000R1"
 
 def export_graph(corpus: Path, out_path: Path) -> None:
     """Export the corpus graph over the published `rac export --graph` contract."""
-    rac = os.environ.get("RAC_BIN", "rac")
+    rac = os.environ.get("RAC_BIN", "decided")
     if shutil.which(rac) is None:
         raise FileNotFoundError(
-            f"'{rac}' not on PATH — install rac-core or set RAC_BIN")
+            f"'{rac}' not on PATH — install asdecided-core or set RAC_BIN")
     result = subprocess.run([rac, "export", str(corpus), "--graph"],
                             capture_output=True, text=True)
     if result.returncode != 0:

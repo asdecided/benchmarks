@@ -42,11 +42,11 @@ class RacResult:
 class RacRunner:
     """Runs ``rac`` subcommands and hands back their JSON contracts."""
 
-    def __init__(self, executable: str = "rac") -> None:
+    def __init__(self, executable: str = "decided") -> None:
         if shutil.which(executable) is None:
             raise UsageError(
                 f"'{executable}' not found on PATH — the suite consumes rac as an "
-                "external CLI (DG-ADR-0001); install rac-core first"
+                "external CLI (DG-ADR-0001); install asdecided-core first"
             )
         self.executable = executable
 

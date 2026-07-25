@@ -67,7 +67,6 @@ def decision_markdown(row: dict) -> str:
         "schema_version: 1",
         f"id: {artifact_id(row['example_id'])}",
         "type: decision",
-        f"tags: [dependencies, versions, {library}]",
         "---",
         f"# Library Version Pin: {library} {version}",
         "",

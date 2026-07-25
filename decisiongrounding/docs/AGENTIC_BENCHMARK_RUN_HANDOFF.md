@@ -7,7 +7,7 @@ session.
 
 ## How to use
 
-1. Start a Claude Code session with the `itsthelore/rac-benchmarks` repository
+1. Start a Claude Code session with the `asdecided/benchmarks` repository
    in scope. The benchmark lives in its `decisiongrounding/` subdirectory (the
    standalone `itsthelore/decisiongrounding` repo was archived into it, history
    preserved); every command below runs from that subdirectory.
@@ -31,7 +31,7 @@ clone), and the `paper/` LaTeX scaffold + `scripts/paper_figs.py`.
 ---
 
 ```text
-You are Claude Code working on the itsthelore/rac-benchmarks repository. The
+You are Claude Code working on the asdecided/benchmarks repository. The
 benchmark is its decisiongrounding/ subdirectory — treat that directory as your
 working directory for every command below. It is a
 reproducible benchmark testing whether deterministic, supersession-aware
@@ -76,8 +76,8 @@ Either way:
 - Work on a NEW branch off fresh origin/main: claude/decision-grounding-results-<slug>.
   Never push to main.
 - Install: `pip install -e ".[real,schema,chart]"`. The `rac` arm needs the `rac`
-  CLI on PATH (pip install "git+https://github.com/itsthelore/rac-core.git" if
-  absent). Alternatively `./scripts/from_source.sh` does venv + install + loads
+  CLI on PATH (`brew install asdecided/tap/asdecided-core`, then
+  `export RAC_BIN=decided`). Alternatively `./scripts/from_source.sh` does venv + install + loads
   keys from .env + probe + run in one go; the granular steps below are recommended
   for the first real run so you can inspect each stage.
 

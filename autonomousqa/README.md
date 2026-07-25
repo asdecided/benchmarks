@@ -11,7 +11,7 @@ scoring that re-derives from recorded evidence, never from a model's opinion.
 "Our agent verifies more of your product for fewer tokens" is marketing until
 anyone can re-run it. This benchmark makes it an argument: a property of the
 **corpora, sample apps, and deterministic scoring** — runnable against any
-autonomous-QA agent — with [Proofkeeper](https://github.com/itsthelore/proofkeeper)
+autonomous-QA agent — with [Proofkeeper](https://github.com/asdecided/proofkeeper)
 as the reference agent. An agent is measured on:
 
 - **Verified rate** — capabilities whose compiled test passed the agent's
@@ -95,8 +95,9 @@ make test                      # the offline pytest battery (no browser, no agen
 make fixtures                  # every scripted flow across all four apps
 ```
 
-`smoke` and `fixtures` need `rac` on PATH (`pip install rac-core`, or set
-`RAC_BIN`) because the corpus reaches the agent over `rac export --graph`.
+`smoke` and `fixtures` need the native engine on PATH. Install it with
+`brew install asdecided/tap/asdecided-core`, then set `RAC_BIN=decided` while
+the benchmark adapter still uses its legacy variable name.
 
 ## Run it for real (BYOK)
 

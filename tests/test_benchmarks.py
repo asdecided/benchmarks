@@ -57,7 +57,7 @@ def test_scorecard_has_exactly_three_top_level_objects(bench, scorecards):
 @pytest.mark.parametrize("bench", BENCHMARKS)
 def test_metadata_records_version_hashes_and_count(bench, scorecards):
     meta = scorecards[bench]["metadata"]
-    assert meta["rac_version"].startswith("rac ")
+    assert meta["rac_version"].startswith("decided ")
     assert meta["corpus_hash"].startswith("sha256:")
     assert meta["query_set_hash"].startswith("sha256:")
     assert meta["n_queries"] == len(scorecards[bench]["per_query"])

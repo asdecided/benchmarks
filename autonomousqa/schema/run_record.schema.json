@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/itsthelore/rac-benchmarks/autonomousqa/schema/run_record.schema.json",
+  "$id": "https://github.com/asdecided/benchmarks/autonomousqa/schema/run_record.schema.json",
   "title": "autonomousqa run record",
   "description": "One agent run over one capability of one frozen sample app. Carries the exact harness configuration and the raw evidence (stdout + exit code) so verdicts re-derive deterministically without re-running the agent or re-spending tokens.",
   "type": "object",

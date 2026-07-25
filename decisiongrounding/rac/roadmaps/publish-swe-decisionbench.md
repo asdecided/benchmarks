@@ -94,5 +94,5 @@ tags: [publication, paper, arxiv]
 
 ## Related Tickets
 
-- itsthelore/rac-benchmarks#11
-- itsthelore/rac-core#295
+- asdecided/benchmarks#11
+- asdecided/core#295
