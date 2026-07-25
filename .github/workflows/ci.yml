@@ -1,7 +1,7 @@
 name: CI
 
 # Gate every per-tool benchmark on every push to main and every pull request.
-# rac is installed from its public source and consumed strictly as an external
+# AsDecided is installed from its checksum-verified native release and consumed as an external
 # CLI on PATH (DG-ADR-0001) — the suite imports no engine code. Re-baselining
 # is human-gated: no step here may ever pass --update-baseline (a test
 # enforces this).
@@ -31,10 +31,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install rac (external CLI on PATH, never an import)
-        run: |
-          python -m pip install --upgrade pip
-          pip install "git+https://github.com/itsthelore/rac-core.git"
+      - name: Install AsDecided (external CLI on PATH, never an import)
+        run: bash .github/scripts/install-asdecided.sh 0.23.1
 
       - name: Install the harness
         run: pip install -e ".[dev]"
@@ -42,7 +40,7 @@ jobs:
       - name: Validate every fixture corpus
         run: |
           for bench in search-artifacts find-decisions get-artifact get-related get-summary; do
-            rac validate "$bench/corpus"
+            decided validate "$bench/corpus"
           done
 
       - name: Run the benchmark battery

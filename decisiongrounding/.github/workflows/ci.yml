@@ -43,9 +43,7 @@ jobs:
 
   corpus:
     # Dogfood RAC: enforce the project's own knowledge corpus the same way the
-    # benchmark studies — validation, relationships, and review must pass. `rac`
-    # is installed from its public source (it is the external tool the rac arm
-    # also uses; not a Python dependency of the benchmark).
+    # benchmark studies — validation, relationships, and review must pass.
     name: rac corpus gate
     runs-on: ubuntu-latest
     steps:
@@ -57,10 +55,8 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install rac
-        run: |
-          python -m pip install --upgrade pip
-          pip install "git+https://github.com/itsthelore/rac-core.git"
+      - name: Install AsDecided
+        run: bash .github/scripts/install-asdecided.sh 0.23.1
 
       - name: Gate the RAC corpus (validate + relationships + review)
-        run: rac gate rac
+        run: decided gate rac

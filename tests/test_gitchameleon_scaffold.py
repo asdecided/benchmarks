@@ -57,7 +57,7 @@ def test_corpus_builder_is_deterministic(tmp_path):
 def test_built_corpora_are_schema_valid(tmp_path):
     corpus = _build(tmp_path)
     completed = subprocess.run(
-        ["rac", "validate", str(corpus)], capture_output=True, text=True, check=False
+        ["decided", "validate", str(corpus)], capture_output=True, text=True, check=False
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
 

@@ -13,10 +13,12 @@ on:
     paths:
       - "autonomousqa/**"
       - ".github/workflows/autonomousqa.yml"
+      - ".github/scripts/install-asdecided.sh"
   pull_request:
     paths:
       - "autonomousqa/**"
       - ".github/workflows/autonomousqa.yml"
+      - ".github/scripts/install-asdecided.sh"
   workflow_dispatch:
 
 concurrency:
@@ -58,15 +60,15 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install rac
-        run: pip install "rac-core @ git+https://github.com/itsthelore/rac-core.git"
+      - name: Install AsDecided
+        run: bash ../.github/scripts/install-asdecided.sh 0.23.1
       - name: Gate the member corpus
-        run: rac gate rac
+        run: decided gate rac
       - name: Validate every seeded app corpus
         run: |
           for corpus in apps/*/rac; do
             echo "== $corpus"
-            rac validate "$corpus"
+            decided validate "$corpus"
           done
 
   smoke:
@@ -89,9 +91,9 @@ jobs:
       - name: Install the playwright browser
         run: npx playwright install --with-deps chromium
         working-directory: autonomousqa/workspace
-      - name: Install the harness and rac
+      - name: Install the harness and AsDecided
         run: |
           pip install -e .
-          pip install "rac-core @ git+https://github.com/itsthelore/rac-core.git"
+          bash ../.github/scripts/install-asdecided.sh 0.23.1
       - name: Smoke — drive, compile, fidelity-gate, meter, re-score
-        run: python -m runner.cli smoke
+        run: RAC_BIN=decided python -m runner.cli smoke

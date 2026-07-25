@@ -64,8 +64,8 @@ def copy_corpus(bench: str, tmp_path: Path) -> Path:
 
 @pytest.fixture(scope="session", autouse=True)
 def rac_on_path():
-    if shutil.which("rac") is None:
-        pytest.fail("rac is not on PATH — the suite consumes rac as an external CLI")
+    if shutil.which("decided") is None:
+        pytest.fail("decided is not on PATH — the suite consumes AsDecided as an external CLI")
 
 
 @pytest.fixture(scope="session")
