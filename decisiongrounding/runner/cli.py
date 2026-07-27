@@ -43,7 +43,7 @@ from providers.base import (  # noqa: E402
     check_context_window,
 )
 from providers.answering import error_kind  # noqa: E402
-from providers.rac import rac_version  # noqa: E402
+from providers.rac import core_version  # noqa: E402
 from scenarios.loader import Scenario, load_pool, load_scenarios  # noqa: E402
 from scoring import aggregate, score  # noqa: E402
 from scoring.crossover import (  # noqa: E402
@@ -161,11 +161,11 @@ def _preflight(arms: tuple[str, ...], answering: str, embedder: str) -> None:
                 )
 
     if {"rac", "rac_snippets"} & set(arms) and shutil.which(
-        os.environ.get("RAC_BIN", "rac")
+        os.environ.get("DECIDED_BIN", "decided")
     ) is None:
         problems.append(
-            "the rac/rac_snippets arms need the `rac` CLI on PATH (pip install -e "
-            "the rac repo, or set RAC_BIN)"
+            "the rac/rac_snippets arms need AsDecided Core's `decided` CLI on "
+            "PATH (install `asdecided-core`, or set DECIDED_BIN)"
         )
 
     if problems:
@@ -257,12 +257,12 @@ def _backend_versions() -> dict:
             out[pkg] = md.version(pkg)
         except Exception:  # noqa: BLE001 - absence is expected offline
             pass
-    # The system under test: without this, two runs against different rac
+    # The system under test: without this, two runs against different Core
     # builds produce indistinguishable reports. Same omit-when-absent
     # convention as the pip packages.
-    v = rac_version()
+    v = core_version()
     if v is not None:
-        out["rac"] = v
+        out["asdecided_core"] = v
     return out
 
 
@@ -456,7 +456,7 @@ def cmd_compare(args) -> int:
 
 def cmd_batch(args) -> int:
     """Same comparison as `compare`, but the answering calls go through the
-    Message Batches API at 50% of standard price. Grounding assembly (rac CLI,
+    Message Batches API at 50% of standard price. Grounding assembly (AsDecided Core,
     embeddings) still runs locally up front; only the held-constant answering
     model is batched. Asynchronous: submit one batch, poll, then score."""
     arms = tuple(a.strip() for a in args.arms.split(",") if a.strip())
@@ -472,7 +472,7 @@ def cmd_batch(args) -> int:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     label = "batch-" + "-".join(arms)
 
-    # 1. Assemble every cell's grounding + request locally (rac CLI / embeddings
+    # 1. Assemble every cell's grounding + request locally (Core CLI / embeddings
     #    happen here). The answering calls are submitted together below. A cell
     #    that would exceed the answering model's context window is skipped
     #    here — the same symmetric preflight as Provider.respond() and

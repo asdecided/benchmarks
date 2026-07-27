@@ -96,4 +96,4 @@ jobs:
           pip install -e .
           bash ../.github/scripts/install-asdecided.sh 0.23.1
       - name: Smoke — drive, compile, fidelity-gate, meter, re-score
-        run: RAC_BIN=decided python -m runner.cli smoke
+        run: DECIDED_BIN=decided python -m runner.cli smoke

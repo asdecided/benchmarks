@@ -136,7 +136,8 @@ pip install -e ".[real,schema,chart]"
 export ANTHROPIC_API_KEY=...        # pinned answering model: claude-opus-4-8
 export VOYAGE_API_KEY=...           # real embeddings for naive_rag
 
-# rac arm additionally needs the `rac` CLI on PATH (or set RAC_BIN)
+# stable rac arm additionally needs AsDecided Core's `decided` CLI on PATH
+# (or set DECIDED_BIN)
 python -m runner.cli compare \
   --arms context_dump,naive_rag,rac \
   --answering claude \
@@ -154,7 +155,7 @@ so a run says exactly what produced it.
 
 For repeat or large runs, `python -m runner.cli batch …` runs the same
 comparison through the **Message Batches API at ~50% of standard token price**.
-It assembles every arm's grounding locally (rac CLI, embeddings) up front, then
+It assembles every arm's grounding locally (AsDecided Core, embeddings) up front, then
 submits all answering calls as one batch and polls to completion (asynchronous —
 usually under an hour). The trade vs `compare` is the live, abortable per-cell
 feedback; for the first exploratory run prefer `compare`, for bulk runs prefer
@@ -162,7 +163,7 @@ feedback; for the first exploratory run prefer `compare`, for bulk runs prefer
 
 A real run is expensive, so the runner protects your spend two ways. It
 **preflights** the configuration before doing any work — a missing
-`ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`, backend package, or `rac` CLI fails fast
+`ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`, backend package, or Core CLI fails fast
 with an actionable message instead of part-way through a paid sweep. And it
 **streams every completed run** to a durable `results/run-<stamp>-<label>.partial.jsonl`
 sidecar as it lands; a transient API error on one (arm, scenario) cell is
@@ -315,14 +316,14 @@ python -m runner.cli compare \
 The `rac` arm is the grounding layer under test: it follows the typed
 `supersedes` edge and supplies the live PEP 440, where `naive_rag` can surface
 PEP 386's appealing `verlib` section without the header that marks it superseded.
-It needs the `rac` CLI on PATH (`pip install -e .` from the repo root, or set
-`RAC_BIN`); drop `,rac` to run the baselines alone.
+It needs AsDecided Core's `decided` CLI on PATH (install `asdecided-core`, or
+set `DECIDED_BIN`); drop `,rac` to run the baselines alone.
 
 This produces the first genuine decision-adherence result (win, tie, or loss)
 on a real corpus; like every run it is appended to `results/`. The build
 environment for this pilot had no API keys, so the scenario is offline-validated
 (loads, schema-validates, scores, and the `rac` arm's supersedes-following is
-verified against the real `rac` CLI) and the real numbers are produced by whoever
+verified against the real AsDecided Core CLI) and the real numbers are produced by whoever
 holds the keys.
 
 ### Real adherence-vs-N curve (real distractors, not synthetic filler)

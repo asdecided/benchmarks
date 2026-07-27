@@ -1,8 +1,8 @@
 """Cover the real-backend wiring: recall metric, supersedes resolution, pins.
 
 These exercise the offline-testable surface of Steps 1-3 (real answering model,
-real embeddings, rac arm). The backends that need network/credentials/the rac
-CLI are constructed but not invoked here.
+real embeddings, rac arm). The backends that need network/credentials or
+AsDecided Core are constructed but not invoked here.
 """
 
 from pathlib import Path

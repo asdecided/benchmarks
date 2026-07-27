@@ -98,7 +98,7 @@ def test_rac_snippets_grounding_within_budget(monkeypatch):
     sc = load_scenarios(_SCENARIOS)[0]
     p = RacSnippetsProvider(ScriptedAnsweringModel(), token_budget=200)
     p._by_id = {a.id: a for a in sc.corpus}
-    # Bypass the rac CLI: _resolve just returns the corpus ids in order.
+    # Bypass Core: _resolve just returns the corpus ids in order.
     monkeypatch.setattr(p, "_resolve", lambda task: [a.id for a in sc.corpus])
     g = p.assemble(sc.task)
     assert g.text  # non-empty when candidates exist
@@ -148,9 +148,9 @@ def test_naive_rag_full_run_one_is_schema_valid():
 # ---------------------------------------------------------------- preflight
 
 
-def test_preflight_requires_rac_cli_for_rac_snippets(monkeypatch):
+def test_preflight_requires_core_cli_for_rac_snippets(monkeypatch):
     from runner.cli import _preflight
 
     monkeypatch.setattr(shutil, "which", lambda *_a, **_k: None)
-    with pytest.raises(SystemExit, match="rac"):
+    with pytest.raises(SystemExit, match="AsDecided Core"):
         _preflight(("rac_snippets",), "offline-stub", "local-hash")
