@@ -60,7 +60,7 @@ _ARM_DESC = {
     "naive_rag": "embeds the corpus, retrieves top-k chunks (classic RAG)",
     "naive_rag_full": "cosine retrieval, whole artifact per top hit (whole-artifact granularity)",
     "no_grounding": "supplies nothing — parametric memory only (control)",
-    "rac": "typed, supersession-aware grounding assembled by the rac CLI",
+    "rac": "typed, supersession-aware grounding assembled by AsDecided Core",
     "rac_snippets": "rac's typed retrieval, snippets under naive_rag's token budget (equal budget)",
     "memory_provider": "pluggable external memory provider (stub)",
 }

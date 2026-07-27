@@ -1,18 +1,19 @@
-"""`rac` arm — deterministic typed retrieval via the system under test.
+"""`rac` arm — deterministic typed retrieval via AsDecided Core.
 
-This arm assembles grounding by calling RAC's deterministic, typed retrieval
+This arm assembles grounding by calling AsDecided Core's deterministic, typed retrieval
 surface rather than embedding similarity. It is the layer whose value the whole
 benchmark exists to test, so it gets NO special treatment: same answering model,
 same scaffold, one symmetric grounding opportunity.
 
-RAC is treated as an EXTERNAL TOOL, never a Python import (ADR-0001): the arm
-shells out to the pinned `rac` CLI (`rac find … --json`, `rac relationships …
+AsDecided Core is treated as an EXTERNAL TOOL, never a Python import (ADR-0001):
+the arm shells out to the pinned `decided` CLI (`decided find … --json`,
+`decided relationships …
 --json`). The thesis is that typed retrieval + relationship traversal preserves
 exactly what naive_rag severs — notably supersession — by FOLLOWING `supersedes`
 edges instead of hoping the superseding artifact lands in top-k.
 
-Requires the `rac` CLI on PATH (or set RAC_BIN). It does not run in the offline
-demo; install `rac` to include this arm in a comparison.
+Requires the `decided` CLI on PATH (or set DECIDED_BIN). It does not run in the
+offline demo; install AsDecided Core to include this arm in a comparison.
 """
 
 from __future__ import annotations
@@ -28,26 +29,26 @@ from functools import lru_cache
 from pathlib import Path
 
 
-def rac_version() -> str | None:
-    """Best-effort version of the `rac` CLI — the system under test.
+def core_version() -> str | None:
+    """Best-effort version of AsDecided Core — the system under test.
 
-    The benchmark pins rac only by convention, so without this two runs
-    against different rac builds produce indistinguishable reports. Returns
-    the stripped `rac --version` output, or None when the binary is absent
+    Without this, two runs against different Core builds produce
+    indistinguishable reports. Returns the stripped `decided --version` output,
+    or None when the binary is absent
     or the call fails: provenance must never break a run.
     """
-    return _rac_version(os.environ.get("RAC_BIN", "rac"))
+    return _core_version(os.environ.get("DECIDED_BIN", "decided"))
 
 
 @lru_cache(maxsize=8)
-def _rac_version(rac_bin: str) -> str | None:
+def _core_version(decided_bin: str) -> str | None:
     """One subprocess per resolved binary per process (see the lru_cache);
-    tests vary RAC_BIN and call `_rac_version.cache_clear()`."""
-    if shutil.which(rac_bin) is None:
+    tests vary DECIDED_BIN and call `_core_version.cache_clear()`."""
+    if shutil.which(decided_bin) is None:
         return None
     try:
         proc = subprocess.run(
-            [rac_bin, "--version"], capture_output=True, text=True, timeout=10
+            [decided_bin, "--version"], capture_output=True, text=True, timeout=10
         )
     except Exception:  # noqa: BLE001 - absence/misbehaviour is expected, not fatal
         return None
@@ -66,7 +67,7 @@ _STOP = {
 
 
 def _query_tokens(text: str) -> list[str]:
-    """Salient single terms for `rac find`, which substring-matches ID/title and
+    """Salient single terms for `decided find`, which matches ID/title and
     narrows on multi-word queries. Querying one term at a time and unioning the
     hits is the deterministic way to retrieve by topic over that surface."""
     seen: list[str] = []
@@ -130,26 +131,29 @@ class RacProvider(Provider):
 
     @staticmethod
     def _bin() -> str:
-        return os.environ.get("RAC_BIN", "rac")
+        return os.environ.get("DECIDED_BIN", "decided")
 
     def _run(self, *args: str) -> dict:
-        rac = self._bin()
-        if shutil.which(rac) is None:
+        decided = self._bin()
+        if shutil.which(decided) is None:
             raise RuntimeError(
-                f"rac CLI not found ({rac!r}). Install `rac` or set RAC_BIN to "
-                "include the rac arm. It does not run in the offline demo."
+                f"AsDecided Core CLI not found ({decided!r}). Install "
+                "`asdecided-core` or set DECIDED_BIN to include the rac arm. "
+                "It does not run in the offline demo."
             )
-        proc = subprocess.run([rac, *args], capture_output=True, text=True)
+        proc = subprocess.run([decided, *args], capture_output=True, text=True)
         if proc.returncode != 0:
             raise RuntimeError(
-                f"rac CLI failed ({rac} {' '.join(args)}): exit {proc.returncode}\n"
+                f"AsDecided Core CLI failed "
+                f"({decided} {' '.join(args)}): exit {proc.returncode}\n"
                 f"{proc.stderr.strip()}"
             )
         try:
             return json.loads(proc.stdout)
         except json.JSONDecodeError as exc:
             raise RuntimeError(
-                f"rac CLI returned non-JSON for ({rac} {' '.join(args)}): {exc}"
+                f"AsDecided Core CLI returned non-JSON for "
+                f"({decided} {' '.join(args)}): {exc}"
             ) from exc
 
     def _find_candidates(self, task: Task) -> list[str]:
@@ -170,15 +174,15 @@ class RacProvider(Provider):
         return sorted(order, key=lambda i: (-hits[i], order.index(i)))
 
     def prepare(self, corpus: list[CorpusArtifact]) -> None:
-        # Write the corpus to a temp dir so the external `rac` CLI can index it.
+        # Write the corpus to a temp dir so the external Core CLI can index it.
         self._by_id = {a.id: a for a in corpus}
-        tmp = Path(tempfile.mkdtemp(prefix="dg-rac-"))
+        tmp = Path(tempfile.mkdtemp(prefix="dg-asdecided-"))
         for a in corpus:
             (tmp / f"{a.id}.md").write_text(a.text, encoding="utf-8")
         self._dir = tmp
         # The corpus is written fresh every prepare(); clean up the previous temp
         # dir and ensure this one is removed when the provider is collected, so a
-        # long sweep does not leak a dg-rac-* directory per run.
+        # long sweep does not leak a dg-asdecided-* directory per run.
         self._cleanup()
         self._finalizer = weakref.finalize(self, shutil.rmtree, tmp, ignore_errors=True)
         self._grounding = GroundingContext(text="", artifacts_supplied=(), token_estimate=0)
@@ -195,10 +199,10 @@ class RacProvider(Provider):
         differ only in grounding granularity, never in retrieval."""
         if self._dir is None:
             raise RuntimeError("rac arm: prepare() must run before assemble()")
-        # 1. Typed candidate decisions. `rac find` substring-matches ID/title and
+        # 1. Typed candidate decisions. `decided find` matches ID/title and
         # ANDs multi-word queries, so we query one salient task term at a time and
         # union the hits, ranking by how many terms hit each decision (then by
-        # first appearance) — a deterministic topic search over rac's surface.
+        # first appearance) — a deterministic topic search over Core's surface.
         matched = self._find_candidates(task)
 
         # 2. Relationship graph → supersedes edges (source supersedes target).
@@ -226,12 +230,12 @@ class RacProvider(Provider):
 
 
 def _extract_supersedes_edges(rels_json: dict) -> list[tuple[str, str]]:
-    """Pull (source, target) supersedes pairs from `rac relationships --json`.
+    """Pull (source, target) pairs from `decided relationships --json`.
 
-    Defensive against shape drift across rac versions: handles both a flat
+    Defensive against shape drift across Core versions: handles both a flat
     relationships list (entries with relationship == "supersedes") and an
     artifacts[] report carrying a per-artifact `relationships.supersedes` list.
-    TODO(rac-arm): pin and verify against the installed rac version's JSON.
+    TODO(rac-arm): pin and verify against the installed Core version's JSON.
     """
     edges: list[tuple[str, str]] = []
 
@@ -242,8 +246,8 @@ def _extract_supersedes_edges(rels_json: dict) -> list[tuple[str, str]]:
                 edges.append((src, tgt))
 
     for art in rels_json.get("artifacts", []) or []:
-        # `rac relationships --json` identifies each artifact by `path`, not `id`
-        # (this rac build emits no `id` here). The arm writes the corpus as
+        # `decided relationships --json` identifies each artifact by `path`, not
+        # `id` (this Core build emits no `id` here). The arm writes the corpus as
         # `<id>.md`, so the file stem is the artifact id; prefer an explicit `id`
         # if a future rac version adds one.
         src = art.get("id") or Path(art.get("path", "")).stem or None

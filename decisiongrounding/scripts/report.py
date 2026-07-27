@@ -38,7 +38,7 @@ _ARM_DESC = {
     "naive_rag": "embeds the corpus and retrieves the top-k chunks (classic RAG)",
     "naive_rag_full": "cosine retrieval, but supplies each top hit's WHOLE artifact (whole-artifact granularity at equal retrieval)",
     "no_grounding": "supplies nothing — the answering model's parametric memory only (control)",
-    "rac": "supplies typed, supersession-aware grounding assembled by the rac CLI",
+    "rac": "supplies typed, supersession-aware grounding assembled by AsDecided Core",
     "rac_snippets": "rac's typed retrieval, but supplies section snippets under naive_rag's token budget (equal-budget typed retrieval)",
     "memory_provider": "a pluggable external memory provider (stub)",
 }
@@ -178,7 +178,7 @@ def _offline_cost_curve(dataset: dict, pool_dir=None, scen_dir=None) -> dict | N
     """Measure mean grounding tokens per (arm, N) WITHOUT answering calls.
     Reconstructs the same corpora as the crossover and only assembles grounding.
     Free: uses the local-hash embedder (token COUNT of top-k is ~embedder
-    independent) and the rac CLI. Returns {arm: {N: mean_tokens}} or None."""
+    independent) and AsDecided Core. Returns {arm: {N: mean_tokens}} or None."""
     from scenarios.loader import load_pool, load_scenarios
     from scoring.crossover import DISCRIMINATING, make_real_distractors
     from providers import build_provider, ScriptedAnsweringModel

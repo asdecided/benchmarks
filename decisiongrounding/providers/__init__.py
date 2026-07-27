@@ -42,7 +42,9 @@ from .rac import RacProvider, resolve_supersedes
 from .rac_snippets import RacSnippetsProvider
 
 # Real, runnable arms this pass: context_dump, naive_rag, no_grounding,
-# naive_rag_full (offline); rac, rac_snippets (need the external rac CLI).
+# naive_rag_full (offline); rac, rac_snippets (need AsDecided Core's external
+# `decided` CLI). The rac identifiers are stable experimental arm IDs, not
+# executable or product names.
 # naive_rag_full and rac_snippets are the token-budget parity variants that
 # complete the 2x2 (retrieval method x grounding granularity).
 # memory_provider is a typed stub.

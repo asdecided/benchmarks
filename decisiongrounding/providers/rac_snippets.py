@@ -7,15 +7,16 @@ ITEMS, not in grounding budget: `rac` supplies up to 4 WHOLE artifacts
 naive_rag comparison: does typed, supersession-aware retrieval help, and
 does dumping whole artifacts help or hurt?
 
-This arm isolates the first. It runs rac's exact typed retrieval
+This arm isolates the first. It runs AsDecided Core's exact typed retrieval
 (`RacProvider._resolve` — same candidates, same supersedes traversal, same
 top_k), then presents the resolved artifacts as SECTION SNIPPETS under a
 token budget matched to naive_rag's typical grounding size — so `rac_snippets`
 vs `naive_rag` compares retrieval method at an equal budget, and `rac_snippets`
 vs `rac` compares snippet vs whole-artifact granularity at equal retrieval.
 
-Requires the `rac` CLI (inherits `RacProvider`); does not run in the offline
-demo. See the 2×2 with `naive_rag_full` (cosine retrieval, whole artifacts).
+Requires the `decided` CLI (inherits `RacProvider`); does not run in the
+offline demo. See the 2×2 with `naive_rag_full` (cosine retrieval, whole
+artifacts).
 """
 
 from __future__ import annotations

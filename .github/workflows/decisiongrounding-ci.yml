@@ -3,7 +3,7 @@ name: decisiongrounding CI
 # The decisiongrounding benchmark arrived from its standalone repository with
 # its workflow at decisiongrounding/.github/workflows/ci.yml — a path GitHub
 # does not read in a subdirectory. This root workflow re-homes those same jobs
-# (test matrix, offline demo smoke, rac corpus gate) unchanged in substance,
+# (test matrix, offline demo smoke, live AsDecided arm smoke, corpus gate)
 # scoped to the subdirectory.
 
 on:
@@ -48,10 +48,10 @@ jobs:
       - name: Smoke the offline demo
         run: python -m runner.cli demo
 
-  corpus:
-    # Dogfood RAC: enforce the benchmark's own knowledge corpus the same way
-    # the benchmark studies — validation, relationships, and review must pass.
-    name: rac corpus gate
+  asdecided-core:
+    # Exercise the actual Rust system-under-test boundary and enforce the
+    # benchmark's own knowledge corpus.
+    name: AsDecided Core integration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -64,6 +64,15 @@ jobs:
 
       - name: Install AsDecided
         run: bash ../.github/scripts/install-asdecided.sh 0.23.1
+
+      - name: Install benchmark
+        run: pip install -e ".[dev,schema]"
+
+      - name: Smoke the AsDecided whole-artifact arm
+        run: python -m runner.cli run --arm rac --scenarios scenarios --out /tmp/dg-core-smoke
+
+      - name: Smoke the AsDecided snippet arm
+        run: python -m runner.cli run --arm rac_snippets --scenarios scenarios --out /tmp/dg-core-snippets-smoke
 
       - name: Gate the RAC corpus (validate + relationships + review)
         run: decided gate rac

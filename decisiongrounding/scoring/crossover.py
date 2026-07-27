@@ -27,7 +27,7 @@ from typing import Callable
 
 from providers import build_provider, make_answering_model
 from providers.answering import error_kind, usage_dict
-from providers.rac import rac_version
+from providers.rac import core_version
 from providers.base import SCAFFOLD, ContextWindowExceededError, CorpusArtifact, check_context_window
 from scenarios.loader import Scenario
 from scoring.metrics import summarize
@@ -208,10 +208,14 @@ def _envelope(discriminating, use_real, pool, seed, ns, model_version, embedder_
         "ns": list(ns),
         "answering_model": model_version,
         "embedder": embedder_spec,
-        # Version of the system under test. None when no rac-based arm is in
-        # this curve — a rac version on a curve that never ran rac would be
-        # noise, and None states explicitly that rac was not in play.
-        "rac_version": rac_version() if {"rac", "rac_snippets"} & set(arms) else None,
+        # Structured system-under-test provenance. None when no AsDecided arm is
+        # in this curve; product and binary names remain independent of stable
+        # historical arm IDs as this suite evolves toward SWE-DecisionGrounding.
+        "system_under_test": {
+            "product": "AsDecided Core",
+            "binary": "decided",
+            "version": core_version(),
+        } if {"rac", "rac_snippets"} & set(arms) else None,
         # Provenance so the cost-vs-N curve can be recomputed offline (no spend).
         "pool_dir": pool_dir,
         "scenarios_dir": scenarios_dir,
@@ -464,7 +468,7 @@ def build_dataset_batched(
 ) -> dict:
     """Same adherence-vs-N curve as build_dataset, but the held-constant answering
     calls go through the Message Batches API (≈50% of standard price, and it runs
-    server-side so it survives a client restart). Grounding assembly (rac CLI /
+    server-side so it survives a client restart). Grounding assembly (AsDecided Core /
     embeddings) still happens locally up front; only the answering is batched.
 
     Pinned to the claude model — the offline stub has nothing to batch.

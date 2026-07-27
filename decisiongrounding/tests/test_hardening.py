@@ -44,11 +44,11 @@ def test_preflight_claude_without_backend_fails_fast(monkeypatch):
 
 
 def test_preflight_rac_arm_without_cli_fails_fast(monkeypatch):
-    # Point RAC_BIN at something guaranteed absent so the check is hermetic.
-    monkeypatch.setenv("RAC_BIN", "definitely-not-a-real-binary-xyz")
+    # Point DECIDED_BIN at something guaranteed absent so the check is hermetic.
+    monkeypatch.setenv("DECIDED_BIN", "definitely-not-a-real-binary-xyz")
     with pytest.raises(SystemExit) as exc:
         _preflight(("rac",), "offline-stub", "local-hash")
-    assert "rac" in str(exc.value)
+    assert "AsDecided Core" in str(exc.value)
 
 
 def test_preflight_offline_default_passes(monkeypatch):

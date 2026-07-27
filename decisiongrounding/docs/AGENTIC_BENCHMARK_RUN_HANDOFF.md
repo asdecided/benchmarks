@@ -77,7 +77,7 @@ Either way:
   Never push to main.
 - Install: `pip install -e ".[real,schema,chart]"`. The `rac` arm needs the `rac`
   CLI on PATH (`brew install asdecided/tap/asdecided-core`, then
-  `export RAC_BIN=decided`). Alternatively `./scripts/from_source.sh` does venv + install + loads
+  `export DECIDED_BIN=decided`). Alternatively `./scripts/from_source.sh` does venv + install + loads
   keys from .env + probe + run in one go; the granular steps below are recommended
   for the first real run so you can inspect each stage.
 
