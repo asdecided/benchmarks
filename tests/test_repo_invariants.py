@@ -12,14 +12,14 @@ from conftest import BENCHMARKS, REPO_ROOT
 _ENGINE_IMPORT = re.compile(r"^\s*(?:import\s+rac\b|from\s+rac\b)", re.MULTILINE)
 
 
-# Non-gated evidence-run subdirs are inside the engine boundary too.
-EVIDENCE_DIRS = ("gitchameleon",)
+# Suites with custom input shapes are inside the engine boundary too.
+CUSTOM_INPUT_DIRS = ("gitchameleon", "sentry")
 
 
 def _suite_python_files():
     yield from (REPO_ROOT / "harness").rglob("*.py")
     yield from (REPO_ROOT / "tests").rglob("*.py")
-    for bench in BENCHMARKS + EVIDENCE_DIRS:
+    for bench in BENCHMARKS + CUSTOM_INPUT_DIRS:
         yield from (REPO_ROOT / bench).rglob("*.py")
 
 
@@ -57,3 +57,13 @@ def test_every_benchmark_ships_its_committed_inputs():
             assert (root / required).is_file(), f"{bench}/{required} missing"
         assert (root / "corpus").is_dir(), f"{bench}/corpus missing"
         assert (root / "decisions").is_dir(), f"{bench}/decisions missing"
+
+
+def test_sentry_benchmark_ships_its_committed_inputs():
+    root = REPO_ROOT / "sentry"
+    for required in ("run.py", "cases.json", "baseline.json", "config.json", "README.md"):
+        assert (root / required).is_file(), f"sentry/{required} missing"
+    assert (root / "corpus").is_dir()
+    assert (root / "repository").is_dir()
+    assert (root / "decisions").is_dir()
+    assert (root / "requirements").is_dir()

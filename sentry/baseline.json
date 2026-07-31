@@ -1,0 +1,46 @@
+{
+  "overall": {
+    "conformance": 1.0,
+    "cases_passed": 63,
+    "cases_total": 63,
+    "negative_violations": 0,
+    "violation_recall": 1.0,
+    "clean_pass_rate": 1.0,
+    "attribution_accuracy": 1.0,
+    "sarif_accuracy": 1.0,
+    "gate_parity": 1.0,
+    "byte_determinism": 1.0
+  },
+  "by_category": {
+    "clean": {
+      "conformance": 1.0
+    },
+    "diff_isolation": {
+      "conformance": 1.0
+    },
+    "forbid_import_javascript": {
+      "conformance": 1.0
+    },
+    "forbid_import_python": {
+      "conformance": 1.0
+    },
+    "forbid_import_rust": {
+      "conformance": 1.0
+    },
+    "forbid_pattern": {
+      "conformance": 1.0
+    },
+    "invalid_constraint": {
+      "conformance": 1.0
+    },
+    "reporting": {
+      "conformance": 1.0
+    },
+    "require_pattern": {
+      "conformance": 1.0
+    },
+    "unsupported_language": {
+      "conformance": 1.0
+    }
+  }
+}

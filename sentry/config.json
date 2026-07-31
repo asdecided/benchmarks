@@ -1,0 +1,15 @@
+{
+  "tolerance": 0.0,
+  "floors": {
+    "negative_violations": 0,
+    "overall": {
+      "conformance": 1.0,
+      "violation_recall": 1.0,
+      "clean_pass_rate": 1.0,
+      "attribution_accuracy": 1.0,
+      "sarif_accuracy": 1.0,
+      "gate_parity": 1.0,
+      "byte_determinism": 1.0
+    }
+  }
+}
