@@ -51,3 +51,6 @@ jobs:
           for bench in search-artifacts find-decisions get-artifact get-related get-summary sentry; do
             python "$bench/run.py" --check
           done
+
+      - name: Verify Sentry at the supported 5,000-decision scale
+        run: python sentry/run.py --scale --corpus-size 5000

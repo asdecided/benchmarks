@@ -366,6 +366,159 @@ def _percentile(values: list[float], percentile: float) -> float:
     return ordered[index]
 
 
+def _scale_decision(index: int) -> str:
+    artifact_id = f"SCL-{index:012d}"
+    return f"""---
+schema_version: 1
+id: {artifact_id}
+type: decision
+tags: [fixture, scale]
+---
+# Decision: Scale Fixture {index:05d}
+
+## Status
+
+Accepted
+
+## Context
+
+This deterministic artifact expands the SentryBench corpus.
+
+## Decision
+
+Keep this synthetic decision outside machine-checkable source enforcement.
+
+## Consequences
+
+Sentry must classify it without producing a code finding.
+
+## Code Constraints
+
+```yaml
+version: 1
+eligibility: ineligible
+reason: "Synthetic scale fixture has no source-code constraint."
+```
+
+## Category
+
+Process
+"""
+
+
+def _expand_corpus(corpus: Path, corpus_size: int) -> None:
+    existing = len(list(corpus.rglob("*.md")))
+    if corpus_size < existing:
+        raise UsageError(
+            f"--corpus-size must be at least {existing} for the committed fixture"
+        )
+    scale = corpus / "scale"
+    scale.mkdir(exist_ok=True)
+    for index in range(1, corpus_size - existing + 1):
+        (scale / f"decision-{index:05d}.md").write_text(
+            _scale_decision(index), encoding="utf-8"
+        )
+
+
+def _timed_invoke(
+    executable: str,
+    cwd: Path,
+    mode: str,
+    base: str,
+    *,
+    surface: str = "sentry",
+) -> tuple[Invocation, float]:
+    started = time.perf_counter_ns()
+    result = _invoke(executable, cwd, mode, base, surface=surface)
+    elapsed_ms = (time.perf_counter_ns() - started) / 1_000_000
+    return result, round(elapsed_ms, 3)
+
+
+def run_scale(executable: str, corpus_size: int) -> dict[str, Any]:
+    if shutil.which(executable) is None:
+        raise UsageError(f"'{executable}' not found on PATH")
+    cases = {case["id"]: case for case in _load_cases(BENCHMARK_DIR / "cases.json")}
+    with tempfile.TemporaryDirectory(prefix="sentrybench-scale-") as raw:
+        parent = Path(raw)
+        corpus, repository, base = _prepare(cases["C01"], parent)
+        _expand_corpus(corpus, corpus_size)
+
+        clean, clean_ms = _timed_invoke(executable, parent, "full", base)
+        clean_payload = clean.payload()
+
+        _write_files(
+            repository,
+            {"src/sql/users.sql": "SELECT 1;\nDELETE FROM users WHERE id = 1;\n"},
+        )
+        _git(repository, "add", "-N", ".")
+        full, full_ms = _timed_invoke(executable, parent, "full", base)
+        diff, diff_ms = _timed_invoke(executable, parent, "diff", base)
+        gate, gate_ms = _timed_invoke(
+            executable, parent, "diff", base, surface="gate"
+        )
+        repeated = _invoke(executable, parent, "diff", base)
+
+        full_payload = full.payload()
+        diff_payload = diff.payload()
+        gate_payload = gate.payload()
+        expected_finding = {
+            "code": "code-constraint-violation",
+            "decision_path": "corpus/enforcement.md",
+            "rule_id": "no-hard-delete",
+            "path": "src/sql/users.sql",
+            "line": 2,
+        }
+        expected_projection = {
+            "code": expected_finding["code"],
+            "path": expected_finding["path"],
+            "line": expected_finding["line"],
+        }
+        expected_coverage = {
+            "live_decisions": corpus_size,
+            "classified_decisions": corpus_size - 1,
+            "unclassified_decisions": 1,
+            "eligible_decisions": 1,
+            "constrained_decisions": 1,
+            "active_rules": 6,
+            "percent": 100.0 / corpus_size,
+            "metric": "corpus_adoption",
+            "corpus_adoption_percent": 100.0 / corpus_size,
+            "eligible_coverage_percent": 100.0,
+        }
+        checks = {
+            "corpus_size": clean_payload.get("coverage", {}).get("live_decisions")
+            == corpus_size,
+            "coverage_accounting": clean_payload.get("coverage") == expected_coverage,
+            "clean_full": clean.exit_code == 0
+            and clean_payload.get("ok") is True
+            and _normalise_findings(clean_payload) == [],
+            "violation_full": full.exit_code == 1
+            and _normalise_findings(full_payload) == [expected_finding],
+            "violation_diff": diff.exit_code == 1
+            and _normalise_findings(diff_payload) == [expected_finding],
+            "gate_parity": gate.exit_code == 1
+            and _sentry_gate_projection(gate_payload) == [expected_projection]
+            and gate_payload.get("code_coverage") == expected_coverage,
+            "byte_determinism": repeated.exit_code == diff.exit_code
+            and repeated.stdout == diff.stdout
+            and repeated.stderr == diff.stderr,
+        }
+        return {
+            "schema_version": "1",
+            "benchmark": "sentry-scale",
+            "engine": _version(executable),
+            "corpus_size": corpus_size,
+            "passed": all(checks.values()),
+            "checks": checks,
+            "profiles": {
+                "clean_full": {"elapsed_ms": clean_ms},
+                "violation_full": {"elapsed_ms": full_ms},
+                "violation_diff": {"elapsed_ms": diff_ms},
+                "gate_diff": {"elapsed_ms": gate_ms},
+            },
+        }
+
+
 def run_performance(executable: str, iterations: int) -> dict[str, Any]:
     if iterations < 1:
         raise UsageError("--iterations must be at least 1")
@@ -403,11 +556,13 @@ def _parser() -> argparse.ArgumentParser:
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--update-baseline", action="store_true")
     mode.add_argument("--performance", action="store_true")
+    mode.add_argument("--scale", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--cases", type=Path, default=BENCHMARK_DIR / "cases.json")
     parser.add_argument("--baseline", type=Path, default=BENCHMARK_DIR / "baseline.json")
     parser.add_argument("--config", type=Path, default=BENCHMARK_DIR / "config.json")
     parser.add_argument("--iterations", type=int, default=10)
+    parser.add_argument("--corpus-size", type=int, default=5000)
     return parser
 
 
@@ -415,6 +570,10 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     executable = os.environ.get("RAC_BIN", "decided")
     try:
+        if args.scale:
+            report = run_scale(executable, args.corpus_size)
+            print(json.dumps(report, indent=2))
+            return 0 if report["passed"] else 1
         if args.performance:
             print(json.dumps(run_performance(executable, args.iterations), indent=2))
             return 0

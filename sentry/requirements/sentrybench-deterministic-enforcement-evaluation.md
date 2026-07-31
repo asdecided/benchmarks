@@ -29,6 +29,7 @@ coverage.
 - [REQ-009] Invalid constraints and unsupported selected import languages MUST fail closed.
 - [REQ-010] Performance measurements MUST remain outside the scored metrics block.
 - [REQ-011] The gate MUST require perfect conformance, violation recall, clean-pass rate, attribution, report accuracy, parity, and determinism.
+- [REQ-012] A generated 5,000-decision corpus profile MUST preserve clean and violating enforcement outcomes, attribution, coverage accounting, composed-gate parity, and byte determinism.
 
 ## Success Metrics
 
@@ -36,12 +37,14 @@ coverage.
 - Violation recall and clean-patch pass rate are both 1.0.
 - Attribution, SARIF, gate parity, and determinism are all 1.0.
 - A deliberately contradicted case fails the benchmark gate.
+- The supported-scale profile passes with exactly 5,000 live decisions.
 
 ## Risks
 
 - Synthetic fixtures may be easier than real repositories; mutation and external-repository tranches must follow.
 - Regex rules can be correct for a fixture but too broad for production; every rule therefore needs a near-neighbour allow case.
 - Runtime measurements vary by host; they are diagnostic until a controlled runner profile is established.
+- Synthetic scale decisions exercise corpus traversal and classification but do not approximate the semantic diversity of 5,000 independently authored decisions.
 - The composed gate does not yet expose Sentry decision and rule fields; parity is limited to code, path, line, outcome, and coverage until that payload grows additively.
 
 ## Assumptions
