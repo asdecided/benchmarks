@@ -32,14 +32,14 @@ jobs:
           cache: pip
 
       - name: Install AsDecided (external CLI on PATH, never an import)
-        run: bash .github/scripts/install-asdecided.sh 0.23.1
+        run: bash .github/scripts/install-asdecided.sh 0.26.0
 
       - name: Install the harness
         run: pip install -e ".[dev]"
 
       - name: Validate every fixture corpus
         run: |
-          for bench in search-artifacts find-decisions get-artifact get-related get-summary; do
+          for bench in search-artifacts find-decisions get-artifact get-related get-summary sentry; do
             decided validate "$bench/corpus"
           done
 
@@ -48,6 +48,6 @@ jobs:
 
       - name: Gate every benchmark against its committed baseline
         run: |
-          for bench in search-artifacts find-decisions get-artifact get-related get-summary; do
+          for bench in search-artifacts find-decisions get-artifact get-related get-summary sentry; do
             python "$bench/run.py" --check
           done
