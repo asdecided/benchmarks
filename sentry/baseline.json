@@ -1,8 +1,8 @@
 {
   "overall": {
     "conformance": 1.0,
-    "cases_passed": 63,
-    "cases_total": 63,
+    "cases_passed": 80,
+    "cases_total": 80,
     "negative_violations": 0,
     "violation_recall": 1.0,
     "clean_pass_rate": 1.0,
@@ -15,7 +15,13 @@
     "clean": {
       "conformance": 1.0
     },
+    "coverage": {
+      "conformance": 1.0
+    },
     "diff_isolation": {
+      "conformance": 1.0
+    },
+    "fail_closed": {
       "conformance": 1.0
     },
     "forbid_import_javascript": {
@@ -31,6 +37,9 @@
       "conformance": 1.0
     },
     "invalid_constraint": {
+      "conformance": 1.0
+    },
+    "multi_finding": {
       "conformance": 1.0
     },
     "reporting": {

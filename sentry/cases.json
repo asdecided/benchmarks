@@ -580,6 +580,185 @@
       "mode": "full",
       "sarif": true,
       "expected_findings": []
+    },
+
+    {
+      "id": "C13",
+      "category": "clean",
+      "mode": "full",
+      "changes": {"src/service.py": "# import sqlalchemy\nvalue = \"from psycopg import connect\"\n"},
+      "expected_findings": []
+    },
+    {
+      "id": "C14",
+      "category": "clean",
+      "mode": "full",
+      "changes": {"src/domain.rs": "// use sqlx::Pool;\nconst IMPORT: &str = \"diesel::Connection\";\n"},
+      "expected_findings": []
+    },
+    {
+      "id": "C15",
+      "category": "clean",
+      "mode": "full",
+      "changes": {"src/index.ts": "const packageName = \"pg\";\nconst packageExample = \"typeorm\";\n"},
+      "expected_findings": []
+    },
+    {
+      "id": "C16",
+      "category": "clean",
+      "mode": "full",
+      "changes": {"scripts/users.sql": "DELETE FROM users WHERE id = 1;\n"},
+      "expected_findings": []
+    },
+    {
+      "id": "C17",
+      "category": "clean",
+      "mode": "full",
+      "changes": {"tools/service.py": "import sqlalchemy\n"},
+      "expected_findings": []
+    },
+    {
+      "id": "C18",
+      "category": "clean",
+      "mode": "full",
+      "changes": {"src/index.ts": "import client from \"pg-native\";\n"},
+      "expected_findings": []
+    },
+    {
+      "id": "C19",
+      "category": "coverage",
+      "mode": "full",
+      "constraint_yaml": "version: 1\neligibility: eligible\nrules: []",
+      "expected_coverage": {
+        "live_decisions": 3,
+        "classified_decisions": 2,
+        "unclassified_decisions": 1,
+        "eligible_decisions": 1,
+        "constrained_decisions": 0,
+        "active_rules": 0,
+        "percent": 0.0,
+        "eligible_coverage_percent": 0.0
+      },
+      "expected_findings": []
+    },
+    {
+      "id": "M01",
+      "category": "multi_finding",
+      "mode": "full",
+      "changes": {
+        "src/domain.rs": "use sqlx::Pool;\n",
+        "src/index.ts": "import { Client } from \"pg\";\n",
+        "src/service.py": "from sqlalchemy.orm import Session\n",
+        "src/sql/users.sql": "SELECT 1;\nDELETE FROM users WHERE id = 1;\nDELETE FROM users WHERE id = 2;\n"
+      },
+      "violation": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-rust-db-import", "path": "src/domain.rs", "line": 1},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-js-db-import", "path": "src/index.ts", "line": 1},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-python-db-import", "path": "src/service.py", "line": 1},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-hard-delete", "path": "src/sql/users.sql", "line": 2},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-hard-delete", "path": "src/sql/users.sql", "line": 3}
+      ]
+    },
+    {
+      "id": "M02",
+      "category": "multi_finding",
+      "mode": "diff",
+      "changes": {
+        "src/nested/one.py": "import sqlalchemy\n",
+        "src/nested/two.py": "import psycopg\n"
+      },
+      "violation": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-python-db-import", "path": "src/nested/one.py", "line": 1},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-python-db-import", "path": "src/nested/two.py", "line": 1}
+      ]
+    },
+    {
+      "id": "M03",
+      "category": "multi_finding",
+      "mode": "full",
+      "changes": {"src/service.py": "import sqlalchemy, psycopg\n"},
+      "violation": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-python-db-import", "path": "src/service.py", "line": 1},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-python-db-import", "path": "src/service.py", "line": 1}
+      ]
+    },
+    {
+      "id": "M04",
+      "category": "multi_finding",
+      "mode": "full",
+      "changes": {"src/index.ts": "import { Client } from \"pg\";\nconst orm = require(\"typeorm\");\n"},
+      "violation": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-js-db-import", "path": "src/index.ts", "line": 1},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-js-db-import", "path": "src/index.ts", "line": 2}
+      ]
+    },
+    {
+      "id": "M05",
+      "category": "multi_finding",
+      "mode": "diff",
+      "changes": {"src/sql/users.sql": "DELETE FROM users WHERE id = 1;\nDELETE FROM users WHERE id = 2;\n"},
+      "violation": true,
+      "sarif": true,
+      "gate_parity": true,
+      "byte_stable": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-hard-delete", "path": "src/sql/users.sql", "line": 1},
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-hard-delete", "path": "src/sql/users.sql", "line": 2}
+      ]
+    },
+    {
+      "id": "D09",
+      "category": "diff_isolation",
+      "mode": "diff",
+      "base_changes": {"src/sql/users.sql": "DELETE FROM users WHERE id = 1;\n"},
+      "changes": {"src/sql/users.sql": "DELETE FROM users WHERE id = 1;\nDELETE FROM users WHERE id = 2;\n"},
+      "violation": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-hard-delete", "path": "src/sql/users.sql", "line": 2}
+      ]
+    },
+    {
+      "id": "D10",
+      "category": "diff_isolation",
+      "mode": "diff",
+      "base_changes": {"src/service.py": "import sqlalchemy\n"},
+      "changes": {"src/service.py": "import sqlalchemy\nimport psycopg\n"},
+      "violation": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-python-db-import", "path": "src/service.py", "line": 2}
+      ]
+    },
+    {
+      "id": "D11",
+      "category": "diff_isolation",
+      "mode": "diff",
+      "base_changes": {"src/index.ts": "import { Client } from \"pg\";\n"},
+      "changes": {"src/index.ts": "import { Client } from \"pg\";\nimport { DataSource } from \"typeorm\";\n"},
+      "violation": true,
+      "expected_findings": [
+        {"code": "code-constraint-violation", "decision_path": "corpus/enforcement.md", "rule_id": "no-js-db-import", "path": "src/index.ts", "line": 2}
+      ]
+    },
+    {
+      "id": "F01",
+      "category": "fail_closed",
+      "mode": "full",
+      "constraint_yaml": "version: 1\neligibility: eligible\nrules:\n  - id: missing-required-file\n    kind: require_pattern\n    path_glob: \"src/missing.rs\"\n    pattern: \"pub fn required\"\n    message: \"Required source file must exist.\"",
+      "expected_findings": [
+        {"code": "code-constraint-empty-match", "decision_path": "corpus/enforcement.md", "rule_id": "missing-required-file", "path": "corpus/enforcement.md", "line": null}
+      ]
+    },
+    {
+      "id": "F02",
+      "category": "fail_closed",
+      "mode": "diff",
+      "constraint_yaml": "version: 1\neligibility: eligible\nrules:\n  - id: missing-required-file\n    kind: require_pattern\n    path_glob: \"src/missing.rs\"\n    pattern: \"pub fn required\"\n    message: \"Required source file must exist.\"",
+      "changes": {"docs/readme.md": "# Fixture service\n\nUnrelated diff.\n"},
+      "expected_findings": []
     }
   ]
 }

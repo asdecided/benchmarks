@@ -33,8 +33,8 @@ def scorecard() -> dict:
 def test_sentry_scorecard_is_perfect():
     card = scorecard()
     overall = card["metrics"]["overall"]
-    assert overall["cases_total"] == 63
-    assert overall["cases_passed"] == 63
+    assert overall["cases_total"] == 80
+    assert overall["cases_passed"] == 80
     for metric in (
         "conformance",
         "violation_recall",
@@ -93,3 +93,25 @@ def test_sentry_performance_is_diagnostic_only():
     for profile in report["profiles"].values():
         assert profile["median_ms"] > 0
         assert profile["p95_ms"] > 0
+
+
+def test_sentry_scale_profile_preserves_contract():
+    completed = run_sentry("--scale", "--corpus-size", "25")
+    assert completed.returncode == 0, completed.stderr
+    report = json.loads(completed.stdout)
+    assert report["benchmark"] == "sentry-scale"
+    assert report["corpus_size"] == 25
+    assert report["passed"] is True
+    assert all(report["checks"].values())
+    assert set(report["profiles"]) == {
+        "clean_full",
+        "violation_full",
+        "violation_diff",
+        "gate_diff",
+    }
+
+
+def test_sentry_scale_rejects_too_small_corpus():
+    completed = run_sentry("--scale", "--corpus-size", "2")
+    assert completed.returncode == 2
+    assert "--corpus-size must be at least 3" in completed.stderr

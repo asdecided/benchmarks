@@ -43,14 +43,20 @@ SentryBench is a contract-shaped benchmark consumed through the published
    metadata and are never collapsed into correctness.
 7. Wall-clock performance is a separate, non-scored mode. Correctness metrics
    contain no clock, network, randomness, embedding, or model output.
+8. Supported-scale evidence runs the same enforcement contract against a
+   deterministically generated 5,000-decision corpus. Generated scale fixtures
+   are temporary; corpus size, findings, attribution, coverage, parity, and
+   repeated output are checked, while elapsed time remains diagnostic.
 
 ## Consequences
 
 The benchmark can block a semantic enforcement regression without importing
 Core internals or using an LLM judge. Fixture expansion is additive. Timing
 results can guide performance work but cannot make an unchanged correctness run
-non-deterministic. Gate-level decision and rule provenance remains an explicit
-follow-up rather than an inferred capability.
+non-deterministic. The 5,000-decision profile proves the supported corpus scale
+without committing thousands of repetitive artifacts. Gate-level decision and
+rule provenance remains an explicit follow-up rather than an inferred
+capability.
 
 ## Related Requirements
 

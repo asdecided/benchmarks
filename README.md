@@ -23,7 +23,7 @@ corpus.
 | [`get-artifact/`](get-artifact/) | Exact-id resolution contract: alias and case-insensitive hits, duplicate and not-found error shapes. Conformance gated at 1.0. |
 | [`get-related/`](get-related/) | Relationship-edge retrieval: exact incoming AND outgoing edge sets per artifact. Conformance gated at 1.0. |
 | [`get-summary/`](get-summary/) | Portfolio summary contract: counts by type, empty-corpus shape, byte stability. Conformance gated at 1.0. |
-| [`sentry/`](sentry/) | Deterministic decision-to-code enforcement: violation recall, clean-pass behaviour, attribution, diff isolation, SARIF, gate parity, and byte determinism. |
+| [`sentry/`](sentry/) | Deterministic decision-to-code enforcement: 80 contract cases plus generated 5,000-decision scale evidence for recall, clean-pass behaviour, attribution, diff isolation, SARIF, gate parity, and byte determinism. |
 | [`gitchameleon/`](gitchameleon/) | External evidence run (scaffold): does grounding in recorded version-pin decisions improve version-correct codegen on GitChameleon 2.0? Upstream executable-test scoring; never a merge gate. |
 
 ## Shared harness

@@ -16,8 +16,9 @@ This is not a retrieval benchmark. It scores enforcement correctness:
 - `decided sentry` / `decided gate --code` parity over their shared projection
 - byte-identical JSON on repeated unchanged runs
 
-The initial frozen set contains 63 contract cases, including 30 seeded
-violations and close-neighbour allow cases.
+The frozen set contains 80 contract cases, including 38 seeded violations,
+multi-finding and ordering cases, diff-isolation edges, fail-closed behaviour,
+and close-neighbour allow cases.
 
 The committed fixture includes an eligible constrained decision, an explicitly
 ineligible decision, and an intentionally unclassified decision. Coverage is
@@ -36,6 +37,21 @@ Set `RAC_BIN` to test a particular native executable:
 ```sh
 RAC_BIN=/path/to/decided python3 sentry/run.py --check
 ```
+
+## Supported-scale evidence
+
+The scale profile deterministically generates a 5,000-decision corpus, then
+checks clean and violating full-tree runs, a violating diff, composed-gate
+parity, attribution, coverage accounting, and byte stability:
+
+```sh
+python3 sentry/run.py --scale
+python3 sentry/run.py --scale --corpus-size 5000
+```
+
+The generated corpus is temporary: the repository does not carry 5,000
+low-information fixture files. The profile reports elapsed time for each
+surface, but correctness does not depend on a wall-clock threshold.
 
 ## Performance evidence
 
