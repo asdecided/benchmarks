@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import json
 import os
+import time
+import urllib.error
 import urllib.request
 
 # The held-constant instruction every arm shares; the task prompt itself is
@@ -32,6 +34,7 @@ SYSTEM = (
 
 PINNED_CLAUDE = "claude-opus-4-8"
 MAX_TOKENS = 2048
+MAX_ATTEMPTS = 5
 
 
 def _compose_user_prompt(prompt: str, grounding: list[str]) -> str:
@@ -67,7 +70,9 @@ class ClaudeModel:
     version = PINNED_CLAUDE
 
     def __init__(self, seed: int = 0):
-        self.seed = seed  # recorded for provenance; the pinned model rejects sampling seeds
+        self.seed = (
+            seed  # recorded for provenance; the pinned model rejects sampling seeds
+        )
         if not os.environ.get("ANTHROPIC_API_KEY"):
             raise SystemExit("the claude answering model needs ANTHROPIC_API_KEY")
         self._client = None
@@ -80,13 +85,36 @@ class ClaudeModel:
         return self._client
 
     def complete(self, prompt: str, grounding: list[str]) -> str:
-        msg = self._ensure_client().messages.create(
-            model=self.version,
-            max_tokens=MAX_TOKENS,
-            system=SYSTEM,
-            messages=[{"role": "user", "content": _compose_user_prompt(prompt, grounding)}],
+        import anthropic
+
+        retryable = (
+            anthropic.RateLimitError,
+            anthropic.APIConnectionError,
+            anthropic.InternalServerError,
         )
-        return "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
+        for attempt in range(MAX_ATTEMPTS):
+            try:
+                msg = self._ensure_client().messages.create(
+                    model=self.version,
+                    max_tokens=MAX_TOKENS,
+                    system=SYSTEM,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": _compose_user_prompt(prompt, grounding),
+                        }
+                    ],
+                )
+                return "".join(
+                    block.text
+                    for block in msg.content
+                    if getattr(block, "type", "") == "text"
+                )
+            except retryable:
+                if attempt + 1 == MAX_ATTEMPTS:
+                    raise
+                time.sleep(min(2**attempt, 30))
+        raise AssertionError("unreachable")
 
 
 class LiteLLMModel:
@@ -112,7 +140,10 @@ class LiteLLMModel:
                 "max_tokens": MAX_TOKENS,
                 "messages": [
                     {"role": "system", "content": SYSTEM},
-                    {"role": "user", "content": _compose_user_prompt(prompt, grounding)},
+                    {
+                        "role": "user",
+                        "content": _compose_user_prompt(prompt, grounding),
+                    },
                 ],
             }
         ).encode("utf-8")
@@ -124,9 +155,23 @@ class LiteLLMModel:
                 "Authorization": f"Bearer {self._key}",
             },
         )
-        with urllib.request.urlopen(req, timeout=300) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
-        return payload["choices"][0]["message"]["content"]
+        for attempt in range(MAX_ATTEMPTS):
+            try:
+                with urllib.request.urlopen(req, timeout=300) as resp:
+                    payload = json.loads(resp.read().decode("utf-8"))
+                return payload["choices"][0]["message"]["content"]
+            except urllib.error.HTTPError as exc:
+                retryable = exc.code == 429 or 500 <= exc.code < 600
+                if not retryable or attempt + 1 == MAX_ATTEMPTS:
+                    raise
+                retry_after = exc.headers.get("Retry-After")
+                delay = float(retry_after) if retry_after else min(2**attempt, 30)
+                time.sleep(delay)
+            except urllib.error.URLError:
+                if attempt + 1 == MAX_ATTEMPTS:
+                    raise
+                time.sleep(min(2**attempt, 30))
+        raise AssertionError("unreachable")
 
 
 def make_answering_model(name: str, seed: int = 0):

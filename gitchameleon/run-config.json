@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "status": "preregistered-not-run",
+  "arms": [
+    "no_grounding",
+    "asdecided",
+    "naive_rag"
+  ],
+  "seed": 0,
+  "dataset": {
+    "id": "cabbage972/GitChameleon-2.0",
+    "revision": "799a6a33e572a07a8985914e7251f5dea54b0ac4",
+    "rows": 328,
+    "rows_hash": "sha256:5fb3b2be20f180be0842950ad96d5c19a92b9cf96c45eb2896addc8c0479ece3",
+    "source_file": "dataset.jsonl"
+  },
+  "answering": {
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "max_tokens": 2048
+  },
+  "naive_rag": {
+    "provider": "voyage",
+    "model": "voyage-4-large",
+    "top_k": 3,
+    "similarity": "cosine",
+    "document_input_type": "document",
+    "query_input_type": "query",
+    "truncation": false
+  },
+  "asdecided": {
+    "executable": "decided",
+    "minimum_version": "0.26.2",
+    "top_k": 3
+  },
+  "upstream_harness": {
+    "repository": "https://github.com/mrcabbage972/GitChameleonBenchmark",
+    "commit": "3a1b6045a6b2a276bd24d715589cb041f8eccb93",
+    "execution": "build-local-docker-image-from-pinned-commit"
+  },
+  "protocol": {
+    "prompt_restates_version": false,
+    "upstream_leaderboard_comparable": false,
+    "merge_gate": false
+  }
+}

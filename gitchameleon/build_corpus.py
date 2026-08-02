@@ -6,7 +6,7 @@ For each problem, the *governing decision* is the version pin the code must
 respect: "this codebase targets ``<library>==<version>`` on Python
 ``<python_version>``". The builder writes that decision plus a deterministic
 set of distractor pins (other examples' decisions) into a per-example corpus
-directory, so the rac arm's grounding retrieval has to find the governing pin
+directory, so the As Decided arm's grounding retrieval has to find the governing pin
 among plausible competitors — the same distractor model decisiongrounding
 uses.
 
@@ -39,7 +39,7 @@ def artifact_id(example_id: str) -> str:
 
 
 def decision_markdown(row: dict) -> str:
-    """One version-pin decision artifact, schema-valid for `rac validate`."""
+    """One version-pin decision artifact, schema-valid for `decided validate`."""
     library = row["library"]
     version = row["version"]
     python_version = row["python_version"]
