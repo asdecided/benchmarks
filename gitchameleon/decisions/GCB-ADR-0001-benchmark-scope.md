@@ -37,7 +37,9 @@ prompt would measure prompt engineering, not grounding.
 
 The dataset is fetched on demand (stdlib script, provenance and content hash
 recorded), never vendored; three verbatim rows are committed as MIT-licensed
-test fixtures with attribution.
+test fixtures with attribution. The funded-run baseline is pinned by
+GCB-ADR-0003 to Voyage `voyage-4-large`; it ranks the same Markdown artifacts
+with explicit query/document embedding modes and deterministic cosine ties.
 
 ## Consequences
 
@@ -45,9 +47,9 @@ Grounding quality becomes the only manipulated variable, so a rac-vs-
 no-grounding delta on the upstream pass rate is attributable to retrieval of
 the governing pin. The deliberate cost: our numbers are **not comparable to
 the upstream leaderboard**, which conditions the prompt on the version
-explicitly — every published result must say so. The naive_rag arm refuses to
-run until its embedder is pinned at funded-run time, so a weak stand-in can
-never masquerade as the RAG baseline.
+explicitly — every published result must say so. The naive_rag arm refuses
+without the pinned embedder's API key, so a weak lexical stand-in can never
+masquerade as the RAG baseline.
 
 ## Category
 

@@ -18,6 +18,9 @@ from conftest import REPO_ROOT
 
 GCB = REPO_ROOT / "gitchameleon"
 FIXTURES = GCB / "fixtures" / "sample_problems.json"
+sys.path.insert(0, str(GCB))
+import arms as arms_mod
+import fetch_dataset as fetch_mod
 
 
 def _run(script: str, *args: str) -> subprocess.CompletedProcess:
@@ -32,7 +35,13 @@ def _run(script: str, *args: str) -> subprocess.CompletedProcess:
 def _build(tmp_path, name: str = "corpus"):
     out = tmp_path / name
     completed = _run(
-        "build_corpus.py", "--dataset", str(FIXTURES), "--out", str(out), "--distractors", "2"
+        "build_corpus.py",
+        "--dataset",
+        str(FIXTURES),
+        "--out",
+        str(out),
+        "--distractors",
+        "2",
     )
     assert completed.returncode == 0, completed.stderr
     return out
@@ -40,12 +49,24 @@ def _build(tmp_path, name: str = "corpus"):
 
 def _corpus_bytes(root) -> dict[str, bytes]:
     return {
-        str(path.relative_to(root)): path.read_bytes() for path in sorted(root.rglob("*.md"))
+        str(path.relative_to(root)): path.read_bytes()
+        for path in sorted(root.rglob("*.md"))
     }
 
 
 def _fixture_rows() -> list[dict]:
     return json.loads(FIXTURES.read_text(encoding="utf-8"))["rows"]
+
+
+def test_funded_run_config_matches_implemented_pins():
+    config = json.loads((GCB / "run-config.json").read_text(encoding="utf-8"))
+    assert config["status"] == "preregistered-not-run"
+    assert config["arms"] == list(arms_mod.ARMS)
+    assert config["answering"]["model"] == "claude-opus-4-8"
+    assert config["naive_rag"]["model"] == arms_mod.NAIVE_RAG_MODEL
+    assert config["naive_rag"]["top_k"] == arms_mod.RAC_TOP_K
+    assert len(config["dataset"]["revision"]) == 40
+    assert len(config["upstream_harness"]["commit"]) == 40
 
 
 def test_corpus_builder_is_deterministic(tmp_path):
@@ -54,10 +75,52 @@ def test_corpus_builder_is_deterministic(tmp_path):
     assert first == second
 
 
+def test_dataset_revision_preserves_the_owner_name_path(monkeypatch):
+    seen = []
+
+    def fake_get(url):
+        seen.append(url)
+        return {"sha": "dataset-pin"}
+
+    monkeypatch.setattr(fetch_mod, "_get_json", fake_get)
+    assert fetch_mod.dataset_revision() == "dataset-pin"
+    assert seen == ["https://huggingface.co/api/datasets/cabbage972/GitChameleon-2.0"]
+
+
+def test_dataset_rows_are_fetched_at_the_exact_revision(monkeypatch):
+    seen = []
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return None
+
+        def read(self):
+            return b'{"example_id":"7"}\n'
+
+    def fake_open(url):
+        seen.append(url)
+        return Response()
+
+    monkeypatch.setattr(fetch_mod.urllib.request, "urlopen", fake_open)
+    assert fetch_mod.fetch_rows("abc123") == [{"example_id": "7"}]
+    assert seen == [
+        (
+            "https://huggingface.co/datasets/cabbage972/GitChameleon-2.0/"
+            "resolve/abc123/dataset.jsonl"
+        )
+    ]
+
+
 def test_built_corpora_are_schema_valid(tmp_path):
     corpus = _build(tmp_path)
     completed = subprocess.run(
-        ["decided", "validate", str(corpus)], capture_output=True, text=True, check=False
+        ["decided", "validate", str(corpus)],
+        capture_output=True,
+        text=True,
+        check=False,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
 
@@ -66,7 +129,9 @@ def test_decision_artifacts_never_leak_solutions_or_tests(tmp_path):
     corpus = _build(tmp_path)
     leaks = [row["solution"].strip() for row in _fixture_rows()]
     leaks += [row["test"].strip() for row in _fixture_rows()]
-    corpus_text = "\n".join(text.decode("utf-8") for text in _corpus_bytes(corpus).values())
+    corpus_text = "\n".join(
+        text.decode("utf-8") for text in _corpus_bytes(corpus).values()
+    )
     for leak in leaks:
         assert leak not in corpus_text
 
@@ -113,7 +178,8 @@ def test_prompt_never_states_the_pinned_version(tmp_path):
         assert bundle["version"] not in bundle["prompt"]
 
 
-def test_naive_rag_refuses_until_embedder_is_pinned(tmp_path):
+def test_naive_rag_refuses_without_the_pinned_embedder_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("VOYAGE_API_KEY", raising=False)
     corpus = _build(tmp_path)
     completed = _run(
         "run.py",
@@ -128,7 +194,24 @@ def test_naive_rag_refuses_until_embedder_is_pinned(tmp_path):
         str(tmp_path / "bundles.jsonl"),
     )
     assert completed.returncode == 2
-    assert "embedder" in completed.stderr
+    assert "VOYAGE_API_KEY" in completed.stderr
+
+
+def test_naive_rag_ranks_the_governing_pin_first(tmp_path):
+    corpus = _build(tmp_path)
+    row = _fixture_rows()[0]
+    corpus_dir = corpus / f"example-{row['example_id']}"
+
+    class FakeEmbedder:
+        def embed(self, texts, input_type):
+            if input_type == "query":
+                return [[1.0, 0.0]]
+            heading = f"# Library Version Pin: {row['library']} {row['version']}"
+            return [[1.0, 0.0] if heading in text else [0.0, 1.0] for text in texts]
+
+    grounding = arms_mod.naive_rag_grounding(FakeEmbedder(), corpus_dir, row)
+    assert len(grounding) == 3
+    assert f"# Library Version Pin: {row['library']} {row['version']}" in grounding[0]
 
 
 def test_bare_invocation_points_at_the_modes(tmp_path):
@@ -147,8 +230,14 @@ def _bundles_file(tmp_path) -> str:
     corpus = _build(tmp_path)
     out = tmp_path / "bundles.jsonl"
     completed = _run(
-        "run.py", "--dry-run", "--dataset", str(FIXTURES), "--corpus", str(corpus),
-        "--out", str(out),
+        "run.py",
+        "--dry-run",
+        "--dataset",
+        str(FIXTURES),
+        "--corpus",
+        str(corpus),
+        "--out",
+        str(out),
     )
     assert completed.returncode == 0, completed.stderr
     return str(out)
@@ -156,14 +245,22 @@ def _bundles_file(tmp_path) -> str:
 
 def _solutions(tmp_path, out_name: str) -> dict[str, list[dict]]:
     completed = _run(
-        "run.py", "solutions", "--bundles", _bundles_file(tmp_path),
-        "--answering", "offline-stub", "--out", str(tmp_path / out_name),
+        "run.py",
+        "solutions",
+        "--bundles",
+        _bundles_file(tmp_path),
+        "--answering",
+        "offline-stub",
+        "--out",
+        str(tmp_path / out_name),
     )
     assert completed.returncode == 0, completed.stderr
     out: dict[str, list[dict]] = {}
     for path in sorted((tmp_path / out_name).glob("solutions-*.jsonl")):
         arm = path.stem.removeprefix("solutions-")
-        out[arm] = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+        out[arm] = [
+            json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()
+        ]
     return out
 
 
@@ -179,13 +276,106 @@ def test_offline_stub_solutions_are_deterministic_and_upstream_shaped(tmp_path):
             assert isinstance(rec["example_id"], str) and rec["answer"]
             assert rec["arm"] == arm
             assert "offline-stub" in rec["answer"]  # plumbing output is labelled
+            assert len(rec["prompt_sha256"]) == 64
+            assert len(rec["grounding_sha256"]) == 64
+
+
+def test_solutions_resume_only_answers_missing_examples(tmp_path):
+    bundles = _bundles_file(tmp_path)
+    out = tmp_path / "resume-solutions"
+    first = _run(
+        "run.py",
+        "solutions",
+        "--bundles",
+        bundles,
+        "--answering",
+        "offline-stub",
+        "--arms",
+        "no_grounding",
+        "--limit",
+        "1",
+        "--out",
+        str(out),
+    )
+    assert first.returncode == 0, first.stderr
+    second = _run(
+        "run.py",
+        "solutions",
+        "--bundles",
+        bundles,
+        "--answering",
+        "offline-stub",
+        "--arms",
+        "no_grounding",
+        "--limit",
+        "2",
+        "--resume",
+        "--out",
+        str(out),
+    )
+    assert second.returncode == 0, second.stderr
+    records = [
+        json.loads(line)
+        for line in (out / "solutions-no_grounding.jsonl").read_text().splitlines()
+    ]
+    assert len(records) == 2
+    assert len({record["example_id"] for record in records}) == 2
+
+
+def test_solutions_resume_refuses_a_different_seed(tmp_path):
+    bundles = _bundles_file(tmp_path)
+    out = tmp_path / "incompatible-resume"
+    first = _run(
+        "run.py",
+        "solutions",
+        "--bundles",
+        bundles,
+        "--answering",
+        "offline-stub",
+        "--arms",
+        "rac",
+        "--limit",
+        "1",
+        "--seed",
+        "0",
+        "--out",
+        str(out),
+    )
+    assert first.returncode == 0, first.stderr
+    second = _run(
+        "run.py",
+        "solutions",
+        "--bundles",
+        bundles,
+        "--answering",
+        "offline-stub",
+        "--arms",
+        "rac",
+        "--limit",
+        "1",
+        "--seed",
+        "1",
+        "--resume",
+        "--out",
+        str(out),
+    )
+    assert second.returncode == 2
+    assert "cannot resume incompatible record" in second.stderr
 
 
 def test_solutions_refuse_real_backends_without_keys(tmp_path, monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)  # the subprocess inherits os.environ
+    monkeypatch.delenv(
+        "ANTHROPIC_API_KEY", raising=False
+    )  # the subprocess inherits os.environ
     completed = _run(
-        "run.py", "solutions", "--bundles", _bundles_file(tmp_path),
-        "--answering", "claude", "--out", str(tmp_path / "sol"),
+        "run.py",
+        "solutions",
+        "--bundles",
+        _bundles_file(tmp_path),
+        "--answering",
+        "claude",
+        "--out",
+        str(tmp_path / "sol"),
     )
     assert completed.returncode != 0
     assert "ANTHROPIC_API_KEY" in (completed.stderr + completed.stdout)
@@ -194,17 +384,35 @@ def test_solutions_refuse_real_backends_without_keys(tmp_path, monkeypatch):
 def _score_records(tmp_path) -> list[dict]:
     records = tmp_path / "resolution_records.jsonl"
     completed = _run(
-        "run.py", "score", "--arm", "rac", "--eval-results", str(EVAL_RAC),
-        "--out", str(records), "--answering-model", "claude-opus-4-8",
-        "--upstream-harness", "test-commit",
+        "run.py",
+        "score",
+        "--arm",
+        "rac",
+        "--eval-results",
+        str(EVAL_RAC),
+        "--out",
+        str(records),
+        "--answering-model",
+        "claude-opus-4-8",
+        "--upstream-harness",
+        "test-commit",
     )
     assert completed.returncode == 0, completed.stderr
     completed = _run(
-        "run.py", "score", "--arm", "no_grounding", "--eval-results", str(EVAL_NONE),
-        "--out", str(records), "--append",
+        "run.py",
+        "score",
+        "--arm",
+        "no_grounding",
+        "--eval-results",
+        str(EVAL_NONE),
+        "--out",
+        str(records),
+        "--append",
     )
     assert completed.returncode == 0, completed.stderr
-    return [json.loads(line) for line in records.read_text(encoding="utf-8").splitlines()]
+    return [
+        json.loads(line) for line in records.read_text(encoding="utf-8").splitlines()
+    ]
 
 
 def test_score_emits_schema_valid_paired_records(tmp_path):
@@ -233,3 +441,33 @@ def test_stats_reproduces_the_hand_computed_mcnemar(tmp_path):
     # exact two-sided binomial at min(2,0)=0 of 2 discordant: 2 * (1/4) = 0.5
     assert pair["mcnemar"]["p_value"] == 0.5
     assert pair["odds_ratio"]["degenerate"] is True
+
+
+def test_stats_refuses_incomplete_required_arms(tmp_path):
+    records = tmp_path / "resolution_records.jsonl"
+    _score_records(tmp_path)
+    rac_ids = [
+        json.loads(line)["example_id"]
+        for line in records.read_text(encoding="utf-8").splitlines()
+        if json.loads(line)["arm"] == "rac"
+    ]
+    removed_id = rac_ids[-1]
+    kept = [
+        line
+        for line in records.read_text(encoding="utf-8").splitlines()
+        if not (
+            json.loads(line)["arm"] == "rac"
+            and json.loads(line)["example_id"] == removed_id
+        )
+    ]
+    records.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    completed = _run(
+        "run.py",
+        "stats",
+        "--records",
+        str(records),
+        "--require-arms",
+        "no_grounding,rac",
+    )
+    assert completed.returncode == 2
+    assert "incomplete paired records" in completed.stderr
