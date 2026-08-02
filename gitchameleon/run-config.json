@@ -3,7 +3,7 @@
   "status": "preregistered-not-run",
   "arms": [
     "no_grounding",
-    "rac",
+    "asdecided",
     "naive_rag"
   ],
   "seed": 0,
@@ -28,7 +28,7 @@
     "query_input_type": "query",
     "truncation": false
   },
-  "rac": {
+  "asdecided": {
     "executable": "decided",
     "minimum_version": "0.26.2",
     "top_k": 3

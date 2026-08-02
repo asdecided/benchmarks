@@ -43,7 +43,12 @@ with explicit query/document embedding modes and deterministic cosine ties.
 
 ## Consequences
 
-Grounding quality becomes the only manipulated variable, so a rac-vs-
+The product-backed arm is named `asdecided` in CLI arguments, generated files,
+records, and published results. The former `rac` label is not an accepted alias:
+mixing both names would make paired-run completeness ambiguous and retain a
+retired product name in durable evidence.
+
+Grounding quality becomes the only manipulated variable, so an asdecided-vs-
 no-grounding delta on the upstream pass rate is attributable to retrieval of
 the governing pin. The deliberate cost: our numbers are **not comparable to
 the upstream leaderboard**, which conditions the prompt on the version

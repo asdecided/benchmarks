@@ -2,8 +2,8 @@
 """GitChameleon evidence-run scaffold battery (offline; fixtures only).
 
 Exercises the key-less surface: the corpus builder is deterministic and emits
-schema-valid RAC decisions, the dry-run assembles honest prompt bundles (the
-rac arm's grounding leads with the governing pin; prompts never leak the
+schema-valid As Decided decisions, the dry-run assembles honest prompt bundles
+(the As Decided arm's grounding leads with the governing pin; prompts never leak the
 pinned version; grounding never leaks solutions or tests), and the funded-run
 seams refuse loudly instead of running weak stand-ins.
 """
@@ -64,7 +64,7 @@ def test_funded_run_config_matches_implemented_pins():
     assert config["arms"] == list(arms_mod.ARMS)
     assert config["answering"]["model"] == "claude-opus-4-8"
     assert config["naive_rag"]["model"] == arms_mod.NAIVE_RAG_MODEL
-    assert config["naive_rag"]["top_k"] == arms_mod.RAC_TOP_K
+    assert config["naive_rag"]["top_k"] == arms_mod.GROUNDING_TOP_K
     assert len(config["dataset"]["revision"]) == 40
     assert len(config["upstream_harness"]["commit"]) == 40
 
@@ -136,7 +136,7 @@ def test_decision_artifacts_never_leak_solutions_or_tests(tmp_path):
         assert leak not in corpus_text
 
 
-def _dry_run_bundles(tmp_path, arms: str = "no_grounding,rac") -> list[dict]:
+def _dry_run_bundles(tmp_path, arms: str = "no_grounding,asdecided") -> list[dict]:
     corpus = _build(tmp_path)
     out = tmp_path / "bundles.jsonl"
     completed = _run(
@@ -155,11 +155,11 @@ def _dry_run_bundles(tmp_path, arms: str = "no_grounding,rac") -> list[dict]:
     return [json.loads(line) for line in out.read_text(encoding="utf-8").splitlines()]
 
 
-def test_rac_arm_grounding_leads_with_the_governing_pin(tmp_path):
+def test_asdecided_arm_grounding_leads_with_the_governing_pin(tmp_path):
     bundles = _dry_run_bundles(tmp_path)
-    rac_bundles = [b for b in bundles if b["arm"] == "rac"]
-    assert len(rac_bundles) == len(_fixture_rows())
-    for bundle in rac_bundles:
+    asdecided_bundles = [b for b in bundles if b["arm"] == "asdecided"]
+    assert len(asdecided_bundles) == len(_fixture_rows())
+    for bundle in asdecided_bundles:
         assert bundle["grounding"], bundle["example_id"]
         heading = f"# Library Version Pin: {bundle['library']} {bundle['version']}"
         assert heading in bundle["grounding"][0]
@@ -220,9 +220,22 @@ def test_bare_invocation_points_at_the_modes(tmp_path):
     assert "solutions / score / stats" in completed.stderr
 
 
+def test_retired_rac_arm_name_is_rejected():
+    completed = _run(
+        "run.py",
+        "--dry-run",
+        "--dataset",
+        str(FIXTURES),
+        "--arms",
+        "rac",
+    )
+    assert completed.returncode == 2
+    assert "unknown arm(s) ['rac']" in completed.stderr
+
+
 # --- the resolution co-primary pipeline (GCB-ADR-0002), offline ---------------
 
-EVAL_RAC = GCB / "fixtures" / "sample_eval_results_rac.csv"
+EVAL_ASDECIDED = GCB / "fixtures" / "sample_eval_results_asdecided.csv"
 EVAL_NONE = GCB / "fixtures" / "sample_eval_results_no_grounding.csv"
 
 
@@ -268,7 +281,7 @@ def test_offline_stub_solutions_are_deterministic_and_upstream_shaped(tmp_path):
     first = _solutions(tmp_path, "sol-a")
     second = _solutions(tmp_path, "sol-b")
     assert first == second
-    assert set(first) == {"no_grounding", "rac"}
+    assert set(first) == {"no_grounding", "asdecided"}
     for arm, records in first.items():
         assert len(records) == len(_fixture_rows())
         for rec in records:
@@ -333,7 +346,7 @@ def test_solutions_resume_refuses_a_different_seed(tmp_path):
         "--answering",
         "offline-stub",
         "--arms",
-        "rac",
+        "asdecided",
         "--limit",
         "1",
         "--seed",
@@ -350,7 +363,7 @@ def test_solutions_resume_refuses_a_different_seed(tmp_path):
         "--answering",
         "offline-stub",
         "--arms",
-        "rac",
+        "asdecided",
         "--limit",
         "1",
         "--seed",
@@ -387,9 +400,9 @@ def _score_records(tmp_path) -> list[dict]:
         "run.py",
         "score",
         "--arm",
-        "rac",
+        "asdecided",
         "--eval-results",
-        str(EVAL_RAC),
+        str(EVAL_ASDECIDED),
         "--out",
         str(records),
         "--answering-model",
@@ -435,8 +448,8 @@ def test_stats_reproduces_the_hand_computed_mcnemar(tmp_path):
     completed = _run("run.py", "stats", "--records", str(records))
     assert completed.returncode == 0, completed.stderr
     stats = json.loads(completed.stdout)
-    pair = stats["pairs"]["rac_vs_no_grounding"]
-    # fixture design: rac passes 3/3, no_grounding 1/3 -> a=1, b=2, c=0, d=0
+    pair = stats["pairs"]["asdecided_vs_no_grounding"]
+    # fixture design: asdecided passes 3/3, no_grounding 1/3 -> a=1, b=2, c=0, d=0
     assert pair["table"] == [1, 2, 0, 0]
     # exact two-sided binomial at min(2,0)=0 of 2 discordant: 2 * (1/4) = 0.5
     assert pair["mcnemar"]["p_value"] == 0.5
@@ -446,17 +459,17 @@ def test_stats_reproduces_the_hand_computed_mcnemar(tmp_path):
 def test_stats_refuses_incomplete_required_arms(tmp_path):
     records = tmp_path / "resolution_records.jsonl"
     _score_records(tmp_path)
-    rac_ids = [
+    asdecided_ids = [
         json.loads(line)["example_id"]
         for line in records.read_text(encoding="utf-8").splitlines()
-        if json.loads(line)["arm"] == "rac"
+        if json.loads(line)["arm"] == "asdecided"
     ]
-    removed_id = rac_ids[-1]
+    removed_id = asdecided_ids[-1]
     kept = [
         line
         for line in records.read_text(encoding="utf-8").splitlines()
         if not (
-            json.loads(line)["arm"] == "rac"
+            json.loads(line)["arm"] == "asdecided"
             and json.loads(line)["example_id"] == removed_id
         )
     ]
@@ -467,7 +480,7 @@ def test_stats_refuses_incomplete_required_arms(tmp_path):
         "--records",
         str(records),
         "--require-arms",
-        "no_grounding,rac",
+        "no_grounding,asdecided",
     )
     assert completed.returncode == 2
     assert "incomplete paired records" in completed.stderr

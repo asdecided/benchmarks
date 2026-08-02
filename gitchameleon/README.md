@@ -30,9 +30,9 @@ per-arm pass rate is SWE-DecisionBench's second co-primary outcome,
 ## Design (GCB-ADR-0001)
 
 - **Arms** (DG-ADR-0001 single-variable pattern; held-constant answering
-  model): `no_grounding` / `rac` (live-decision retrieval over the example's
-  corpus via the shared harness runner — As Decided strictly as an external
-  CLI) / `naive_rag` (embedding retrieval over the identical corpus, pinned to
+  model): `no_grounding` / `asdecided` (live-decision retrieval over the
+  example's corpus via the shared harness runner — As Decided strictly as an
+  external CLI) / `naive_rag` (embedding retrieval over the identical corpus, pinned to
   `voyage-4-large`, with query/document input types and cosine ranking).
 - **Corpus**: `build_corpus.py` turns each problem into a RAC decision
   artifact — the version pin, its rationale, companion pins, and the
@@ -53,12 +53,12 @@ per-arm pass rate is SWE-DecisionBench's second co-primary outcome,
 ```
 python3 fetch_dataset.py --revision 799a6a33e572a07a8985914e7251f5dea54b0ac4
 python3 build_corpus.py                        # per-example corpora under corpus-build/
-python3 run.py --dry-run                       # no_grounding + rac bundles
+python3 run.py --dry-run                       # no_grounding + asdecided bundles
 python3 run.py --dry-run \
   --dataset fixtures/sample_problems.json      # the same, offline from the fixtures
 ```
 
-`decided` must be on `PATH` for the rac arm (external CLI only — no engine
+`decided` must be on `PATH` for the `asdecided` arm (external CLI only — no engine
 imports, DG-ADR-0001).
 
 ## The funded run (GCB-ADR-0002 — the resolution co-primary pipeline)
@@ -74,7 +74,7 @@ resumable in isolation:
 
    ```
    VOYAGE_API_KEY=... python3 run.py --dry-run \
-     --arms no_grounding,rac,naive_rag --out out/bundles.jsonl
+     --arms no_grounding,asdecided,naive_rag --out out/bundles.jsonl
    ```
 
 2. Run a one-example-per-arm shakedown, inspect it, then answer every bundle.
@@ -104,13 +104,13 @@ resumable in isolation:
    paired analysis:
 
    ```
-   python3 run.py score --arm rac \
-     --eval-results out/solutions/solutions-rac_eval_results.csv \
+   python3 run.py score --arm asdecided \
+     --eval-results out/solutions/solutions-asdecided_eval_results.csv \
      --answering-model claude-opus-4-8 --upstream-harness <commit> \
      --out out/resolution_records.jsonl
    python3 run.py score --arm no_grounding --eval-results … --append …
    python3 run.py stats --records out/resolution_records.jsonl \
-     --require-arms no_grounding,rac,naive_rag
+     --require-arms no_grounding,asdecided,naive_rag
    ```
 
 5. Publish the records, per-arm pass rates, and stats with the dataset

@@ -5,8 +5,8 @@ Arms differ ONLY in how they assemble grounding context for the held-constant
 answering model (the DG-ADR-0001 single-variable design):
 
 - ``no_grounding`` — the problem alone; the model answers from its weights.
-- ``rac``          — the governing version-pin decision retrieved from the
-  example's corpus via the live-decision query (`rac find --decisions`),
+- ``asdecided``    — the governing version-pin decision retrieved from the
+  example's corpus via the live-decision query (`decided find --decisions`),
   driven strictly as an external CLI through the shared harness runner.
 - ``naive_rag``    — embedding retrieval over the same corpus. Deliberately a
   seam: the embedder is pinned at funded-run time (mirroring
@@ -27,9 +27,9 @@ from pathlib import Path
 
 from harness.runner import RacRunner
 
-ARMS = ("no_grounding", "rac", "naive_rag")
-# How many retrieved decisions the rac arm feeds the answering model.
-RAC_TOP_K = 3
+ARMS = ("no_grounding", "asdecided", "naive_rag")
+# Both grounded arms supply the same number of artifacts to the answering model.
+GROUNDING_TOP_K = 3
 NAIVE_RAG_MODEL = "voyage-4-large"
 VOYAGE_EMBEDDINGS_URL = "https://api.voyageai.com/v1/embeddings"
 
@@ -115,8 +115,8 @@ def _cosine(left: list[float], right: list[float]) -> float:
     return numerator / (left_norm * right_norm) if left_norm and right_norm else 0.0
 
 
-def rac_grounding(runner: RacRunner, corpus_dir: Path, row: dict) -> list[str]:
-    """The rac arm: live-decision retrieval, retrieved artifacts verbatim.
+def asdecided_grounding(runner: RacRunner, corpus_dir: Path, row: dict) -> list[str]:
+    """The As Decided arm: live-decision retrieval, artifacts verbatim.
 
     The query is what an agent grounding itself would ask before writing code
     against a library: which live decisions bind this dependency?
@@ -124,7 +124,7 @@ def rac_grounding(runner: RacRunner, corpus_dir: Path, row: dict) -> list[str]:
     query = f"{row['library']} version pin"
     returned = runner.find_ids(query, str(corpus_dir), decisions=True)
     grounding: list[str] = []
-    for artifact_id in returned[:RAC_TOP_K]:
+    for artifact_id in returned[:GROUNDING_TOP_K]:
         resolved = runner.resolve(artifact_id, str(corpus_dir))
         payload = resolved.payload()
         if resolved.exit_code == 0 and "path" in payload:
@@ -150,7 +150,7 @@ def naive_rag_grounding(
         zip(paths, documents, document_vectors),
         key=lambda item: (-_cosine(query_vector, item[2]), str(item[0])),
     )
-    return [document for _, document, _ in ranked[:RAC_TOP_K]]
+    return [document for _, document, _ in ranked[:GROUNDING_TOP_K]]
 
 
 def assemble_grounding(
@@ -163,10 +163,10 @@ def assemble_grounding(
     """The grounding context one arm supplies for one example."""
     if arm == "no_grounding":
         return []
-    if arm == "rac":
+    if arm == "asdecided":
         if runner is None:
-            raise ValueError("the rac arm needs a RacRunner (rac CLI on PATH)")
-        return rac_grounding(runner, corpus_dir, row)
+            raise ValueError("the asdecided arm needs the decided CLI on PATH")
+        return asdecided_grounding(runner, corpus_dir, row)
     if arm == "naive_rag":
         if embedder is None:
             raise ValueError("the naive_rag arm needs the pinned Voyage embedder")

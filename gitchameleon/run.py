@@ -72,7 +72,7 @@ def _grounding_hash(bundle: dict) -> str:
 def dry_run(
     rows: list[dict], corpus_root: Path, arm_names: list[str], out_path: Path
 ) -> int:
-    runner = RacRunner() if "rac" in arm_names else None
+    runner = RacRunner() if "asdecided" in arm_names else None
     embedder = arms_mod.VoyageEmbedder() if "naive_rag" in arm_names else None
     bundles = 0
     with out_path.open("w", encoding="utf-8") as out:
@@ -493,7 +493,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--arms",
-        default="no_grounding,rac",
+        default="no_grounding,asdecided",
         help="Comma-separated arms (naive_rag refuses until its embedder is pinned).",
     )
     parser.add_argument(
