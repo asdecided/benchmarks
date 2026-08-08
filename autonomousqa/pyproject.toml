@@ -16,6 +16,11 @@ requires-python = ">=3.11"
 # contracts, never imported.
 dependencies = []
 
+[project.urls]
+Homepage = "https://asdecided.com/"
+Documentation = "https://asdecided.com/docs/ecosystem/"
+Repository = "https://github.com/asdecided/benchmarks/tree/main/autonomousqa"
+
 [project.optional-dependencies]
 schema = ["jsonschema>=4.20"]
 dev = ["pytest>=7"]

@@ -13,6 +13,11 @@ requires-python = ">=3.11"
 # Core spine is stdlib-only so the demo runs offline with no install.
 dependencies = []
 
+[project.urls]
+Homepage = "https://asdecided.com/"
+Documentation = "https://asdecided.com/docs/ecosystem/"
+Repository = "https://github.com/asdecided/benchmarks/tree/main/decisiongrounding"
+
 [project.optional-dependencies]
 # Strict JSON Schema (Draft 2020-12) validation. Without it the loader falls
 # back to a built-in required-key check.

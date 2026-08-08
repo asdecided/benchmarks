@@ -1,5 +1,7 @@
 # AsDecided Benchmarks
 
+[Product site](https://asdecided.com/) · [Ecosystem documentation](https://asdecided.com/docs/ecosystem/) · [Canonical sources](https://asdecided.com/sources)
+
 Evaluation suites for [AsDecided](https://github.com/asdecided/core)
 (requirements-as-code) — one subdir per benchmark. Per ADR-092 (one repo per
 concern, subdir per member) this is the single home for RAC's benchmarks; future
