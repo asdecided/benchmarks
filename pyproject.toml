@@ -15,6 +15,11 @@ requires-python = ">=3.11"
 # PATH), no embeddings, no network, no third-party runtime dependency.
 dependencies = []
 
+[project.urls]
+Homepage = "https://asdecided.com/"
+Documentation = "https://asdecided.com/docs/ecosystem/"
+Repository = "https://github.com/asdecided/benchmarks"
+
 [project.optional-dependencies]
 dev = ["pytest>=8", "pyyaml>=6"]
 
