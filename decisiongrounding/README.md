@@ -70,6 +70,20 @@ as "this layer will fix adherence in production" overstates what was measured.
   explanation for why adherence moves (the analog of MemoryBench's Hit@K). There
   is deliberately **no** composite score.
 
+### Retrieval-gate acceptance slice
+
+`scenarios_retrieval_gate/` is a deliberately small downstream acceptance
+slice for Core ranking changes. Its two nine-decision scenarios put a focused,
+binding policy behind four graph-popular but lexically weaker catalogue
+records. The `rac` arm has the same four-decision grounding budget as the main
+benchmark: the governing policy must remain first, be supplied to the answering
+model, and produce an adherent action.
+
+These scenarios do not tune Core's ranking constant. The deterministic
+`search-artifacts` benchmark owns that component regression. This slice answers
+the separate end-to-end question: did the corrected ranking keep the governing
+decision inside an agent's actual grounding budget?
+
 ## Related work
 
 **SWE-ContextBench** (Zhu et al., 2026; [arXiv:2602.08316](https://arxiv.org/abs/2602.08316))
@@ -400,6 +414,7 @@ decisiongrounding/
   schema/      JSON Schema (Draft 2020-12) for Scenario and RunResult
   providers/   uniform adapter (prepare/respond) + the arms + answering/embedding
   scenarios/   loader + worked scenarios with tiny synthetic corpora
+  scenarios_retrieval_gate/  focused Core-ranking adherence acceptance slice
   scenarios_real/  real/public-derived corpora (PEP supersession pilot)
   ingest/      deterministic ingest of public artifacts (PEPs) into corpora
   scoring/     deterministic scorer, metrics, crossover dataset + chart

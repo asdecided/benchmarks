@@ -214,6 +214,38 @@
       "relevant": [
         "SAB-FK8CDGGX4SAR"
       ]
+    },
+    {
+      "id": "Q25",
+      "category": "graph_boost_gate",
+      "query": "archive",
+      "relevant": [
+        "SAB-6A7E1EC1CA11"
+      ]
+    },
+    {
+      "id": "Q26",
+      "category": "graph_boost_gate",
+      "query": "retention",
+      "relevant": [
+        "SAB-6A7E1EC1CA11"
+      ]
+    },
+    {
+      "id": "Q27",
+      "category": "graph_boost_gate",
+      "query": "lifecycle",
+      "relevant": [
+        "SAB-6A7E1EC1CA11"
+      ]
+    },
+    {
+      "id": "Q28",
+      "category": "graph_boost_gate",
+      "query": "expiry",
+      "relevant": [
+        "SAB-6A7E1EC1CA11"
+      ]
     }
   ]
 }
