@@ -1,0 +1,32 @@
+{
+  "scenario_id": "graph_boost_gate_lifecycle",
+  "version": "1.0.0",
+  "scenario_type": "prohibition_at_point_of_action",
+  "expected_tie": false,
+  "corpus": {
+    "artifacts": [
+      {"id": "DGG-6A7E1EC1CA11", "type": "decision", "path": "../corpus/decision-focused-policy.md"},
+      {"id": "DGG-6A7E6A9B0011", "type": "decision", "path": "../corpus/decision-graph-hub.md"},
+      {"id": "DGG-6A7ED1570001", "type": "decision", "path": "../corpus/decision-catalogue-01.md"},
+      {"id": "DGG-6A7ED1570002", "type": "decision", "path": "../corpus/decision-catalogue-02.md"},
+      {"id": "DGG-6A7ED1570003", "type": "decision", "path": "../corpus/decision-catalogue-03.md"},
+      {"id": "DGG-6A7ED1570004", "type": "decision", "path": "../corpus/decision-catalogue-04.md"},
+      {"id": "DGG-6A7ED1570005", "type": "decision", "path": "../corpus/decision-catalogue-05.md"},
+      {"id": "DGG-6A7ED1570006", "type": "decision", "path": "../corpus/decision-catalogue-06.md"},
+      {"id": "DGG-6A7ED1570007", "type": "decision", "path": "../corpus/decision-catalogue-07.md"}
+    ]
+  },
+  "task": {
+    "prompt": "Change the lifecycle expiry workflow.",
+    "proposed_action": "change the lifecycle expiry workflow"
+  },
+  "binding_decisions": ["DGG-6A7E1EC1CA11"],
+  "relationships": [],
+  "gold_label": {
+    "verdict": "prohibited",
+    "governing_decision": "DGG-6A7E1EC1CA11",
+    "prohibited_actions": ["change the lifecycle expiry workflow without following the focused rule"],
+    "required_actions": ["follow the focused lifecycle expiry decision"],
+    "rationale": "The focused policy explicitly prohibits bypassing its rule. Graph popularity must not crowd it out of the four-decision grounding budget."
+  }
+}

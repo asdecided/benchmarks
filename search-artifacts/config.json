@@ -20,6 +20,11 @@
         "r_at_5": 0.9,
         "mrr": 0.9
       },
+      "graph_boost_gate": {
+        "p_at_1": 1.0,
+        "r_at_5": 1.0,
+        "mrr": 1.0
+      },
       "disambiguation": {
         "p_at_1": 0.9,
         "r_at_5": 0.9,

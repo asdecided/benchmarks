@@ -68,6 +68,9 @@ jobs:
       - name: Install benchmark
         run: pip install -e ".[dev,schema]"
 
+      - name: Verify retrieval-gate acceptance slice
+        run: python -m pytest -q tests/test_retrieval_gate_scenarios.py
+
       - name: Smoke the AsDecided whole-artifact arm
         run: python -m runner.cli run --arm rac --scenarios scenarios --out /tmp/dg-core-smoke
 
